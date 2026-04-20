@@ -1,0 +1,436 @@
+"""Global morphometric feature extraction for Stage 1 cell-type detection.
+
+Computes whole-cell summary features from an SWC file that characterize
+the morphology independently of its node-level labels. These features
+must remain label-free so Stage 1 cannot leak ground-truth SWC types
+into cell-type prediction.
+"""
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass, field, asdict
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+
+
+# ---------------------------------------------------------------------------
+# SWC parsing (minimal, standalone)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class SWCNode:
+    id: int
+    type: int
+    x: float
+    y: float
+    z: float
+    radius: float
+    parent: int
+
+
+def parse_swc(path: str | Path) -> list[SWCNode]:
+    """Parse an SWC file into a list of SWCNode."""
+    nodes: list[SWCNode] = []
+    with open(path, "r", encoding="utf-8", errors="ignore") as fh:
+        for line in fh:
+            s = line.strip()
+            if not s or s.startswith("#"):
+                continue
+            parts = s.split()
+            if len(parts) < 7:
+                continue
+            try:
+                nodes.append(SWCNode(
+                    id=int(float(parts[0])),
+                    type=int(float(parts[1])),
+                    x=float(parts[2]),
+                    y=float(parts[3]),
+                    z=float(parts[4]),
+                    radius=float(parts[5]),
+                    parent=int(float(parts[6])),
+                ))
+            except (ValueError, IndexError):
+                continue
+    return nodes
+
+
+# ---------------------------------------------------------------------------
+# Topology helpers
+# ---------------------------------------------------------------------------
+
+def _build_tree(nodes: list[SWCNode]) -> tuple[
+    dict[int, SWCNode],
+    dict[int, list[int]],
+    list[int],
+]:
+    """Return (id->node, id->children_ids, root_ids)."""
+    by_id = {n.id: n for n in nodes}
+    children: dict[int, list[int]] = {n.id: [] for n in nodes}
+    roots: list[int] = []
+    for n in nodes:
+        if n.parent == -1 or n.parent not in by_id:
+            roots.append(n.id)
+        else:
+            children[n.parent].append(n.id)
+    return by_id, children, roots
+
+
+def _euclidean(a: SWCNode, b: SWCNode) -> float:
+    return math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2)
+
+
+# ---------------------------------------------------------------------------
+# Feature vector
+# ---------------------------------------------------------------------------
+
+FEATURE_NAMES: list[str] = [
+    # Size / count features
+    "n_nodes",
+    "n_root_nodes",
+    "n_branch_points",
+    "n_terminals",
+    "n_primary_subtrees",       # soma children count
+    "branch_point_ratio",       # branch_points / total_nodes
+    "terminal_ratio",           # terminals / total_nodes
+
+    # Path / distance features
+    "max_path_length",
+    "mean_path_length",
+    "std_path_length",
+    "max_radial_distance",
+    "mean_radial_distance",
+    "std_radial_distance",
+    "path_radial_ratio_mean",   # mean(path/radial) — tortuosity proxy
+
+    # Radius features
+    "mean_radius",
+    "std_radius",
+    "max_radius",
+    "radius_cv",                # coefficient of variation
+
+    # Z-extent features
+    "z_span",
+    "z_asymmetry",              # (above - below) / span, relative to soma
+    "z_max_above_soma",
+    "z_max_below_soma",
+    "x_span",
+    "y_span",
+    "xy_aspect_ratio",
+    "planarity",
+    "linearity",
+    "thickness_ratio",
+
+    # Subtree features
+    "max_subtree_size",
+    "min_subtree_size",
+    "subtree_size_std",
+    "max_subtree_path",
+    "subtree_path_std",
+    "max_subtree_size_ratio",
+    "max_subtree_path_ratio",
+
+    # Strahler order
+    "max_strahler",
+    "mean_strahler",
+
+    # Sholl-like features
+    "sholl_max_intersections",
+    "sholl_peak_distance",
+    "sholl_decay_rate",
+    "terminal_radial_mean",
+    "terminal_radial_std",
+
+]
+
+
+def extract_global_features(nodes: list[SWCNode]) -> dict[str, float]:
+    """Compute the full global feature vector for a morphology."""
+    if not nodes:
+        return {name: 0.0 for name in FEATURE_NAMES}
+
+    by_id, children, roots = _build_tree(nodes)
+    n = len(nodes)
+
+    # ---- Soma proxy detection (label-free) ----
+    root_ids = roots or [nodes[0].id]
+    proxy_root_id = max(
+        root_ids,
+        key=lambda nid: (by_id[nid].radius, len(children.get(nid, []))),
+    )
+    proxy_root = by_id[proxy_root_id]
+    soma_center = SWCNode(
+        id=-1, type=1,
+        x=proxy_root.x, y=proxy_root.y, z=proxy_root.z,
+        radius=0.0, parent=-1,
+    )
+    non_proxy_nodes = [nd for nd in nodes if nd.id != proxy_root_id]
+    if not non_proxy_nodes:
+        non_proxy_nodes = list(nodes)
+
+    # ---- BFS to compute path lengths ----
+    path_from_root: dict[int, float] = {}
+    order: list[int] = []
+    queue = list(roots)
+    for rid in roots:
+        path_from_root[rid] = 0.0
+    visited: set[int] = set()
+    while queue:
+        nid = queue.pop(0)
+        if nid in visited:
+            continue
+        visited.add(nid)
+        order.append(nid)
+        nd = by_id[nid]
+        for cid in children[nid]:
+            child_nd = by_id[cid]
+            path_from_root[cid] = path_from_root.get(nid, 0.0) + _euclidean(nd, child_nd)
+            queue.append(cid)
+
+    # ---- Radial distances from soma ----
+    radial_distances = [_euclidean(nd, soma_center) for nd in nodes]
+
+    # ---- Basic counts ----
+    branch_points = [nid for nid, kids in children.items() if len(kids) >= 2]
+    terminals = [nid for nid, kids in children.items() if len(kids) == 0 and nid not in roots]
+    n_branch_points = len(branch_points)
+    n_terminals = len(terminals)
+
+    # ---- Primary subtrees (soma children) ----
+    primary_roots: list[int] = []
+    for cid in children.get(proxy_root_id, []):
+        if cid != proxy_root_id:
+            primary_roots.append(cid)
+    if not primary_roots and roots:
+        # Fallback: direct root children
+        for rid in roots:
+            if rid == proxy_root_id:
+                continue
+            primary_roots.append(rid)
+    n_primary = len(primary_roots)
+
+    # ---- Subtree sizes and max paths ----
+    subtree_sizes: list[int] = []
+    subtree_max_paths: list[float] = []
+    for pr in primary_roots:
+        stack = [pr]
+        size = 0
+        max_path = 0.0
+        while stack:
+            cur = stack.pop()
+            size += 1
+            max_path = max(max_path, path_from_root.get(cur, 0.0))
+            stack.extend(children.get(cur, []))
+        subtree_sizes.append(size)
+        subtree_max_paths.append(max_path)
+
+    # ---- Path length stats ----
+    path_vals = [path_from_root.get(nd.id, 0.0) for nd in non_proxy_nodes]
+    if not path_vals:
+        path_vals = [0.0]
+
+    # ---- Radius stats (non-soma) ----
+    radii = [nd.radius for nd in non_proxy_nodes]
+    if not radii:
+        radii = [nd.radius for nd in nodes]
+    if not radii:
+        radii = [0.0]
+
+    # ---- Z stats ----
+    soma_z = soma_center.z
+    z_vals = [nd.z for nd in nodes]
+    x_vals = [nd.x for nd in nodes]
+    y_vals = [nd.y for nd in nodes]
+    z_above = max(0.0, max(z_vals) - soma_z) if z_vals else 0.0
+    z_below = max(0.0, soma_z - min(z_vals)) if z_vals else 0.0
+    z_span = z_above + z_below
+    z_asymmetry = (z_above - z_below) / z_span if z_span > 1e-9 else 0.0
+    x_span = (max(x_vals) - min(x_vals)) if x_vals else 0.0
+    y_span = (max(y_vals) - min(y_vals)) if y_vals else 0.0
+    xy_aspect_ratio = max(x_span, y_span) / max(1e-9, min(x_span, y_span)) if min(x_span, y_span) > 1e-9 else 1.0
+
+    coords = np.array([[nd.x, nd.y, nd.z] for nd in nodes], dtype=np.float64)
+    if len(coords) >= 3:
+        centered = coords - np.mean(coords, axis=0, keepdims=True)
+        cov = np.cov(centered.T)
+        eigvals = np.sort(np.maximum(np.linalg.eigvalsh(cov), 0.0))[::-1]
+        lam1, lam2, lam3 = eigvals.tolist()
+        linearity = (lam1 - lam2) / lam1 if lam1 > 1e-9 else 0.0
+        planarity = (lam2 - lam3) / lam1 if lam1 > 1e-9 else 0.0
+        thickness_ratio = lam3 / lam1 if lam1 > 1e-9 else 0.0
+    else:
+        linearity = 0.0
+        planarity = 0.0
+        thickness_ratio = 0.0
+
+    # ---- Tortuosity ----
+    radial_non_soma = [r for r, nd in zip(radial_distances, nodes) if nd.id != proxy_root_id]
+    path_non_soma = [path_from_root.get(nd.id, 0.0) for nd in non_proxy_nodes]
+    tortuosity_vals = []
+    for p, r in zip(path_non_soma, radial_non_soma):
+        if r > 1e-6:
+            tortuosity_vals.append(p / r)
+    if not tortuosity_vals:
+        tortuosity_vals = [1.0]
+
+    # ---- Strahler order ----
+    strahler = _compute_strahler(by_id, children, roots)
+    strahler_vals = list(strahler.values()) if strahler else [0]
+
+    # ---- Sholl analysis (simplified) ----
+    sholl_max, sholl_peak_dist, sholl_decay = _sholl_features(radial_distances, nodes)
+    terminal_radials = [
+        _euclidean(by_id[nid], soma_center)
+        for nid in terminals if nid in by_id
+    ]
+    if not terminal_radials:
+        terminal_radials = [0.0]
+
+    mean_radius = float(np.mean(radii))
+    std_radius = float(np.std(radii))
+
+    feats: dict[str, float] = {
+        "n_nodes": float(n),
+        "n_root_nodes": float(len(root_ids)),
+        "n_branch_points": float(n_branch_points),
+        "n_terminals": float(n_terminals),
+        "n_primary_subtrees": float(n_primary),
+        "branch_point_ratio": n_branch_points / max(1, n),
+        "terminal_ratio": n_terminals / max(1, n),
+
+        "max_path_length": float(max(path_vals)),
+        "mean_path_length": float(np.mean(path_vals)),
+        "std_path_length": float(np.std(path_vals)),
+        "max_radial_distance": float(max(radial_distances)),
+        "mean_radial_distance": float(np.mean(radial_distances)),
+        "std_radial_distance": float(np.std(radial_distances)),
+        "path_radial_ratio_mean": float(np.mean(tortuosity_vals)),
+
+        "mean_radius": mean_radius,
+        "std_radius": std_radius,
+        "max_radius": float(max(radii)),
+        "radius_cv": std_radius / mean_radius if mean_radius > 1e-9 else 0.0,
+
+        "z_span": z_span,
+        "z_asymmetry": z_asymmetry,
+        "z_max_above_soma": z_above,
+        "z_max_below_soma": z_below,
+        "x_span": x_span,
+        "y_span": y_span,
+        "xy_aspect_ratio": xy_aspect_ratio,
+        "planarity": float(planarity),
+        "linearity": float(linearity),
+        "thickness_ratio": float(thickness_ratio),
+
+        "max_subtree_size": float(max(subtree_sizes)) if subtree_sizes else 0.0,
+        "min_subtree_size": float(min(subtree_sizes)) if subtree_sizes else 0.0,
+        "subtree_size_std": float(np.std(subtree_sizes)) if len(subtree_sizes) > 1 else 0.0,
+        "max_subtree_path": float(max(subtree_max_paths)) if subtree_max_paths else 0.0,
+        "subtree_path_std": float(np.std(subtree_max_paths)) if len(subtree_max_paths) > 1 else 0.0,
+        "max_subtree_size_ratio": (float(max(subtree_sizes)) / max(1.0, float(sum(subtree_sizes)))) if subtree_sizes else 0.0,
+        "max_subtree_path_ratio": (float(max(subtree_max_paths)) / max(1e-9, float(sum(subtree_max_paths)))) if subtree_max_paths else 0.0,
+
+        "max_strahler": float(max(strahler_vals)),
+        "mean_strahler": float(np.mean(strahler_vals)),
+
+        "sholl_max_intersections": float(sholl_max),
+        "sholl_peak_distance": float(sholl_peak_dist),
+        "sholl_decay_rate": float(sholl_decay),
+        "terminal_radial_mean": float(np.mean(terminal_radials)),
+        "terminal_radial_std": float(np.std(terminal_radials)),
+    }
+    return feats
+
+
+def extract_feature_vector(nodes: list[SWCNode]) -> np.ndarray:
+    """Return feature dict values as a numpy array in canonical order."""
+    feats = extract_global_features(nodes)
+    return np.array([feats[name] for name in FEATURE_NAMES], dtype=np.float64)
+
+
+# ---------------------------------------------------------------------------
+# Strahler order
+# ---------------------------------------------------------------------------
+
+def _compute_strahler(
+    by_id: dict[int, SWCNode],
+    children: dict[int, list[int]],
+    roots: list[int],
+) -> dict[int, int]:
+    """Compute Strahler order for each node (bottom-up)."""
+    strahler: dict[int, int] = {}
+
+    # Post-order traversal
+    post_order: list[int] = []
+    stack: list[tuple[int, bool]] = [(r, False) for r in roots]
+    while stack:
+        nid, processed = stack.pop()
+        if processed:
+            post_order.append(nid)
+            continue
+        stack.append((nid, True))
+        for cid in children.get(nid, []):
+            stack.append((cid, False))
+
+    for nid in post_order:
+        kids = children.get(nid, [])
+        if not kids:
+            strahler[nid] = 1
+        else:
+            child_orders = sorted([strahler.get(c, 1) for c in kids], reverse=True)
+            if len(child_orders) == 1:
+                strahler[nid] = child_orders[0]
+            elif child_orders[0] == child_orders[1]:
+                strahler[nid] = child_orders[0] + 1
+            else:
+                strahler[nid] = child_orders[0]
+    return strahler
+
+
+# ---------------------------------------------------------------------------
+# Sholl analysis (simplified)
+# ---------------------------------------------------------------------------
+
+def _sholl_features(
+    radial_distances: list[float],
+    nodes: list[SWCNode],
+    n_bins: int = 20,
+) -> tuple[float, float, float]:
+    """Compute simplified Sholl features.
+
+    Returns (max_intersections, peak_distance, decay_rate).
+    """
+    root_ids = {nd.id for nd in nodes if nd.parent == -1}
+    if not root_ids and nodes:
+        root_ids = {nodes[0].id}
+    non_soma_radial = [r for r, nd in zip(radial_distances, nodes) if nd.id not in root_ids]
+    if not non_soma_radial:
+        return 0.0, 0.0, 0.0
+
+    max_r = max(non_soma_radial)
+    if max_r < 1e-6:
+        return 0.0, 0.0, 0.0
+
+    bin_edges = np.linspace(0, max_r, n_bins + 1)
+    counts = np.zeros(n_bins)
+    for r in non_soma_radial:
+        idx = int(r / max_r * n_bins)
+        idx = min(idx, n_bins - 1)
+        counts[idx] += 1
+
+    peak_idx = int(np.argmax(counts))
+    peak_dist = float((bin_edges[peak_idx] + bin_edges[peak_idx + 1]) / 2)
+    max_count = float(counts[peak_idx])
+
+    # Decay rate: how fast counts drop after peak
+    if peak_idx < n_bins - 1 and max_count > 0:
+        post_peak = counts[peak_idx + 1:]
+        if len(post_peak) > 0:
+            decay = float(max_count - np.mean(post_peak)) / max_count
+        else:
+            decay = 0.0
+    else:
+        decay = 0.0
+
+    return max_count, peak_dist, decay
