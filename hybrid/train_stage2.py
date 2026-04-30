@@ -2,7 +2,7 @@
 """Train Stage 2 branch-level classifier (per cell type, per node).
 
 Design:
-- One model per cell type (pyramidal, interneuron, purkinje). Label
+- One model per cell type (pyramidal, interneuron). Label
   spaces differ between cell types, so a shared model wastes capacity
   on the wrong sub-problem.
 - Per-node training target: each branch emits one row per distinct
@@ -19,8 +19,8 @@ Data leakage prevention:
   column is used only as the target label and for soma detection.
 
 Usage:
-    python -m hybrid.train_stage2 --data-dir data/training_morphologies
-    python -m hybrid.train_stage2 --data-dir data/training_morphologies --test-size 0.2
+    python -m hybrid.train_stage2 --data-dir data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned
+    python -m hybrid.train_stage2 --data-dir data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned --test-size 0.2
 """
 from __future__ import annotations
 
@@ -58,8 +58,6 @@ LABEL_NAMES = {1: "soma", 2: "axon", 3: "basal/dendrite", 4: "apical"}
 VALID_LABELS = {
     "pyramidal": {2, 3, 4},
     "interneuron": {2, 3},
-    "purkinje": {3},       # only dendrite (no axon in most reconstructions)
-    "other": {2, 3},
 }
 
 OWNER_AUG_FEATURE_NAMES = [
@@ -89,7 +87,8 @@ def _collect_branches(
         if valid_cell_types and cell_type not in valid_cell_types:
             continue
 
-        swc_files = sorted(subdir.glob("*.swc"))
+        swc_root = subdir / "swc" if (subdir / "swc").is_dir() else subdir
+        swc_files = sorted(swc_root.glob("*.swc"))
         print(f"  {cell_type}: {len(swc_files)} files")
         valid_labels = VALID_LABELS.get(cell_type, {2, 3})
 
@@ -576,10 +575,9 @@ def train(
     node-level class balancing.
 
     Key changes vs the old single-shared-model design:
-      1. One model per cell type (pyramidal, interneuron, purkinje).
+      1. One model per cell type (pyramidal, interneuron).
          Label spaces differ, so a shared model wastes capacity on the
-         wrong subproblem. Purkinje is only trained if ≥2 classes in
-         training data; otherwise a default-label entry is recorded.
+         wrong subproblem.
       2. Per-node training: each training row is (branch_features, label)
          weighted by the number of nodes in that branch with that label.
          This makes the loss per-node-accurate, not per-branch-majority.
@@ -589,7 +587,7 @@ def train(
          basal/apical discrimination drives the learning.
     """
     print(f"Collecting branches from {data_dir} ...")
-    morphologies = _collect_branches(data_dir, {"pyramidal", "interneuron", "purkinje"})
+    morphologies = _collect_branches(data_dir, {"pyramidal", "interneuron"})
     print(f"Total: {len(morphologies)} morphologies, "
           f"{sum(len(m.branches) for m in morphologies)} branches")
 
@@ -604,8 +602,7 @@ def train(
 
     # --- Subtree-owner models (item 4: whole-subtree classifier) ---
     # One subtree model per cell type. Pyramidal covers {axon, basal, apical};
-    # interneuron covers {axon, basal}. Purkinje is single-class so no model
-    # is learnable. The subtree model's predictions are used two ways:
+    # interneuron covers {axon, basal}. The subtree model's predictions are used two ways:
     #   (a) as 7 augmentation features on each branch feature vector;
     #   (b) broadcast at Stage 3 inference time to seed whole-subtree labels
     #       before branch-level overrides (see pipeline.py).
@@ -640,7 +637,7 @@ def train(
                 subtree_owner_models_by_cell_type[m.cell_type],
             )
 
-    for ct in ["pyramidal", "interneuron", "purkinje"]:
+    for ct in ["pyramidal", "interneuron"]:
         print(f"\n{'='*70}\nCell type: {ct.upper()}\n{'='*70}")
         ct_train = [m for m in train_morphs if m.cell_type == ct]
         ct_test = [m for m in test_morphs if m.cell_type == ct]
@@ -756,7 +753,7 @@ def main() -> int:
     parser.add_argument(
         "--data-dir",
         type=Path,
-        default=ROOT / "data" / "training_morphologies",
+        default=ROOT / "data" / "benchmark_pyramidal_interneuron_v1_qc_diag_pruned",
     )
     parser.add_argument("--test-size", type=float, default=0.2)
     parser.add_argument("--seed", type=int, default=42)

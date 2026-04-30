@@ -1,8 +1,8 @@
 """Stage 1: Cell-type and structure detection.
 
-Classifies whole morphologies into cell types and determines:
-- cell_type: pyramidal, interneuron, purkinje, granule, other
-- label_set: which SWC type codes to assign (e.g. {1,2,3,4} or {1,3})
+Classifies whole morphologies into the current benchmark cell types and determines:
+- cell_type: pyramidal or interneuron
+- label_set: which SWC type codes to assign (e.g. {1,2,3,4} or {1,2,3})
 - structure_flags: purely morphology-derived properties
 
 This stage must not depend on ground-truth SWC type labels. Any trained
@@ -34,16 +34,12 @@ from .features import (
 CELL_TYPES = [
     "pyramidal",
     "interneuron",
-    "purkinje",
-    "other",
 ]
 
 # What label sets each cell type typically uses
 CELL_TYPE_LABEL_SETS: dict[str, set[int]] = {
     "pyramidal": {1, 2, 3, 4},       # soma, axon, basal, apical
     "interneuron": {1, 2, 3},         # soma, axon, dendrite (basal only)
-    "purkinje": {1, 3},               # soma, dendrite
-    "other": {1, 2, 3},               # default fallback
 }
 
 LEAKY_STAGE1_FEATURES = {
@@ -150,28 +146,12 @@ def _heuristic_classify(features: dict[str, float]) -> tuple[str, dict[str, floa
     if n_nodes < 3000:
         scores["interneuron"] += 0.05
 
-    # --- Purkinje indicators ---
-    # Very high branching, large planar dendritic tree, high Strahler
-    if max_strahler >= 8:
-        scores["purkinje"] += 0.30
-    if branch_ratio > 0.20:
-        scores["purkinje"] += 0.20
-    if n_nodes > 3000 and n_primary <= 2:
-        scores["purkinje"] += 0.15
-    if mean_radius > 0.8:
-        scores["purkinje"] += 0.10
-
     # Normalize to probabilities
     total = sum(scores.values())
     if total <= 0:
-        scores["other"] = 1.0
-        total = 1.0
+        scores = {ct: 1.0 for ct in CELL_TYPES}
+        total = float(len(CELL_TYPES))
     probs = {ct: s / total for ct, s in scores.items()}
-
-    # Add base probability for "other"
-    probs["other"] = max(probs.get("other", 0.0), 0.02)
-    total = sum(probs.values())
-    probs = {ct: p / total for ct, p in probs.items()}
 
     best = max(probs, key=lambda ct: probs[ct])
     return best, probs
@@ -201,7 +181,7 @@ class CellTypeClassifier:
         if not model_path.exists():
             raise FileNotFoundError(
                 f"No trained model found at {model_path}. "
-                "Run hybrid/train.py first to train a model, "
+                "Run hybrid/train_stage1.py first to train a model, "
                 "or the heuristic fallback will be used."
             )
         with open(model_path, "rb") as f:
@@ -212,11 +192,11 @@ class CellTypeClassifier:
         obj.feature_names = data.get("feature_names", list(FEATURE_NAMES))
         if any(name in LEAKY_STAGE1_FEATURES for name in obj.feature_names):
             raise ValueError(
-                f"Leaky Stage 1 model at {model_path}: feature_names contain SWC type-derived fields. Retrain hybrid/train.py."
+                f"Leaky Stage 1 model at {model_path}: feature_names contain SWC type-derived fields. Retrain hybrid/train_stage1.py."
             )
         if obj.feature_names != list(FEATURE_NAMES):
             raise ValueError(
-                f"Stage 1 model at {model_path} has stale feature schema. Retrain hybrid/train.py."
+                f"Stage 1 model at {model_path} has stale feature schema. Retrain hybrid/train_stage1.py."
             )
         return obj
 
@@ -261,7 +241,7 @@ def detect_cell_type(
     nodes = parse_swc(swc_path)
     if not nodes:
         return CellTypeResult(
-            cell_type="other",
+            cell_type="interneuron",
             confidence=0.0,
             probabilities={ct: 1.0 / len(CELL_TYPES) for ct in CELL_TYPES},
             label_set={1, 2, 3},
@@ -309,7 +289,7 @@ def detect_cell_type_from_nodes(
     """Run Stage 1 on pre-parsed nodes (avoids re-reading file)."""
     if not nodes:
         return CellTypeResult(
-            cell_type="other",
+            cell_type="interneuron",
             confidence=0.0,
             probabilities={ct: 1.0 / len(CELL_TYPES) for ct in CELL_TYPES},
             label_set={1, 2, 3},

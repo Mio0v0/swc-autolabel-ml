@@ -142,6 +142,18 @@ FEATURE_NAMES: list[str] = [
     "terminal_radial_mean",
     "terminal_radial_std",
 
+    # PCA principal-axis features (rotation- and slice-invariant analogues
+    # of the z-axis features above). These let the classifier discriminate
+    # pyramidals from interneurons even when the cell is rotated, the
+    # tissue was sliced thin (z_span collapsed), or the z-axis is not the
+    # cortical depth axis.
+    "pc1_span",                    # total extent along PC1
+    "pc1_asymmetry",               # (above_soma - below_soma) / span on PC1
+    "pc1_max_above_soma",          # extent in signed-positive PC1 direction
+    "pc1_max_below_soma",          # extent in signed-negative PC1 direction
+    "pc1_radial_max",              # max |projection on PC1| (cell radius along PC1)
+    "subtree_pc1_concentration",   # fraction of total |PC1 mass| in top-aligned primary subtree
+    "subtree_pc1_top_alignment",   # mean signed PC1 projection of top subtree, normalized to pc1_radial_max
 ]
 
 
@@ -251,14 +263,73 @@ def extract_global_features(nodes: list[SWCNode]) -> dict[str, float]:
     xy_aspect_ratio = max(x_span, y_span) / max(1e-9, min(x_span, y_span)) if min(x_span, y_span) > 1e-9 else 1.0
 
     coords = np.array([[nd.x, nd.y, nd.z] for nd in nodes], dtype=np.float64)
+    soma_xyz = np.array([soma_center.x, soma_center.y, soma_center.z], dtype=np.float64)
+    pc1_span = 0.0
+    pc1_asymmetry = 0.0
+    pc1_max_above_soma = 0.0
+    pc1_max_below_soma = 0.0
+    pc1_radial_max = 0.0
+    subtree_pc1_concentration = 0.0
+    subtree_pc1_top_alignment = 0.0
+
     if len(coords) >= 3:
-        centered = coords - np.mean(coords, axis=0, keepdims=True)
+        centroid = np.mean(coords, axis=0)
+        centered = coords - centroid
         cov = np.cov(centered.T)
-        eigvals = np.sort(np.maximum(np.linalg.eigvalsh(cov), 0.0))[::-1]
+        # eigh returns ascending order; eigvecs columns correspond to eigvals
+        eigvals_asc, eigvecs = np.linalg.eigh(cov)
+        eigvals = np.maximum(eigvals_asc[::-1], 0.0)
         lam1, lam2, lam3 = eigvals.tolist()
         linearity = (lam1 - lam2) / lam1 if lam1 > 1e-9 else 0.0
         planarity = (lam2 - lam3) / lam1 if lam1 > 1e-9 else 0.0
         thickness_ratio = lam3 / lam1 if lam1 > 1e-9 else 0.0
+
+        # ---- PC1 principal axis (rotation-invariant analogue of z-axis) ----
+        pc1 = eigvecs[:, -1].astype(np.float64)
+        # Sign convention: positive PC1 points from soma toward the cell
+        # centroid. For pyramidals this aligns roughly with the apical
+        # trunk; for interneurons the signed direction is biology-agnostic.
+        if np.dot(centroid - soma_xyz, pc1) < 0:
+            pc1 = -pc1
+        proj = (coords - soma_xyz) @ pc1                # signed, soma-relative
+        pc1_max_above_soma = float(max(0.0, float(proj.max())))
+        pc1_max_below_soma = float(max(0.0, float(-proj.min())))
+        pc1_span = pc1_max_above_soma + pc1_max_below_soma
+        if pc1_span > 1e-9:
+            pc1_asymmetry = (pc1_max_above_soma - pc1_max_below_soma) / pc1_span
+        pc1_radial_max = max(pc1_max_above_soma, pc1_max_below_soma)
+
+        # ---- Per-primary-subtree PC1 alignment ----
+        # For each primary subtree, compute (1) the sum of |projections|
+        # contributed by its nodes (a "PC1-mass" of the subtree) and
+        # (2) the mean signed projection. The most apical-like subtree is
+        # the one with the most positive mean projection.
+        if primary_roots and pc1_radial_max > 1e-9:
+            nid_to_idx = {nd.id: i for i, nd in enumerate(nodes)}
+            sub_abs_mass: list[float] = []
+            sub_signed_mean: list[float] = []
+            for pr in primary_roots:
+                stack = [pr]
+                projs: list[float] = []
+                while stack:
+                    cur = stack.pop()
+                    idx = nid_to_idx.get(cur)
+                    if idx is not None:
+                        projs.append(float(proj[idx]))
+                    stack.extend(children.get(cur, []))
+                if projs:
+                    arr = np.asarray(projs, dtype=np.float64)
+                    sub_abs_mass.append(float(np.sum(np.abs(arr))))
+                    sub_signed_mean.append(float(np.mean(arr)))
+                else:
+                    sub_abs_mass.append(0.0)
+                    sub_signed_mean.append(0.0)
+            if sub_signed_mean:
+                top_idx = int(np.argmax(sub_signed_mean))
+                subtree_pc1_top_alignment = sub_signed_mean[top_idx] / pc1_radial_max
+                total_mass = float(sum(sub_abs_mass))
+                if total_mass > 1e-9:
+                    subtree_pc1_concentration = sub_abs_mass[top_idx] / total_mass
     else:
         linearity = 0.0
         planarity = 0.0
@@ -339,6 +410,15 @@ def extract_global_features(nodes: list[SWCNode]) -> dict[str, float]:
         "sholl_decay_rate": float(sholl_decay),
         "terminal_radial_mean": float(np.mean(terminal_radials)),
         "terminal_radial_std": float(np.std(terminal_radials)),
+
+        # PCA principal-axis features (rotation-invariant)
+        "pc1_span": float(pc1_span),
+        "pc1_asymmetry": float(pc1_asymmetry),
+        "pc1_max_above_soma": float(pc1_max_above_soma),
+        "pc1_max_below_soma": float(pc1_max_below_soma),
+        "pc1_radial_max": float(pc1_radial_max),
+        "subtree_pc1_concentration": float(subtree_pc1_concentration),
+        "subtree_pc1_top_alignment": float(subtree_pc1_top_alignment),
     }
     return feats
 

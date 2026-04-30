@@ -11,12 +11,13 @@ Reports:
 - Improvement from Stage 3 refinement
 
 Usage:
-    python -m hybrid.evaluate --data-dir data/training_morphologies
-    python -m hybrid.evaluate --data-dir data/training_morphologies --test-size 0.25
+    python -m hybrid.evaluate --data-dir data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned
+    python -m hybrid.evaluate --data-dir data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned --test-size 0.25
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import pickle
 import sys
@@ -54,13 +55,27 @@ LABEL_NAMES = {1: "soma", 2: "axon", 3: "basal/dendrite", 4: "apical"}
 VALID_LABELS = {
     "pyramidal": {1, 2, 3, 4},
     "interneuron": {1, 2, 3},
-    "purkinje": {1, 3},
 }
 NEURITE_LABELS = {
     "pyramidal": {2, 3, 4},
     "interneuron": {2, 3},
-    "purkinje": {3},
 }
+
+
+def _file_in_test_bucket(file_name: str, seed: int, test_size: float) -> bool:
+    """Stable file-identity split: hash(seed + cell_type + file_name) → bucket.
+
+    Crucial property: the same file with the same seed ALWAYS lands in the
+    same split, regardless of how many other files are in the dataset. This
+    makes A/B comparisons across dataset versions robust — removing a file
+    doesn't reshuffle the rest into different splits.
+
+    The seed only changes which files land in test; flipping the seed gives
+    a different but equally reproducible split.
+    """
+    h = hashlib.md5(f"{seed}:{file_name}".encode()).hexdigest()
+    bucket = int(h[:8], 16) / 0xFFFFFFFF  # uniform [0, 1)
+    return bucket < test_size
 
 
 def _file_level_split(
@@ -68,18 +83,28 @@ def _file_level_split(
     test_size: float,
     seed: int,
 ) -> tuple[dict[str, list[Path]], dict[str, list[Path]]]:
-    """Split files into train/test per cell type."""
-    rng = np.random.RandomState(seed)
+    """Split files into train/test per cell type using a stable hash bucket.
+
+    See _file_in_test_bucket for the hash-bucket rationale. Per-class minimum
+    of 1 test file is guaranteed (falls back to the lexicographically first
+    file if the hash bucket happens to leave a class empty).
+    """
     train: dict[str, list[Path]] = {}
     test: dict[str, list[Path]] = {}
 
     for ct, files in sorted(files_by_type.items()):
-        indices = np.arange(len(files))
-        rng.shuffle(indices)
-        n_test = max(1, int(len(files) * test_size))
-        test_idx = set(indices[:n_test].tolist())
-        train[ct] = [f for i, f in enumerate(files) if i not in test_idx]
-        test[ct] = [f for i, f in enumerate(files) if i in test_idx]
+        ct_train, ct_test = [], []
+        for f in files:
+            if _file_in_test_bucket(f.name, seed, test_size):
+                ct_test.append(f)
+            else:
+                ct_train.append(f)
+        # Guarantee at least one test file per class
+        if not ct_test and files:
+            ct_test = [files[0]]
+            ct_train = files[1:]
+        train[ct] = ct_train
+        test[ct] = ct_test
 
     return train, test
 
@@ -136,7 +161,7 @@ def _train_stage2(train_files: dict[str, list[Path]], model_path: Path) -> None:
     """Train Stage 2 per-cell-type on train split only.
 
     Mirrors the production design in train_stage2.py:
-      - One model per cell type (pyramidal, interneuron, purkinje)
+      - One model per cell type (pyramidal, interneuron)
       - Per-node training: one row per (branch, label) weighted by node count
       - Node-level class balancing via sample_weight (equal per-class mass)
       - Purkinje falls back to a default label if only one class in data
@@ -147,7 +172,7 @@ def _train_stage2(train_files: dict[str, list[Path]], model_path: Path) -> None:
     # Collect per-cell-type train morphologies once — reused below for subtree
     # owner training and for branch feature extraction.
     train_morphs_by_ct: dict[str, list] = {}
-    for ct in ("pyramidal", "interneuron", "purkinje"):
+    for ct in ("pyramidal", "interneuron"):
         morphs = []
         for f in train_files.get(ct, []):
             try:
@@ -159,7 +184,7 @@ def _train_stage2(train_files: dict[str, list[Path]], model_path: Path) -> None:
         train_morphs_by_ct[ct] = morphs
 
     # Train a subtree-owner model per cell type (item 4). Pyramidal gets
-    # {2,3,4}; interneuron {2,3}; purkinje is single-class so is skipped.
+    # {2,3,4}; interneuron {2,3}.
     subtree_owner_models_by_cell_type: dict[str, object] = {}
     subtree_targets = {
         "pyramidal": {2, 3, 4},
@@ -169,7 +194,6 @@ def _train_stage2(train_files: dict[str, list[Path]], model_path: Path) -> None:
         all_train_morphs = (
             train_morphs_by_ct.get("pyramidal", [])
             + train_morphs_by_ct.get("interneuron", [])
-            + train_morphs_by_ct.get("purkinje", [])
         )
         m = _train_subtree_owner_for_cell_type(
             all_train_morphs, ct, valid_sub_labels, seed=42
@@ -187,7 +211,7 @@ def _train_stage2(train_files: dict[str, list[Path]], model_path: Path) -> None:
                 str(f), ct, owner_model
             )
 
-    for ct in ["pyramidal", "interneuron", "purkinje"]:
+    for ct in ["pyramidal", "interneuron"]:
         if ct not in train_files or not train_files[ct]:
             continue
         valid_neurite = NEURITE_LABELS.get(ct, {2, 3})
@@ -329,7 +353,6 @@ def _evaluate_file(
             for idx in br.node_indices:
                 s2_labels[idx] = best
     else:
-        # No trained model for this cell type (e.g. single-class Purkinje)
         fb = default_label if default_label is not None else (
             neurite_labels[0] if neurite_labels else 3
         )
@@ -517,7 +540,8 @@ def evaluate(
         ct = subdir.name.lower()
         if ct not in VALID_LABELS:
             continue
-        files = sorted(subdir.glob("*.swc"))
+        swc_root = subdir / "swc" if (subdir / "swc").is_dir() else subdir
+        files = sorted(swc_root.glob("*.swc"))
         if files:
             files_by_type[ct] = files
 
@@ -525,11 +549,23 @@ def evaluate(
     for ct, files in sorted(files_by_type.items()):
         print(f"  {ct}: {len(files)} files")
 
-    # Split
+    # Split (stable hash-based — same file → same split regardless of dataset size)
     train_files, test_files = _file_level_split(files_by_type, test_size, seed)
-    print(f"\nSplit (test_size={test_size}):")
+    print(f"\nSplit (test_size={test_size}, seed={seed}, hash-bucket):")
     for ct in sorted(train_files.keys()):
         print(f"  {ct}: {len(train_files[ct])} train, {len(test_files[ct])} test")
+
+    # Persist the test split so A/B runs can confirm overlap.
+    split_path = Path(__file__).parent / "models" / "eval_split.json"
+    split_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(split_path, "w") as f:
+        json.dump({
+            "seed": seed,
+            "test_size": test_size,
+            "data_dir": str(data_dir),
+            "test_files": {ct: sorted(p.name for p in files) for ct, files in test_files.items()},
+        }, f, indent=2)
+    print(f"  test split written to {split_path}")
 
     # Train models on train split only
     eval_dir = Path(__file__).parent / "models" / "eval_tmp"
@@ -695,10 +731,29 @@ def evaluate(
         json.dump(output, f, indent=2)
     print(f"\nResults saved to {output_path}")
 
-    # Cleanup eval models
-    s1_model.unlink(missing_ok=True)
-    s2_model.unlink(missing_ok=True)
-    eval_dir.rmdir()
+    # Full per-file CSV — one row per test file, both Stage 2 and Stage 2+3
+    # scores, sorted worst-first. Use this to find the long tail of bad files.
+    csv_path = Path(__file__).parent / "models" / "per_file_scores.csv"
+    s23_by_path = {row["path"]: row for rows in file_scores_s23.values() for row in rows}
+    all_rows = []
+    for ct, rows in file_scores_s2.items():
+        for r in rows:
+            s23 = s23_by_path.get(r["path"], {})
+            all_rows.append((
+                r["path"], ct, r["n_nodes"],
+                float(r["neurite_macro_f1"]),
+                float(s23.get("neurite_macro_f1", 0.0)),
+            ))
+    all_rows.sort(key=lambda x: (x[4], x[3]))  # worst Stage 2+3 first
+    with open(csv_path, "w") as f:
+        f.write("path,cell_type,n_nodes,neurite_macro_f1_stage2,neurite_macro_f1_stage23\n")
+        for row in all_rows:
+            f.write(f"{row[0]},{row[1]},{row[2]},{row[3]:.4f},{row[4]:.4f}\n")
+    print(f"Per-file CSV saved to {csv_path}")
+
+    # Keep eval models around so follow-up diagnostic scripts can reuse them
+    # without retraining. Delete hybrid/models/eval_tmp/ manually when done.
+    print(f"Eval models kept at {eval_dir} — delete manually when no longer needed.")
 
     return output
 
@@ -707,7 +762,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Evaluate hybrid pipeline with file-level train/test split"
     )
-    parser.add_argument("--data-dir", type=Path, default=ROOT / "data" / "training_morphologies")
+    parser.add_argument("--data-dir", type=Path, default=ROOT / "data" / "benchmark_pyramidal_interneuron_v1_qc_diag_pruned")
     parser.add_argument("--test-size", type=float, default=0.2)
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()

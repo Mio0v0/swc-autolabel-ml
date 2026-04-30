@@ -172,6 +172,94 @@ def _primary_subtree_voting(
     return out, subtree_labels
 
 
+def _pick_apical_by_principal_axis(
+    subtree_labels: dict[int, int],
+    nodes: list[SWCNode],
+    children: list[list[int]],
+    soma_indices: set[int],
+    labels: list[int],
+    apical_label: int = 4,
+    fallback_label: int = 3,
+) -> tuple[dict[int, int], list[int]]:
+    """Enforce ≤1 apical primary subtree, choosing the winner by the cell's
+    principal axis (PC1 of all neurite nodes) rather than by confidence sum.
+
+    Rationale: in cells with rotated coordinate frames or sideways apicals,
+    the model can confidently mislabel the wrong subtree as apical. PC1
+    captures the cell's actual elongation direction, so the subtree whose
+    mean position projects highest along PC1 is the true apical trunk.
+
+    Falls back to a no-op if PC1 is degenerate or only one apical subtree
+    exists.
+    """
+    out_labels = list(labels)
+    out_subtrees = dict(subtree_labels)
+
+    apical_owners = [pr for pr, lbl in subtree_labels.items() if lbl == apical_label]
+    if len(apical_owners) <= 1:
+        return out_subtrees, out_labels
+
+    # Soma center (proxy)
+    if soma_indices:
+        sx = float(np.mean([nodes[i].x for i in soma_indices]))
+        sy = float(np.mean([nodes[i].y for i in soma_indices]))
+        sz = float(np.mean([nodes[i].z for i in soma_indices]))
+    else:
+        sx, sy, sz = nodes[0].x, nodes[0].y, nodes[0].z
+
+    # PC1 of neurite cloud, signed away from soma
+    n = len(nodes)
+    neurite_idx = [i for i in range(n) if i not in soma_indices]
+    if len(neurite_idx) < 5:
+        return out_subtrees, out_labels
+    pts = np.array(
+        [[nodes[i].x - sx, nodes[i].y - sy, nodes[i].z - sz] for i in neurite_idx],
+        dtype=np.float64,
+    )
+    try:
+        cov = np.cov(pts.T)
+        eigvals, eigvecs = np.linalg.eigh(cov)
+        order_eig = np.argsort(eigvals)[::-1]
+        pc1 = eigvecs[:, order_eig[0]]
+        if float(np.dot(pc1, pts.mean(axis=0))) < 0.0:
+            pc1 = -pc1
+    except np.linalg.LinAlgError:
+        return out_subtrees, out_labels
+
+    # Score each apical-labeled primary by mean PC1 projection of its subtree
+    best_pr = None
+    best_score = -float("inf")
+    for pr in apical_owners:
+        sub = _subtree_indices(pr, children)
+        if not sub:
+            continue
+        projs = [
+            (nodes[i].x - sx) * pc1[0]
+            + (nodes[i].y - sy) * pc1[1]
+            + (nodes[i].z - sz) * pc1[2]
+            for i in sub
+        ]
+        score = float(np.mean(projs))
+        if score > best_score:
+            best_score = score
+            best_pr = pr
+
+    if best_pr is None:
+        return out_subtrees, out_labels
+
+    # Reassign losers to fallback (basal)
+    for pr in apical_owners:
+        if pr == best_pr:
+            continue
+        out_subtrees[pr] = fallback_label
+        sub = _subtree_indices(pr, children)
+        for idx in sub:
+            if out_labels[idx] == apical_label:
+                out_labels[idx] = fallback_label
+
+    return out_subtrees, out_labels
+
+
 def _enforce_single_class(
     subtree_labels: dict[int, int],
     nodes: list[SWCNode],
@@ -377,6 +465,164 @@ def _constrain_apical_to_owner_subtree(
     return out
 
 
+def _soft_subtree_majority(
+    nodes: list[SWCNode],
+    labels: list[int],
+    confidences: list[float],
+    children: list[list[int]],
+    soma_indices: set[int],
+    label_set: set[int],
+    high_conf: float = 0.70,
+    low_conf: float = 0.55,
+    min_margin: float = 0.60,
+) -> list[int]:
+    """Soft subtree-majority propagation (interneuron-safe).
+
+    Unlike pyramidal "hard" subtree voting (which forces every node in a
+    primary subtree to one label), interneurons allow axons to emerge from
+    within dendritic subtrees — so we cannot simply majority-vote. Instead:
+
+    1. For each primary subtree, compute confidence-weighted votes using
+       ONLY nodes with ml_confidence ≥ high_conf.
+    2. If the winning label owns ≥ min_margin of the high-confidence mass,
+       propagate it ONLY to low-confidence (< low_conf) nodes in the subtree.
+    3. High-confidence nodes are never touched.
+
+    This is a conservative "fill in the unsure parts" operation.
+    """
+    neurite_labels = sorted(label_set - {1})
+    if len(neurite_labels) <= 1:
+        return labels
+
+    out = list(labels)
+    primary_roots: list[int] = []
+    for si in soma_indices:
+        for ci in children[si]:
+            if ci not in soma_indices:
+                primary_roots.append(ci)
+
+    for pr in primary_roots:
+        subtree = _subtree_indices(pr, children)
+        if len(subtree) < 4:
+            continue  # too small to vote
+
+        # Confidence-weighted votes over HIGH-confidence nodes only
+        hi_votes: dict[int, float] = {lbl: 0.0 for lbl in neurite_labels}
+        hi_total = 0.0
+        for idx in subtree:
+            if confidences[idx] < high_conf:
+                continue
+            lbl = out[idx]
+            if lbl in hi_votes:
+                hi_votes[lbl] += confidences[idx]
+                hi_total += confidences[idx]
+
+        if hi_total <= 0:
+            continue
+
+        winner = max(neurite_labels, key=lambda lbl: hi_votes.get(lbl, 0.0))
+        winner_share = hi_votes[winner] / hi_total
+
+        if winner_share < min_margin:
+            continue  # subtree is genuinely mixed — leave it alone
+
+        # Flip low-confidence nodes in this subtree to the winner
+        for idx in subtree:
+            if confidences[idx] < low_conf and out[idx] != winner and out[idx] in neurite_labels:
+                out[idx] = winner
+
+    return out
+
+
+def _interneuron_axon_bias(
+    nodes: list[SWCNode],
+    labels: list[int],
+    confidences: list[float],
+    children: list[list[int]],
+    soma_indices: set[int],
+    label_set: set[int],
+    low_conf: float = 0.60,
+    min_subtree_nodes: int = 20,
+    thin_radius_percentile: float = 0.25,
+) -> list[int]:
+    """Bias the thinnest-longest primary subtree toward axon (interneuron).
+
+    Interneuron axons are characterized by a distinctive geometric signature:
+    thin (small radius) and long (high path length). This rule identifies
+    the primary subtree most axon-like by that signature and gently flips
+    low-confidence non-axon nodes in it toward axon (2).
+
+    It does NOT touch high-confidence nodes, so if the ML model is certain
+    a thin branch is dendritic, the rule defers.
+    """
+    if 2 not in label_set:
+        return labels
+
+    out = list(labels)
+    primary_roots: list[int] = []
+    for si in soma_indices:
+        for ci in children[si]:
+            if ci not in soma_indices:
+                primary_roots.append(ci)
+
+    if len(primary_roots) < 2:
+        return out  # nothing to compare against
+
+    # Score each primary by an axon-likeness metric: low mean radius + high
+    # max path length. Normalize both within this cell so the rule is
+    # scale-invariant.
+    primary_stats: list[tuple[int, float, float, int]] = []  # (pr, mean_r, max_path, size)
+    for pr in primary_roots:
+        subtree = _subtree_indices(pr, children)
+        if len(subtree) < min_subtree_nodes:
+            continue
+        radii = [nodes[i].radius for i in subtree]
+        if not radii:
+            continue
+        mean_r = float(np.mean(radii))
+        # Path length from pr to the deepest node
+        dist = _path_length_from(pr, nodes, [None] * len(nodes), children)
+        max_path = max(dist.values()) if dist else 0.0
+        primary_stats.append((pr, mean_r, max_path, len(subtree)))
+
+    if len(primary_stats) < 2:
+        return out
+
+    min_r = min(s[1] for s in primary_stats)
+    max_r = max(s[1] for s in primary_stats)
+    max_path = max(s[2] for s in primary_stats)
+    if max_r - min_r < 1e-9 or max_path < 1e-9:
+        return out
+
+    # axon-score = 0.6 * (1 - normalized_radius) + 0.4 * normalized_path
+    best_pr = None
+    best_score = -1.0
+    for pr, mean_r, path, _size in primary_stats:
+        r_score = 1.0 - (mean_r - min_r) / (max_r - min_r)
+        p_score = path / max_path
+        score = 0.6 * r_score + 0.4 * p_score
+        if score > best_score:
+            best_score = score
+            best_pr = pr
+
+    # Only act if the candidate is notably thinner than average — otherwise
+    # there isn't a clear axon-like primary to bias toward.
+    avg_r = float(np.mean([s[1] for s in primary_stats]))
+    best_mean_r = next(s[1] for s in primary_stats if s[0] == best_pr)
+    if best_mean_r > avg_r * (1.0 - thin_radius_percentile):
+        return out  # not distinctly thin → don't force
+
+    # Bias low-confidence non-axon nodes in the winning subtree toward axon
+    axon_subtree = _subtree_indices(best_pr, children)
+    for idx in axon_subtree:
+        if idx in soma_indices:
+            continue
+        if out[idx] != 2 and confidences[idx] < low_conf and out[idx] != 1:
+            out[idx] = 2
+
+    return out
+
+
 def _strip_spurious_soma(
     labels: list[int],
     soma_indices: set[int],
@@ -484,9 +730,30 @@ def refine(
         n_refined = sum(1 for i in range(n) if labels[i] != ml_labels[i])
 
     elif cell_type == "interneuron":
-        # Interneuron: NO subtree voting — axon can emerge from within
-        # dendrite subtrees, so forcing whole subtrees to one label hurts.
-        # Only gentle smoothing and small island flipping.
+        # Interneuron: no HARD subtree voting (axon can emerge from within
+        # dendrite subtrees), but soft rules help close the Stage-3 gap.
+        #
+        # Rule 1 — thin-primary axon bias: identify the primary subtree
+        # most likely to be the axon (thinnest mean radius + longest path)
+        # and gently flip low-confidence non-axon nodes in it toward axon.
+        labels = _interneuron_axon_bias(
+            nodes, labels, ml_confidences, children,
+            soma_indices, label_set,
+            low_conf=0.60,
+        )
+
+        # Rule 2 — soft subtree majority: for each primary subtree, if
+        # high-confidence nodes strongly agree on one label, propagate that
+        # label only to LOW-confidence nodes in the same subtree. High
+        # confidence predictions are preserved.
+        labels = _soft_subtree_majority(
+            nodes, labels, ml_confidences, children,
+            soma_indices, label_set,
+            high_conf=0.70, low_conf=0.55, min_margin=0.60,
+        )
+
+        # Rule 3 — gentle parent-child smoothing and small-island flipping
+        # (unchanged).
         labels = _parent_child_smoothing(
             nodes, labels, ml_confidences, parent_idx, children,
             soma_indices, label_set,
@@ -515,8 +782,14 @@ def refine(
                 target_class=2, fallback_class=3,
             )
 
-        # 3. Single-apical constraint
+        # 3. Single-apical constraint — PCA-ranked picker first (uses cell's
+        # own principal axis, robust to rotated coordinate frames), then the
+        # confidence-based enforcer as a safety net.
         if 4 in label_set:
+            subtree_labels, labels = _pick_apical_by_principal_axis(
+                subtree_labels, nodes, children, soma_indices, labels,
+                apical_label=4, fallback_label=3,
+            )
             subtree_labels, labels = _enforce_single_class(
                 subtree_labels, nodes, children, labels, ml_confidences,
                 target_class=4, fallback_class=3,

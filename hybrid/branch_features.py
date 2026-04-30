@@ -86,6 +86,45 @@ BRANCH_FEATURE_NAMES: list[str] = [
     "distal_mean_radius",       # mean radius over last 1/3 of branch
     "proximal_persistence",     # straightness of first 1/3
     "distal_persistence",       # straightness of last 1/3
+
+    # --- Apical-vs-basal discrimination features (added 2026-04) ---
+    # Help resolve the main remaining confusion in pyramidal cells
+    # (apical points pia-ward as a tall, tight, thick trunk; basal spreads
+    # horizontally around the soma).
+    "polar_angle_from_up",               # angle (radians) between soma→branch-mid and +z. Apical ≈ 0, basal ≈ π/2
+    "vertical_horizontal_span_ratio",    # primary-subtree z_span / max(xy_span, eps). Apical tall/thin → high
+    "soma_z_offset_norm",                # (mean_z - soma_z) / cell_z_range. Apical ≈ +1, basal ≈ 0, descending axon < 0
+    "is_trunk_primary",                  # 1.0 if this branch's primary subtree is the top apical-trunk candidate
+    "primary_subtree_polar_spread",      # std of polar angles within the primary subtree. Apical tight → low
+
+    # --- Cell-intrinsic principal-axis features (added 2026-04-25) ---
+    # Replace world-z assumptions with the cell's OWN long axis (PC1 of the
+    # neurite point cloud). Handles cells with rotated coordinate frames,
+    # sideways-projecting apicals, and stunted apicals where the world z-axis
+    # is not the apical axis.
+    "principal_axis_projection",         # signed branch-midpoint projection onto cell PC1, normalized to [-1, +1]
+    "polar_angle_from_principal_axis",   # angle (radians) between soma→branch-mid and the cell's PC1
+    "principal_axis_alignment_strength", # PC1 explained variance ratio. High → cell is elongated, axis is meaningful
+    "subtree_principal_projection",      # mean PC1 projection of this branch's primary subtree, normalized
+    "subtree_principal_rank",            # normalized rank of subtree mean PC1 projection (1.0 = top apical candidate)
+
+    # --- Branching-rate features (added 2026-04-25) ---
+    # Targets axon-vs-apical confusion when both project upward. Axons have
+    # long internodes and few bifurcations per micron; apicals branch
+    # frequently (especially in the tuft); basals are moderately bushy.
+    "bifurcations_per_micron",           # this branch's bifurcation count / path_length
+    "mean_internode_distance",           # mean Euclidean distance between consecutive nodes in this branch
+    "subtree_bifurcations_per_micron",   # subtree total bifurcations / subtree total path length (axon: low)
+
+    # --- Trunk-detection features (added 2026-04-29) ---
+    # Directly encode "apical = one dominant trunk before bifurcating; basal =
+    # bushy from the start." A "trunk" here is the longest root-to-leaf path
+    # within a primary subtree. Apical subtrees have a long, dominant trunk;
+    # basal subtrees branch early and have no clear trunk.
+    "path_to_first_bifurcation_norm",    # primary-root to first bifurcation distance / max cell path. Apical: large, basal: small
+    "subtree_trunk_length_norm",         # subtree longest root-to-leaf path length / max cell path
+    "subtree_trunk_fraction",            # trunk_length / total subtree path length. Apical: ~0.3-0.6, basal: ~0.05-0.2
+    "on_longest_path",                   # 1.0 if this branch is on its subtree's longest path (= trunk)
 ]
 
 
@@ -346,6 +385,11 @@ def extract_branches(
     subtree_z_span_by_root: dict[int, float] = {}
     subtree_min_radius_by_root: dict[int, float] = {}
     subtree_max_radial_by_root: dict[int, float] = {}
+    # New (apical-vs-basal): per-primary-subtree xy-span, mean z offset,
+    # polar-angle spread (std of soma→node angle from +z).
+    subtree_xy_span_by_root: dict[int, float] = {}
+    subtree_mean_z_offset_by_root: dict[int, float] = {}
+    subtree_polar_std_by_root: dict[int, float] = {}
     for pr in primary_set:
         stack = [pr]
         sub_nodes: list[int] = []
@@ -359,7 +403,12 @@ def extract_branches(
             continue
         subtree_max_path_by_root[pr] = max(path_from_root[i] for i in sub_nodes)
         z_vals = [nodes[i].z for i in sub_nodes]
+        x_vals = [nodes[i].x for i in sub_nodes]
+        y_vals = [nodes[i].y for i in sub_nodes]
         subtree_z_span_by_root[pr] = (max(z_vals) - min(z_vals)) if z_vals else 0.0
+        xy_x_span = (max(x_vals) - min(x_vals)) if x_vals else 0.0
+        xy_y_span = (max(y_vals) - min(y_vals)) if y_vals else 0.0
+        subtree_xy_span_by_root[pr] = math.sqrt(xy_x_span ** 2 + xy_y_span ** 2)
         subtree_min_radius_by_root[pr] = min(nodes[i].radius for i in sub_nodes)
         subtree_max_radial_by_root[pr] = max(
             math.sqrt(
@@ -369,6 +418,198 @@ def extract_branches(
             )
             for i in sub_nodes
         )
+        # Mean z offset from soma (apical positive, basal near 0, descending negative)
+        subtree_mean_z_offset_by_root[pr] = float(np.mean([nodes[i].z - soma_z for i in sub_nodes]))
+        # Polar angle std: angle between (node - soma) and +z axis
+        polar_angles: list[float] = []
+        for i in sub_nodes:
+            dx = nodes[i].x - soma_x
+            dy = nodes[i].y - soma_y
+            dz = nodes[i].z - soma_z
+            r = math.sqrt(dx * dx + dy * dy + dz * dz)
+            if r > 1e-9:
+                cos_theta = max(-1.0, min(1.0, dz / r))
+                polar_angles.append(math.acos(cos_theta))
+        subtree_polar_std_by_root[pr] = (
+            float(np.std(polar_angles)) if len(polar_angles) > 1 else 0.0
+        )
+
+    # Apical-trunk-candidate primary: the primary with the largest mean
+    # z-offset above soma (i.e. most pia-ward). Tie-break by largest z_span.
+    trunk_primary_root: int | None = None
+    best_trunk_score = -float("inf")
+    for pr in primary_set:
+        z_off = subtree_mean_z_offset_by_root.get(pr, 0.0)
+        if z_off <= 0:
+            continue  # candidates must be above soma
+        z_span = subtree_z_span_by_root.get(pr, 0.0)
+        # Weighted score: mean-z-offset dominates, z-span breaks ties
+        score = z_off + 0.1 * z_span
+        if score > best_trunk_score:
+            best_trunk_score = score
+            trunk_primary_root = pr
+
+    # Cell-level z-range for normalization (used in soma_z_offset_norm)
+    all_z_vals = [nd.z for nd in nodes]
+    cell_z_range = (max(all_z_vals) - min(all_z_vals)) if all_z_vals else 1.0
+    cell_z_range = max(cell_z_range, 1e-6)
+
+    # --- Cell-intrinsic principal axis (PC1 of neurite point cloud) ---
+    # Robust to coordinate-frame rotation: when the cell is not aligned with
+    # world z, PC1 still finds the apical/elongation direction. We sign PC1
+    # so its dot product with (centroid - soma) is positive — "out from soma
+    # along the long axis" → toward the apical end for typical pyramidals.
+    neurite_idx = [i for i in range(n) if i not in soma_indices]
+    pc1_vec = np.array([0.0, 0.0, 1.0], dtype=np.float64)  # safe default = world z
+    pc1_strength = 0.0
+    max_abs_proj = 1.0
+    if len(neurite_idx) >= 5:
+        pts = np.array(
+            [[nodes[i].x - soma_x, nodes[i].y - soma_y, nodes[i].z - soma_z]
+             for i in neurite_idx],
+            dtype=np.float64,
+        )
+        try:
+            # Centered covariance — already centered at soma (close enough)
+            cov = np.cov(pts.T)
+            eigvals, eigvecs = np.linalg.eigh(cov)  # ascending
+            order_eig = np.argsort(eigvals)[::-1]
+            eigvals = eigvals[order_eig]
+            eigvecs = eigvecs[:, order_eig]
+            pc1 = eigvecs[:, 0]
+            total_var = float(np.sum(eigvals))
+            pc1_strength = (
+                float(eigvals[0]) / total_var if total_var > 1e-12 else 0.0
+            )
+            # Sign convention: PC1 points away from soma along the dominant
+            # neurite mass. Use centroid (mean of neurite cloud relative to soma).
+            centroid = pts.mean(axis=0)
+            if float(np.dot(pc1, centroid)) < 0.0:
+                pc1 = -pc1
+            pc1_vec = pc1
+            # Cell-level max abs projection (for normalization).
+            projs = pts @ pc1_vec
+            max_abs_proj = float(np.max(np.abs(projs))) if projs.size else 1.0
+            max_abs_proj = max(max_abs_proj, 1e-6)
+        except np.linalg.LinAlgError:
+            pass
+
+    # Per-primary-subtree mean PC1 projection (raw, unnormalized) and rank.
+    subtree_principal_proj_by_root: dict[int, float] = {}
+    for pr in primary_set:
+        # Re-walk subtree to gather projections (we already walked it above
+        # but didn't store positions — keep this localized to avoid coupling).
+        stack = [pr]
+        projs: list[float] = []
+        while stack:
+            idx = stack.pop()
+            dx = nodes[idx].x - soma_x
+            dy = nodes[idx].y - soma_y
+            dz = nodes[idx].z - soma_z
+            projs.append(dx * pc1_vec[0] + dy * pc1_vec[1] + dz * pc1_vec[2])
+            for ci in children[idx]:
+                stack.append(ci)
+        if projs:
+            subtree_principal_proj_by_root[pr] = float(np.mean(projs))
+
+    # Normalized rank by mean principal projection (1.0 = top apical candidate)
+    principal_rank_of_root: dict[int, float] = {}
+    sorted_roots_by_proj = sorted(
+        subtree_principal_proj_by_root.items(), key=lambda kv: kv[1], reverse=True
+    )
+    n_pp = len(sorted_roots_by_proj)
+    for rank, (pr, _) in enumerate(sorted_roots_by_proj):
+        principal_rank_of_root[pr] = (
+            1.0 - (rank / max(1, n_pp - 1)) if n_pp > 1 else 1.0
+        )
+
+    # --- Per-primary-subtree bifurcations / micron (axon-discriminator) ---
+    # Axons branch sparsely → low bif rate. Apicals + basals branch densely.
+    subtree_bif_density_by_root: dict[int, float] = {}
+    for pr in primary_set:
+        stack = [pr]
+        n_bif = 0
+        total_path = 0.0
+        while stack:
+            idx = stack.pop()
+            n_kids = len(children[idx])
+            if n_kids > 1:
+                n_bif += 1
+            for ci in children[idx]:
+                total_path += _euclidean(nodes[idx], nodes[ci])
+                stack.append(ci)
+        subtree_bif_density_by_root[pr] = (
+            n_bif / total_path if total_path > 1e-9 else 0.0
+        )
+
+    # --- Per-primary-subtree trunk-detection stats ---
+    # Trunk = longest root-to-leaf path inside the subtree. Apical subtrees
+    # have one dominant trunk before tufting; basal subtrees bifurcate early
+    # and have no clear trunk dominance.
+    subtree_trunk_length_by_root: dict[int, float] = {}
+    subtree_total_path_by_root: dict[int, float] = {}
+    subtree_first_bif_by_root: dict[int, float] = {}
+    trunk_node_set_by_root: dict[int, set[int]] = {}
+
+    for pr in primary_set:
+        # Iterative post-order traversal of the subtree (children before parent)
+        sub_nodes_post: list[int] = []
+        stack_po: list[tuple[int, bool]] = [(pr, False)]
+        while stack_po:
+            idx, processed = stack_po.pop()
+            if processed:
+                sub_nodes_post.append(idx)
+                continue
+            stack_po.append((idx, True))
+            for ci in children[idx]:
+                stack_po.append((ci, False))
+
+        # Longest root-to-leaf descent length per node + trunk best-child pointer
+        longest_descent: dict[int, float] = {}
+        best_child_of: dict[int, int | None] = {}
+        sub_total_path = 0.0
+        for idx in sub_nodes_post:
+            kids = children[idx]
+            if not kids:
+                longest_descent[idx] = 0.0
+                best_child_of[idx] = None
+            else:
+                best_len = -1.0
+                best_ci: int | None = None
+                for ci in kids:
+                    edge = _euclidean(nodes[idx], nodes[ci])
+                    desc = edge + longest_descent.get(ci, 0.0)
+                    if desc > best_len:
+                        best_len = desc
+                        best_ci = ci
+                longest_descent[idx] = best_len
+                best_child_of[idx] = best_ci
+            for ci in kids:
+                sub_total_path += _euclidean(nodes[idx], nodes[ci])
+
+        # Walk trunk from pr following best_child until a leaf
+        trunk_set: set[int] = {pr}
+        trunk_len = 0.0
+        cur_t = pr
+        while best_child_of.get(cur_t) is not None:
+            nxt = best_child_of[cur_t]
+            trunk_len += _euclidean(nodes[cur_t], nodes[nxt])
+            trunk_set.add(nxt)
+            cur_t = nxt
+
+        # First bifurcation: walk from pr while only 1 child; stop at branch point
+        first_bif = 0.0
+        cur_b = pr
+        while len(children[cur_b]) == 1:
+            nxt = children[cur_b][0]
+            first_bif += _euclidean(nodes[cur_b], nodes[nxt])
+            cur_b = nxt
+        # If we reached a leaf with no bifurcation, first_bif equals trunk length.
+
+        subtree_trunk_length_by_root[pr] = trunk_len
+        subtree_total_path_by_root[pr] = sub_total_path
+        subtree_first_bif_by_root[pr] = first_bif
+        trunk_node_set_by_root[pr] = trunk_set
 
     max_subtree_path_across = max(subtree_max_path_by_root.values(), default=1.0)
     max_subtree_z_across = max(subtree_z_span_by_root.values(), default=1.0)
@@ -556,6 +797,100 @@ def extract_branches(
             prox_persist = persistence
             dist_persist = persistence
 
+        # --- Apical-vs-basal discrimination features ---
+        # Polar angle from +z of the soma→branch-midpoint vector.
+        # Apical ~ 0 (straight up), basal ~ π/2 (horizontal), axon often > π/2.
+        mid_node = nodes[mid_idx]
+        dx_mid = mid_node.x - soma_x
+        dy_mid = mid_node.y - soma_y
+        dz_mid = mid_node.z - soma_z
+        r_mid = math.sqrt(dx_mid * dx_mid + dy_mid * dy_mid + dz_mid * dz_mid)
+        if r_mid > 1e-9:
+            polar_angle_up = math.acos(max(-1.0, min(1.0, dz_mid / r_mid)))
+        else:
+            polar_angle_up = math.pi / 2.0  # unknown → horizontal default
+
+        # Primary-subtree-based features use the primary root this branch belongs to.
+        if br_primary_root >= 0 and br_primary_root in subtree_z_span_by_root:
+            sub_z = subtree_z_span_by_root[br_primary_root]
+            sub_xy = subtree_xy_span_by_root.get(br_primary_root, 0.0)
+            vh_ratio = sub_z / max(sub_xy, 1e-6)
+            polar_spread = subtree_polar_std_by_root.get(br_primary_root, 0.0)
+        else:
+            vh_ratio = 0.0
+            polar_spread = 0.0
+
+        # Mean z offset of this branch relative to soma, normalized by cell z-range.
+        # Apical branches land near +1, basal near 0, descending axons negative.
+        soma_z_offset_norm = z_rel / cell_z_range
+
+        # Trunk-primary flag: 1.0 if this branch's primary subtree is the
+        # top apical-trunk candidate.
+        is_trunk = 1.0 if (
+            trunk_primary_root is not None
+            and br_primary_root == trunk_primary_root
+        ) else 0.0
+
+        # --- Cell-intrinsic principal-axis features ---
+        # Branch midpoint vector from soma, projected onto cell PC1.
+        mid_proj_raw = (
+            dx_mid * pc1_vec[0] + dy_mid * pc1_vec[1] + dz_mid * pc1_vec[2]
+        )
+        principal_axis_proj = mid_proj_raw / max_abs_proj  # ~[-1, +1]
+        # Polar angle between (mid - soma) and PC1.
+        if r_mid > 1e-9:
+            cos_pc = max(-1.0, min(1.0, mid_proj_raw / r_mid))
+            polar_angle_principal = math.acos(cos_pc)
+        else:
+            polar_angle_principal = math.pi / 2.0
+        # Subtree-level features
+        if br_primary_root >= 0 and br_primary_root in subtree_principal_proj_by_root:
+            sub_principal_proj = (
+                subtree_principal_proj_by_root[br_primary_root] / max_abs_proj
+            )
+            sub_principal_rank = principal_rank_of_root.get(br_primary_root, 0.0)
+        else:
+            sub_principal_proj = 0.0
+            sub_principal_rank = 0.0
+
+        # --- Branching-rate features ---
+        # bifurcations_per_micron in this branch
+        bif_per_micron = (
+            float(bif_count) / path_length if path_length > 1e-9 else 0.0
+        )
+        # mean internode distance (path_length already excludes the anchor edge)
+        mean_internode = (
+            path_length / max(1, len(segment) - 1) if len(segment) > 1 else 0.0
+        )
+        # subtree-level bif density (axon: low; dendrite: high)
+        sub_bif_density = (
+            subtree_bif_density_by_root.get(br_primary_root, 0.0)
+            if br_primary_root >= 0 else 0.0
+        )
+
+        # --- Trunk-detection features ---
+        # Direct encoding of "apical = one dominant trunk; basal = bushy".
+        if br_primary_root >= 0 and br_primary_root in subtree_trunk_length_by_root:
+            sub_trunk_len = subtree_trunk_length_by_root[br_primary_root]
+            sub_total_p = subtree_total_path_by_root[br_primary_root]
+            sub_first_bif = subtree_first_bif_by_root[br_primary_root]
+            trunk_nodes = trunk_node_set_by_root[br_primary_root]
+            path_to_first_bif_norm = (
+                sub_first_bif / max_path_in_cell if max_path_in_cell > 1e-9 else 0.0
+            )
+            sub_trunk_length_norm = (
+                sub_trunk_len / max_path_in_cell if max_path_in_cell > 1e-9 else 0.0
+            )
+            sub_trunk_fraction = (
+                sub_trunk_len / sub_total_p if sub_total_p > 1e-9 else 0.0
+            )
+            on_longest_path = 1.0 if any(i in trunk_nodes for i in segment) else 0.0
+        else:
+            path_to_first_bif_norm = 0.0
+            sub_trunk_length_norm = 0.0
+            sub_trunk_fraction = 0.0
+            on_longest_path = 0.0
+
         # Build feature vector
         fv = np.array([
             path_length,
@@ -613,6 +948,31 @@ def extract_branches(
             dist_mean_r,
             prox_persist,
             dist_persist,
+
+            # Apical-vs-basal discrimination
+            polar_angle_up,
+            vh_ratio,
+            soma_z_offset_norm,
+            is_trunk,
+            polar_spread,
+
+            # Cell-intrinsic principal axis (PC1)
+            principal_axis_proj,
+            polar_angle_principal,
+            pc1_strength,
+            sub_principal_proj,
+            sub_principal_rank,
+
+            # Branching-rate (axon vs dendrite discriminator)
+            bif_per_micron,
+            mean_internode,
+            sub_bif_density,
+
+            # Trunk-detection (apical-vs-basal discriminator)
+            path_to_first_bif_norm,
+            sub_trunk_length_norm,
+            sub_trunk_fraction,
+            on_longest_path,
         ], dtype=np.float64)
 
         branches.append(BranchData(

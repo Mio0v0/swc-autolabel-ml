@@ -13,10 +13,19 @@ import numpy as np
 
 from .features import SWCNode, parse_swc
 from .cell_type_detector import (
+    CELL_TYPES,
+    CELL_TYPE_LABEL_SETS,
     CellTypeResult,
     detect_cell_type_from_nodes,
     DEFAULT_MODEL_PATH as STAGE1_MODEL,
 )
+
+# Soft handoff: when Stage 1's confidence falls below this threshold the
+# pipeline runs Stage 2+3 for BOTH cell types and picks whichever produces
+# higher mean per-node confidence. This recovers borderline files (e.g.
+# slice-flat pyramidals, tall interneurons) that would otherwise be
+# locked into the wrong Stage 2 branch by a hard Stage-1 label.
+DEFAULT_SOFT_HANDOFF_THRESHOLD = 0.65
 from .branch_features import (
     extract_branches,
 )
@@ -62,7 +71,7 @@ def _select_stage2_model(
             return models[cell_type], None
         if cell_type in defaults:
             return None, int(defaults[cell_type])
-        # Fallback: use any trained model (e.g. "other" cell type)
+        # Fallback: use any trained model if a direct cell-type match is absent.
         if models:
             return next(iter(models.values())), None
         return None, 3  # final fallback: mark as generic dendrite
@@ -94,21 +103,105 @@ def run_pipeline_on_nodes(
     file_path: str = "",
     stage1_model: str | Path | None = None,
     stage2_model: str | Path | None = None,
+    soft_handoff_threshold: float = DEFAULT_SOFT_HANDOFF_THRESHOLD,
 ) -> PipelineResult:
-    """Run the full pipeline on pre-parsed nodes."""
-    n = len(nodes)
+    """Run the full pipeline on pre-parsed nodes.
 
+    When Stage 1's predicted-class probability falls below
+    ``soft_handoff_threshold`` and the Stage 2 bundle has models for
+    multiple cell types, the pipeline runs Stage 2+3 for *both* cell
+    types and picks whichever produces higher mean per-node confidence.
+    This recovers borderline files (e.g. slice-flat pyramidals or tall
+    interneurons) that would otherwise be locked into the wrong Stage 2
+    branch by a hard Stage-1 label.
+
+    Pass ``soft_handoff_threshold=0.0`` to disable the soft handoff and
+    use the original hard-cascade behaviour.
+    """
     # --- Stage 1: Cell-type detection ---
     s1_result = detect_cell_type_from_nodes(nodes, stage1_model)
-    cell_type = s1_result.cell_type
-    label_set = s1_result.label_set
 
-    # --- Stage 2: Branch classification ---
     s2_path = Path(stage2_model) if stage2_model else STAGE2_MODEL
     bundle = _load_stage2_bundle(s2_path)
+
+    # --- Soft handoff: try both cell types when Stage 1 is uncertain ---
+    chosen_ct = s1_result.cell_type
+    soft_handoff_used = False
+    can_handoff = (
+        s1_result.confidence < soft_handoff_threshold
+        and bundle.get("models_by_cell_type") is not None
+        and len(bundle.get("models_by_cell_type") or {}) > 1
+    )
+    if can_handoff:
+        candidates: list[tuple[str, dict]] = []
+        for ct in CELL_TYPES:
+            try:
+                trial = _run_stage23(nodes, file_path, ct, bundle, s1_result)
+                candidates.append((ct, trial))
+            except Exception:
+                # Don't let a per-branch trial failure crash the whole pipeline;
+                # fall back to the hard Stage-1 prediction below.
+                continue
+        if candidates:
+            best_ct, best_trial = max(
+                candidates,
+                key=lambda kv: kv[1]["mean_neurite_conf"],
+            )
+            chosen_ct = best_ct
+            chosen = best_trial
+            soft_handoff_used = (best_ct != s1_result.cell_type)
+        else:
+            chosen = _run_stage23(nodes, file_path, s1_result.cell_type, bundle, s1_result)
+    else:
+        chosen = _run_stage23(nodes, file_path, s1_result.cell_type, bundle, s1_result)
+
+    # If the soft handoff overrode the Stage 1 label, propagate the new
+    # cell type into the returned s1_result so downstream consumers see
+    # the resolved type and the canonical label set for it.
+    if chosen_ct != s1_result.cell_type:
+        s1_result = CellTypeResult(
+            cell_type=chosen_ct,
+            confidence=float(s1_result.probabilities.get(chosen_ct, s1_result.confidence)),
+            probabilities=dict(s1_result.probabilities),
+            label_set=set(CELL_TYPE_LABEL_SETS.get(chosen_ct, {1, 2, 3})),
+            structure_flags={**s1_result.structure_flags, "soft_handoff": True},
+            features=dict(s1_result.features),
+        )
+    elif soft_handoff_used:
+        # Same prediction, but record that the soft handoff was exercised.
+        s1_result.structure_flags["soft_handoff"] = True
+
+    return PipelineResult(
+        stage1=s1_result,
+        stage3=chosen["s3_result"],
+        node_labels=chosen["final_labels"],
+        node_confidences=chosen["node_confidences"],
+    )
+
+
+def _run_stage23(
+    nodes: list[SWCNode],
+    file_path: str,
+    cell_type: str,
+    bundle: dict,
+    s1_result: CellTypeResult,
+) -> dict:
+    """Run Stage 2 + Stage 3 for a *given* cell type.
+
+    Used both for the normal hard-cascade case and as the trial routine
+    inside the soft-handoff branch. Returns a dict with:
+        - final_labels: list[int]
+        - node_confidences: list[float]
+        - s3_result: RefinementResult
+        - mean_neurite_conf: float (used to compare trials)
+        - cell_type: str
+    """
+    n = len(nodes)
+    label_set = set(CELL_TYPE_LABEL_SETS.get(cell_type, {1, 2, 3}))
+    neurite_labels = sorted(label_set - {1})
+
+    # --- Stage 2 model selection ---
     model, default_label = _select_stage2_model(bundle, cell_type)
-    # Pick subtree-owner model: new bundles have a per-cell-type dict,
-    # older bundles have a single pyramidal-only model.
     subtree_models_by_ct = bundle.get("subtree_owner_models_by_cell_type")
     if subtree_models_by_ct:
         subtree_owner_model = subtree_models_by_ct.get(cell_type)
@@ -118,24 +211,19 @@ def run_pipeline_on_nodes(
 
     morph = extract_branches(nodes, cell_type, file_path)
     subtree_owner_map = _predict_subtree_owner_map(nodes, cell_type, subtree_owner_model)
-    # Apical owner only exists for pyramidal cells (no apical in interneurons).
     apical_owner_root = _best_apical_owner(subtree_owner_map) if cell_type == "pyramidal" else None
 
-    # Initialize per-node labels and confidences from the label-free proxy root.
     proxy_soma = set(morph.soma_indices)
     node_labels = [1 if i in proxy_soma else 0 for i in range(n)]
     node_confidences = [1.0 if i in proxy_soma else 0.0 for i in range(n)]
 
-    neurite_labels = sorted(label_set - {1})
-
+    branch_confs: list[float] = []
     if model is not None:
-        # Classify branches via the per-cell-type model
         for br in morph.branches:
             X = _branch_feature_with_owner(br, subtree_owner_map).reshape(1, -1)
             probs = model.predict_proba(X)[0]
             classes = model.classes_
 
-            # Find probabilities for valid labels only
             valid_probs: dict[int, float] = {}
             for cls, prob in zip(classes, probs):
                 if int(cls) in neurite_labels:
@@ -151,13 +239,11 @@ def run_pipeline_on_nodes(
                 best_label = neurite_labels[0] if neurite_labels else 3
                 best_conf = 0.5
 
+            branch_confs.append(best_conf)
             for node_idx in br.node_indices:
                 node_labels[node_idx] = best_label
                 node_confidences[node_idx] = best_conf
     else:
-        # No model for this cell type (e.g. Purkinje with only dendrite
-        # in training data). Assign the registered default label with
-        # conservative confidence so Stage 3 can still override it.
         fallback = default_label if default_label is not None else (
             neurite_labels[0] if neurite_labels else 3
         )
@@ -165,29 +251,44 @@ def run_pipeline_on_nodes(
             for node_idx in br.node_indices:
                 node_labels[node_idx] = fallback
                 node_confidences[node_idx] = 0.5
+        # Conservative confidence so the soft-handoff comparison doesn't
+        # spuriously prefer the no-model branch.
+        branch_confs.append(0.5)
 
-    # Fill any unassigned non-soma nodes
     for i in range(n):
         if node_labels[i] == 0:
             node_labels[i] = neurite_labels[0] if neurite_labels else 3
             node_confidences[i] = 0.3
 
-    # --- Stage 3: Topology refinement ---
+    # Build a trial Stage-1 result with the candidate cell type so
+    # Stage-3 refinement uses the matching label set.
+    trial_s1 = CellTypeResult(
+        cell_type=cell_type,
+        confidence=float(s1_result.probabilities.get(cell_type, s1_result.confidence)),
+        probabilities=dict(s1_result.probabilities),
+        label_set=label_set,
+        structure_flags=dict(s1_result.structure_flags),
+        features=dict(s1_result.features),
+    )
+
     s3_result = refine(
         nodes,
         node_labels,
         node_confidences,
-        s1_result,
+        trial_s1,
         apical_owner_root=apical_owner_root,
     )
     final_labels = [rl.label for rl in s3_result.labels]
 
-    return PipelineResult(
-        stage1=s1_result,
-        stage3=s3_result,
-        node_labels=final_labels,
-        node_confidences=node_confidences,
-    )
+    mean_neurite_conf = float(np.mean(branch_confs)) if branch_confs else 0.0
+
+    return {
+        "final_labels": final_labels,
+        "node_confidences": node_confidences,
+        "s3_result": s3_result,
+        "mean_neurite_conf": mean_neurite_conf,
+        "cell_type": cell_type,
+    }
 
 
 def _predict_subtree_owner_map(
@@ -195,9 +296,9 @@ def _predict_subtree_owner_map(
     cell_type: str,
     subtree_owner_model: object | None,
 ) -> dict[int, dict[str, float | int]]:
-    # Generalised (item 4): any cell type with a trained subtree-owner
-    # model gets augmented features. Pyramidal → {axon, basal, apical},
-    # interneuron → {axon, basal}, purkinje → usually none (single-class).
+    # Any cell type with a trained subtree-owner model gets augmented
+    # features. In the current benchmark: pyramidal → {axon, basal, apical},
+    # interneuron → {axon, basal}.
     if subtree_owner_model is None:
         return {}
 

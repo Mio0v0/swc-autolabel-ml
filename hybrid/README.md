@@ -1,107 +1,109 @@
 # Hybrid Auto-Labeling Pipeline
 
-ML + rule-based hybrid approach for generalizing neuron morphology auto-labeling
-across different cell types (pyramidal, interneuron, Purkinje, granule, etc.).
+ML + rule-based hybrid pipeline for per-node neuron morphology labeling
+(soma, axon, basal dendrite, apical dendrite) across pyramidal and
+interneuron cells.
 
 ## Architecture
 
 ```
-Stage 1: Cell-Type Detection (ML)    → determines label set & weight profile
-Stage 2: Branch Classification (ML + Rules)  → per-branch type assignment
-Stage 3: Topology Refinement (Rules) → structural constraints & smoothing
+Stage 1: Cell-type detection (whole-cell ML, 49 features) → pyramidal | interneuron
+Stage 2: Per-branch classifier  (cell-type-conditioned ML, 57 features) → axon | basal | apical
+Stage 3: Topology refinement    (rules) → enforce one-apical, subtree consistency, etc.
 ```
 
-## Quick Start
+When Stage 1's confidence falls below 0.65, the pipeline runs Stage 2+3 for
+**both** cell types and picks whichever produces sharper predictions
+("soft handoff").
 
-### 1. Download training data
+## Layout
 
-**Allen Cell Types Database** (automated):
+| Module | Role |
+|---|---|
+| `features.py`            | Stage 1 whole-cell feature extraction |
+| `branch_features.py`     | Stage 2 per-branch features |
+| `subtree_features.py`    | Primary-subtree features |
+| `cell_type_detector.py`  | Stage 1 logic |
+| `stage3_refine.py`       | Stage 3 topology rules |
+| `pipeline.py`            | End-to-end orchestrator (with soft handoff) |
+| `train_stage1.py`        | Train Stage 1 cell-type classifier |
+| `train_stage2.py`        | Train Stage 2 per-branch classifier |
+| `evaluate.py`            | Full Stage 1+2+3 evaluation with clean train/test split |
+| `evaluate_stage1.py`     | Stage 1 only — deeper recurring-error analysis |
+| `qc.py`                  | Dataset QC toolbox: diagnose / clean-soma / filter / prune |
+| `data_prep.py`           | Data prep toolbox: download / build-source-pool / build-benchmark |
+
+Paper deliverables (baselines, slides, speaker notes) live in **`paper/`**, a sibling directory. See `paper/__init__.py` for the layout.
+
+## Quick start
+
+### Build / clean a dataset (one-time)
+
 ```bash
-# Download all available morphologies (~367 files, ~5 min)
-python -m hybrid.download_allen_data
+# Download raw morphologies
+python -m hybrid.data_prep download-allen
+python -m hybrid.data_prep download-neuromorpho --types purkinje granule interneuron
 
-# Or limit per type for quick testing
-python -m hybrid.download_allen_data --max-per-type 20
+# Filter to a usable source pool (canonical labels, soma required)
+python -m hybrid.data_prep build-source-pool
+
+# Assemble the benchmark
+python -m hybrid.data_prep build-benchmark --per-type 1000
+
+# Soma cleanup + diagnostic-driven pruning
+python -m hybrid.qc clean-soma
+python -m hybrid.qc prune --source data/benchmark_pyramidal_interneuron_v1_soma_clean \
+                          --scores hybrid/models/per_file_scores.csv \
+                          --out   data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned \
+                          --apply
 ```
 
-**NeuroMorpho.Org** (manual — see instructions below):
-Place downloaded SWC files into `data/training_morphologies/<cell_type>/`.
-
-### 2. Train the classifier
+### Diagnose a low-F1 file
 
 ```bash
-python -m hybrid.train --data-dir data/training_morphologies
+python -m hybrid.qc diagnose path/to/file.swc
+python -m hybrid.qc diagnose --from-csv hybrid/models/per_file_scores.csv --top 15
 ```
 
-### 3. Test on files
+### Train and evaluate
 
 ```bash
-python -m hybrid.test_stage1 path/to/file.swc
-python -m hybrid.test_stage1 data/training_morphologies/pyramidal/*.swc
+# Default --data-dir is data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned
+python -m hybrid.train_stage1
+python -m hybrid.train_stage2
+python -m hybrid.evaluate
 ```
 
-## Training Data Structure
+`evaluate.py` does its own internal train/test split and trains fresh
+models in `hybrid/models/eval_tmp/` to avoid data leakage. The scripts
+above (`train_stage1`, `train_stage2`) are for shipping production
+models trained on all data.
 
+## Latest results
+
+See `hybrid/models/evaluation_results.json` for the full numbers.
+
+| Metric                 | Stage 2+3 |
+|------------------------|-----------|
+| Overall accuracy       | 0.992     |
+| Pooled F1              | 0.976     |
+| Per-file mean F1       | 0.963     |
+| Per-file P10           | 0.901     |
+| Apical F1              | 0.937     |
+| Basal F1               | 0.972     |
+
+## Public Python API
+
+```python
+# Pipeline
+from hybrid.pipeline import run_pipeline_on_nodes
+
+# QC
+from hybrid.qc import diagnose, clean_benchmark, filter_benchmark, prune_benchmark
+
+# Data prep
+from hybrid.data_prep import (
+    download_allen, download_neuromorpho,
+    build_source_pool, build_benchmark,
+)
 ```
-data/training_morphologies/
-├── pyramidal/          # spiny cells with apical + basal dendrites
-│   ├── cell_001.swc
-│   └── ...
-├── interneuron/        # aspiny / sparsely spiny cells
-│   ├── cell_001.swc
-│   └── ...
-├── purkinje/           # cerebellar Purkinje cells
-│   ├── cell_001.swc
-│   └── ...
-├── granule/            # small granule cells
-│   ├── cell_001.swc
-│   └── ...
-└── metadata.csv
-```
-
-## Downloading NeuroMorpho.Org Data
-
-NeuroMorpho.Org has the largest collection of reconstructed morphologies (~190k+).
-Bulk download requires their API. Here's how:
-
-### Option A: Web interface
-1. Go to https://neuromorpho.org/
-2. Click "Browse" → filter by Cell Type (e.g., "Purkinje", "granule", "interneuron")
-3. Select cells → click "Download selected" → choose SWC format
-4. Place files in `data/training_morphologies/<cell_type>/`
-
-### Option B: API (recommended for bulk)
-```bash
-# List available cell types
-curl "https://neuromorpho.org/api/neuron/fields/cell_type"
-
-# Query Purkinje cells (get metadata)
-curl "https://neuromorpho.org/api/neuron/select?q=cell_type:Purkinje&size=10"
-
-# Get download links from the neuron_name field:
-# SWC URL pattern: https://neuromorpho.org/dableFiles/<archive_name>/CNG%20version/<neuron_name>.CNG.swc
-
-# Example workflow:
-# 1. Query neurons
-curl -s "https://neuromorpho.org/api/neuron/select?q=cell_type:Purkinje&size=50" | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-for n in data['_embedded']['neuronResources']:
-    name = n['neuron_name']
-    archive = n['archive']
-    print(f'https://neuromorpho.org/dableFiles/{archive}/CNG%20version/{name}.CNG.swc')
-"
-# 2. Download each URL with wget/curl
-```
-
-### Recommended cell types to download from NeuroMorpho:
-- **Purkinje**: search `cell_type:Purkinje` (~1000+ cells)
-- **Granule**: search `cell_type:granule` (~500+ cells)
-- **Interneuron**: search `cell_type:interneuron` (~2000+ cells)
-- **Pyramidal**: search `cell_type:pyramidal` (~5000+ cells, already have Allen data)
-
-### How many files do you need?
-- Minimum: ~50 per cell type for reasonable accuracy
-- Recommended: ~200+ per cell type for robust generalization
-- The Allen download script provides ~120 pyramidal + ~247 interneuron
-- Adding ~50-100 Purkinje and ~50 granule from NeuroMorpho completes the training set
