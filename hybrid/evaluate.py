@@ -268,6 +268,9 @@ def _evaluate_file(
     cell_type_gt: str,
     stage1_model: Path,
     stage2_model: Path,
+    gnn_state: object | None = None,
+    gnn_after_stage3: bool = False,
+    use_subtree_stage2: bool = False,
 ) -> tuple[
     list[int],      # gt labels
     list[int],      # stage2-only labels
@@ -279,7 +282,11 @@ def _evaluate_file(
     gt_labels = [nd.type for nd in nodes]
 
     # Run full pipeline
-    result = run_pipeline_on_nodes(nodes, "", stage1_model, stage2_model)
+    result = run_pipeline_on_nodes(
+        nodes, "", stage1_model, stage2_model,
+        gnn_state=gnn_state, gnn_after_stage3=gnn_after_stage3,
+        use_subtree_stage2=use_subtree_stage2,
+    )
 
     # Also get Stage 2-only labels (before refinement)
     # Re-extract to get the pre-refinement labels
@@ -468,7 +475,7 @@ def _print_metrics(title: str, metrics: dict) -> None:
     # but NOT the primary number.
     print(f"\n  {title}")
     print(f"    HEADLINE  neurite-macro-F1  = {metrics.get('neurite_macro_f1', 0.0):.4f}  "
-          f"← per-class equal weight, soma excluded")
+          f"<- per-class equal weight, soma excluded")
     print(f"              neurite-bal-acc   = {metrics.get('neurite_balanced_accuracy', 0.0):.4f}")
     print(f"    (ref)     macro-F1          = {metrics.get('macro_f1', 0.0):.4f}  "
           f"(includes trivially-100%-correct soma)")
@@ -483,7 +490,8 @@ def _print_metrics(title: str, metrics: dict) -> None:
                   f"{m['f1']:>8.4f} {m['support']:>8d}")
     if metrics.get("confusion"):
         labels = list(metrics["confusion"].keys())
-        print(f"    {'GT \\ Pred':<16}", end="")
+        header = "GT \\ Pred"
+        print(f"    {header:<16}", end="")
         for l in labels:
             print(f" {l:>14}", end="")
         print()
@@ -530,8 +538,23 @@ def evaluate(
     data_dir: Path,
     test_size: float = 0.2,
     seed: int = 42,
+    use_gnn: bool = False,
+    gnn_model_path: Path | None = None,
+    gnn_after_stage3: bool = False,
+    use_binary_stage2: bool = False,
+    binary_stage2_path: Path | None = None,
+    use_subtree_stage2: bool = False,
 ) -> dict:
-    """Full evaluation with fresh train/test split and no leakage."""
+    """Full evaluation with fresh train/test split and no leakage.
+
+    When ``use_gnn=True``, loads the GraphSAGE apical-vs-basal head
+    from ``gnn_model_path`` (defaults to paper/models/gnn_apical_basal.pt)
+    and uses it as a Stage-2b override for pyramidal dendrite branches.
+
+    When ``use_binary_stage2=True``, swaps the eval-split-trained Tier B
+    (3-class) for the binary B1 (axon-vs-dendrite) classifier loaded from
+    ``binary_stage2_path``. The GNN then handles basal-vs-apical.
+    """
     # Collect files
     files_by_type: dict[str, list[Path]] = {}
     for subdir in sorted(data_dir.iterdir()):
@@ -573,15 +596,57 @@ def evaluate(
     s1_model = eval_dir / "s1_eval.pkl"
     s2_model = eval_dir / "s2_eval.pkl"
 
-    print("\nTraining Stage 1 on train split...")
-    t0 = time.time()
-    _train_stage1(train_files, s1_model)
-    print(f"  done in {time.time() - t0:.1f}s")
+    if s1_model.exists():
+        print(f"\nReusing cached Stage 1 eval model: {s1_model}")
+    else:
+        print("\nTraining Stage 1 on train split...")
+        t0 = time.time()
+        _train_stage1(train_files, s1_model)
+        print(f"  done in {time.time() - t0:.1f}s")
 
-    print("Training Stage 2 on train split...")
-    t0 = time.time()
-    _train_stage2(train_files, s2_model)
-    print(f"  done in {time.time() - t0:.1f}s")
+    if s2_model.exists():
+        print(f"Reusing cached Stage 2 eval model: {s2_model}")
+    else:
+        print("Training Stage 2 on train split...")
+        t0 = time.time()
+        _train_stage2(train_files, s2_model)
+        print(f"  done in {time.time() - t0:.1f}s")
+
+    # Optional binary B1 swap: replaces the cached 3-class Stage 2 with a
+    # binary axon-vs-dendrite classifier (trained separately by
+    # `python -m hybrid.train_stage2_binary`). Pipeline detects the bundle's
+    # `kind == "axon_dendrite_binary"` and switches inference logic.
+    if use_binary_stage2:
+        binary_path = (Path(binary_stage2_path) if binary_stage2_path
+                       else Path(__file__).parent / "models" / "branch_classifier_axon_dendrite.pkl")
+        if not binary_path.exists():
+            print(f"\n[ERROR] Binary B1 bundle not found at {binary_path}")
+            print(f"  Run `python -m hybrid.train_stage2_binary` first.")
+            return {}
+        print(f"\nUsing binary B1 (axon-vs-dendrite) Stage 2 from {binary_path}")
+        s2_model = binary_path
+
+    # Optional GNN apical/basal head: load once, reuse for every test file.
+    gnn_state = None
+    if use_gnn:
+        from paper.gnn_inference import load_gnn  # noqa: PLC0415
+        from paper.gnn_apical_basal import DEFAULT_CKPT_PATH  # noqa: PLC0415
+        ckpt = Path(gnn_model_path) if gnn_model_path else DEFAULT_CKPT_PATH
+        print(f"\nLoading GNN apical-vs-basal head from {ckpt} ...")
+        gnn_state = load_gnn(ckpt)
+        meta = gnn_state.metadata
+        cv = meta.get("cv_summary") or []
+        if cv:
+            cv_macro = sum(c["val_branch_macro_f1"] for c in cv) / len(cv)
+            print(f"  loaded model (CV mean macroF1 = {cv_macro:.4f})")
+        if meta.get("test_metrics"):
+            tm = meta["test_metrics"]
+            print(
+                f"  standalone held-out test (apical/basal only): "
+                f"macroF1={tm.get('branch_macro_f1', 0):.4f}, "
+                f"apF1={tm.get('branch_apical_f1', 0):.4f}, "
+                f"baF1={tm.get('branch_basal_f1', 0):.4f}"
+            )
 
     # Evaluate on test files
     print("\nEvaluating on test files...")
@@ -600,7 +665,11 @@ def evaluate(
                 nodes = parse_swc(f)
                 if not nodes:
                     continue
-                gt, s2, s23, pred_ct = _evaluate_file(nodes, ct, s1_model, s2_model)
+                gt, s2, s23, pred_ct = _evaluate_file(
+                    nodes, ct, s1_model, s2_model,
+                    gnn_state=gnn_state, gnn_after_stage3=gnn_after_stage3,
+                    use_subtree_stage2=use_subtree_stage2,
+                )
                 all_gt[ct].extend(gt)
                 all_s2[ct].extend(s2)
                 all_s23[ct].extend(s23)
@@ -765,13 +834,56 @@ def main() -> int:
     parser.add_argument("--data-dir", type=Path, default=ROOT / "data" / "benchmark_pyramidal_interneuron_v1_qc_diag_pruned")
     parser.add_argument("--test-size", type=float, default=0.2)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--use-gnn", action="store_true",
+        help="Use the GraphSAGE apical-vs-basal head from paper/models/gnn_apical_basal.pt "
+             "as a Stage-2b override for pyramidal dendrite branches.",
+    )
+    parser.add_argument(
+        "--gnn-model-path", type=Path, default=None,
+        help="Path to GNN checkpoint (defaults to paper/models/gnn_apical_basal.pt).",
+    )
+    parser.add_argument(
+        "--gnn-after-stage3", action="store_true",
+        help="Run GNN AFTER Stage 3 refinement instead of before. Stage 3 first "
+             "rescues apical-as-axon errors via topology rules; the GNN then "
+             "re-decides apical-vs-basal among already-classified dendrite "
+             "branches. Compare to default (GNN before Stage 3).",
+    )
+    parser.add_argument(
+        "--use-binary-stage2", action="store_true",
+        help="Use the binary axon-vs-dendrite Stage 2 (Tier B1) instead of the "
+             "default 3-class Tier B. Combine with --use-gnn so the GNN handles "
+             "basal-vs-apical for dendrite branches. Loads the bundle at "
+             "hybrid/models/branch_classifier_axon_dendrite.pkl.",
+    )
+    parser.add_argument(
+        "--binary-stage2-path", type=Path, default=None,
+        help="Override path for the binary B1 bundle.",
+    )
+    parser.add_argument(
+        "--use-subtree-stage2", action="store_true",
+        help="Stage 2 = Tier A's per-subtree predictions (whole subtree gets one "
+             "label), bypassing the per-branch Tier B classifier. Targets the "
+             "apical-as-axon failure where individual thin trunk branches look "
+             "axon-like but the whole subtree has clear apical signatures. "
+             "Combine with --use-gnn so the GNN refines basal-vs-apical at "
+             "branch level inside dendrite subtrees.",
+    )
     args = parser.parse_args()
 
     if not args.data_dir.exists():
         print(f"Error: {args.data_dir} not found")
         return 1
 
-    evaluate(args.data_dir, args.test_size, args.seed)
+    evaluate(
+        args.data_dir, args.test_size, args.seed,
+        use_gnn=args.use_gnn, gnn_model_path=args.gnn_model_path,
+        gnn_after_stage3=args.gnn_after_stage3,
+        use_binary_stage2=args.use_binary_stage2,
+        binary_stage2_path=args.binary_stage2_path,
+        use_subtree_stage2=args.use_subtree_stage2,
+    )
     return 0
 
 

@@ -83,6 +83,7 @@ def run_pipeline(
     swc_path: str | Path,
     stage1_model: str | Path | None = None,
     stage2_model: str | Path | None = None,
+    gnn_state: object | None = None,
 ) -> PipelineResult:
     """Run the full 3-stage hybrid pipeline on an SWC file.
 
@@ -90,12 +91,20 @@ def run_pipeline(
         swc_path: path to SWC file
         stage1_model: path to Stage 1 model (optional, uses default)
         stage2_model: path to Stage 2 model (optional, uses default)
+        gnn_state: optional pre-loaded GNN state (from
+            ``paper.gnn_inference.load_gnn``). When provided AND the cell
+            is pyramidal, the GNN re-decides apical vs basal for every
+            branch Stage 2 classified as a dendrite, before Stage 3
+            refinement runs.
 
     Returns:
         PipelineResult with per-node labels and metadata.
     """
     nodes = parse_swc(swc_path)
-    return run_pipeline_on_nodes(nodes, str(swc_path), stage1_model, stage2_model)
+    return run_pipeline_on_nodes(
+        nodes, str(swc_path), stage1_model, stage2_model,
+        gnn_state=gnn_state,
+    )
 
 
 def run_pipeline_on_nodes(
@@ -104,6 +113,9 @@ def run_pipeline_on_nodes(
     stage1_model: str | Path | None = None,
     stage2_model: str | Path | None = None,
     soft_handoff_threshold: float = DEFAULT_SOFT_HANDOFF_THRESHOLD,
+    gnn_state: object | None = None,
+    gnn_after_stage3: bool = False,
+    use_subtree_stage2: bool = False,
 ) -> PipelineResult:
     """Run the full pipeline on pre-parsed nodes.
 
@@ -136,7 +148,11 @@ def run_pipeline_on_nodes(
         candidates: list[tuple[str, dict]] = []
         for ct in CELL_TYPES:
             try:
-                trial = _run_stage23(nodes, file_path, ct, bundle, s1_result)
+                trial = _run_stage23(
+                    nodes, file_path, ct, bundle, s1_result,
+                    gnn_state=gnn_state, gnn_after_stage3=gnn_after_stage3,
+                    use_subtree_stage2=use_subtree_stage2,
+                )
                 candidates.append((ct, trial))
             except Exception:
                 # Don't let a per-branch trial failure crash the whole pipeline;
@@ -151,9 +167,16 @@ def run_pipeline_on_nodes(
             chosen = best_trial
             soft_handoff_used = (best_ct != s1_result.cell_type)
         else:
-            chosen = _run_stage23(nodes, file_path, s1_result.cell_type, bundle, s1_result)
+            chosen = _run_stage23(
+                nodes, file_path, s1_result.cell_type, bundle, s1_result,
+                gnn_state=gnn_state, gnn_after_stage3=gnn_after_stage3,
+                use_subtree_stage2=use_subtree_stage2,
+            )
     else:
-        chosen = _run_stage23(nodes, file_path, s1_result.cell_type, bundle, s1_result)
+        chosen = _run_stage23(
+            nodes, file_path, s1_result.cell_type, bundle, s1_result,
+            gnn_state=gnn_state,
+        )
 
     # If the soft handoff overrode the Stage 1 label, propagate the new
     # cell type into the returned s1_result so downstream consumers see
@@ -179,12 +202,73 @@ def run_pipeline_on_nodes(
     )
 
 
+def _apply_gnn_override(
+    labels: list[int],
+    confidences: list[float],
+    morph,
+    gnn_state: object,
+    update_confidences: bool = True,
+    apical_evidence: bool = False,
+) -> None:
+    """Override basal/apical labels in-place using the GNN.
+
+    Two gating modes:
+
+    * Default (apical_evidence=False): require BOTH an apical-labeled (4)
+      and a basal-labeled (3) branch in the input ``labels``. Used in
+      multi-class Stage 2 mode where Tier B emits {axon, basal, apical} and
+      this gate prevents the GNN from hallucinating apical on basal-only
+      cells.
+
+    * apical_evidence=True: skip the both-classes gate. Used in binary
+      Stage 2 mode (B1 only emits {axon, dendrite}, defaulting all dendrite
+      to basal=3, so the multi-class gate would always fail). The caller
+      asserts apical evidence exists — typically via Tier A's
+      ``apical_owner_root`` being non-None.
+
+    Reads the per-branch label from the first node in each branch's
+    node_indices, then rewrites `labels[i]` (and optionally `confidences[i]`)
+    for branches the GNN flips between basal and apical.
+    """
+    if not apical_evidence:
+        dendrite_labels = {
+            labels[br.node_indices[0]]
+            for br in morph.branches
+            if labels[br.node_indices[0]] in (3, 4)
+        }
+        if not {3, 4}.issubset(dendrite_labels):
+            return  # gate: don't run GNN if input doesn't have both classes
+
+    # Lazy import: keeps the core pipeline torch-free for callers
+    # who never set use_gnn.
+    from paper.gnn_inference import score_morphology  # noqa: PLC0415
+
+    gnn_preds = score_morphology(gnn_state, morph)
+    for br in morph.branches:
+        cur_label = labels[br.node_indices[0]]
+        if cur_label not in (3, 4):
+            continue
+        pred = gnn_preds.get(br.branch_id)
+        if pred is None:
+            continue
+        gnn_label, gnn_conf = pred
+        if gnn_label == cur_label:
+            continue  # GNN agreed; no work
+        for node_idx in br.node_indices:
+            labels[node_idx] = gnn_label
+            if update_confidences:
+                confidences[node_idx] = gnn_conf
+
+
 def _run_stage23(
     nodes: list[SWCNode],
     file_path: str,
     cell_type: str,
     bundle: dict,
     s1_result: CellTypeResult,
+    gnn_state: object | None = None,
+    gnn_after_stage3: bool = False,
+    use_subtree_stage2: bool = False,
 ) -> dict:
     """Run Stage 2 + Stage 3 for a *given* cell type.
 
@@ -217,27 +301,91 @@ def _run_stage23(
     node_labels = [1 if i in proxy_soma else 0 for i in range(n)]
     node_confidences = [1.0 if i in proxy_soma else 0.0 for i in range(n)]
 
+    is_binary_b1 = bundle.get("kind") == "axon_dendrite_binary"
     branch_confs: list[float] = []
-    if model is not None:
+    if use_subtree_stage2:
+        # Stage 2 = Tier A's per-subtree predictions, propagated to all
+        # branches in each primary subtree. Skips the per-branch Tier B
+        # inference entirely. Rationale: branch-level features struggle to
+        # distinguish thin trunk-like apicals from axons; subtree-level
+        # features (path length, polar angle, total node count, depth)
+        # carry much stronger signal. The GNN downstream still refines
+        # basal-vs-apical at branch level when Tier A predicts there is
+        # an apical somewhere.
+        if not subtree_owner_map:
+            # Tier A unavailable for this cell type — fall back to default basal.
+            fallback = 3 if 3 in neurite_labels else (
+                neurite_labels[0] if neurite_labels else 3
+            )
+            for br in morph.branches:
+                branch_confs.append(0.5)
+                for node_idx in br.node_indices:
+                    node_labels[node_idx] = fallback
+                    node_confidences[node_idx] = 0.5
+        else:
+            for br in morph.branches:
+                pr = br.primary_root_idx
+                info = subtree_owner_map.get(pr) if pr is not None else None
+                if info is None:
+                    best_label = 3 if 3 in neurite_labels else (
+                        neurite_labels[0] if neurite_labels else 3
+                    )
+                    best_conf = 0.5
+                else:
+                    pred = int(info.get("pred", 3))
+                    if pred not in neurite_labels:
+                        # Tier A predicted a class invalid for this cell type
+                        # (e.g. apical for an interneuron). Default to basal.
+                        pred = 3 if 3 in neurite_labels else (
+                            neurite_labels[0] if neurite_labels else 3
+                        )
+                    best_label = pred
+                    best_conf = float(info.get("conf", 0.5))
+                branch_confs.append(best_conf)
+                for node_idx in br.node_indices:
+                    node_labels[node_idx] = best_label
+                    node_confidences[node_idx] = best_conf
+    elif model is not None:
         for br in morph.branches:
             X = _branch_feature_with_owner(br, subtree_owner_map).reshape(1, -1)
             probs = model.predict_proba(X)[0]
             classes = model.classes_
 
-            valid_probs: dict[int, float] = {}
-            for cls, prob in zip(classes, probs):
-                if int(cls) in neurite_labels:
-                    valid_probs[int(cls)] = float(prob)
-
-            if valid_probs:
-                total = sum(valid_probs.values())
-                if total > 0:
-                    valid_probs = {k: v / total for k, v in valid_probs.items()}
-                best_label = max(valid_probs, key=lambda k: valid_probs[k])
-                best_conf = valid_probs[best_label]
+            if is_binary_b1:
+                # B1 emits {dendrite=0, axon=1}. Map to SWC labels:
+                # axon -> 2; dendrite -> 3 (basal default; GNN re-decides for
+                # pyramidals if its gate fires).
+                cls_list = list(classes)
+                p_axon = float(probs[cls_list.index(1)]) if 1 in cls_list else 0.0
+                p_dend = float(probs[cls_list.index(0)]) if 0 in cls_list else 1.0 - p_axon
+                if p_axon > 0.5 and 2 in neurite_labels:
+                    best_label = 2
+                    best_conf = p_axon
+                else:
+                    # Default dendrite to basal (3) when valid; otherwise pick
+                    # the first non-axon neurite label available for this cell type.
+                    dend_candidates = [l for l in neurite_labels if l != 2]
+                    best_label = (3 if 3 in dend_candidates else
+                                  (dend_candidates[0] if dend_candidates
+                                   else (neurite_labels[0] if neurite_labels else 3)))
+                    best_conf = p_dend
             else:
-                best_label = neurite_labels[0] if neurite_labels else 3
-                best_conf = 0.5
+                # Original multi-class behaviour: pick the highest-probability
+                # neurite label, normalize to that subset.
+                valid_probs: dict[int, float] = {}
+                for cls, prob in zip(classes, probs):
+                    if int(cls) in neurite_labels:
+                        valid_probs[int(cls)] = float(prob)
+
+                if valid_probs:
+                    total = sum(valid_probs.values())
+                    if total > 0:
+                        valid_probs = {k: v / total for k, v in valid_probs.items()}
+                    best_label = max(valid_probs, key=lambda k: valid_probs[k])
+                    best_conf = valid_probs[best_label]
+                else:
+                    best_label = neurite_labels[0] if neurite_labels else 3
+                    best_conf = 0.5
 
             branch_confs.append(best_conf)
             for node_idx in br.node_indices:
@@ -260,6 +408,30 @@ def _run_stage23(
             node_labels[i] = neurite_labels[0] if neurite_labels else 3
             node_confidences[i] = 0.3
 
+    # --- Stage 2b: GNN apical-vs-basal override (pyramidal only) ---
+    # The GNN re-decides apical (4) vs basal (3) for every branch already
+    # labeled as a dendrite. Gate: the input labels must contain BOTH an
+    # apical (4) and a basal (3) branch — the GNN was trained only on
+    # cells with both classes present and will otherwise hallucinate an
+    # apical on basal-only "pyramidal" files.
+    #
+    # Position controlled by `gnn_after_stage3`:
+    #   False (default) — runs on Stage 2 raw labels, then Stage 3 refines.
+    #                     Stage 3 sees the GNN's basal/apical decisions and
+    #                     applies its topology rules on top.
+    #   True            — runs on Stage 3-refined labels. Stage 3 has
+    #                     already rescued the axon/dendrite confusion; the
+    #                     GNN only second-guesses basal-vs-apical among
+    #                     already-classified dendrite branches.
+    if gnn_state is not None and cell_type == "pyramidal" and not gnn_after_stage3:
+        _apply_gnn_override(
+            node_labels, node_confidences, morph, gnn_state,
+            apical_evidence=(
+                (is_binary_b1 or use_subtree_stage2)
+                and apical_owner_root is not None
+            ),
+        )
+
     # Build a trial Stage-1 result with the candidate cell type so
     # Stage-3 refinement uses the matching label set.
     trial_s1 = CellTypeResult(
@@ -279,6 +451,18 @@ def _run_stage23(
         apical_owner_root=apical_owner_root,
     )
     final_labels = [rl.label for rl in s3_result.labels]
+
+    if gnn_state is not None and cell_type == "pyramidal" and gnn_after_stage3:
+        # Operate directly on `final_labels`; node_confidences is left
+        # untouched because Stage 3 already produced the canonical scores.
+        _apply_gnn_override(
+            final_labels, node_confidences, morph, gnn_state,
+            update_confidences=False,
+            apical_evidence=(
+                (is_binary_b1 or use_subtree_stage2)
+                and apical_owner_root is not None
+            ),
+        )
 
     mean_neurite_conf = float(np.mean(branch_confs)) if branch_confs else 0.0
 

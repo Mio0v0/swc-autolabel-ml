@@ -121,8 +121,14 @@ def _aggregate_per_file(
 
             valid = set(CELL_TYPE_LABEL_SETS.get(ct, {1, 2, 3}))
             metrics = _compute_metrics(gt, pred, valid)
+            try:
+                rel_path = str(f.relative_to(ROOT))
+            except ValueError:
+                # Symlinks/abs paths from non-canonical data dirs (e.g. v9 merged
+                # dataset) may not be under ROOT — use the full path as-is.
+                rel_path = str(f)
             file_rows.append({
-                "path": str(f.relative_to(ROOT)),
+                "path": rel_path,
                 "cell_type": ct,
                 "n_nodes": len(nodes),
                 "neurite_macro_f1": float(metrics.get("neurite_macro_f1", 0.0)),
@@ -486,7 +492,7 @@ def write_table(results: list[dict], out_path: Path) -> None:
             r.get("per_file", {}).get("p10"),
         ]
         lines.append(" ".join(fmt_cell(v, w) for v, w in zip(cells, widths)))
-    out_path.write_text("\n".join(lines) + "\n")
+    out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 # =============================================================================

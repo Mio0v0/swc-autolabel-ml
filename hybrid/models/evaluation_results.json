@@ -1,16 +1,16 @@
 {
-  "cell_type_accuracy": 0.9817,
+  "cell_type_accuracy": 0.9928,
   "per_cell_type": {
     "interneuron": {
       "stage2": {
-        "accuracy": 0.9814,
+        "accuracy": 0.9813,
         "n": 1885308,
         "macro_f1": 0.978,
-        "macro_precision": 0.9908,
-        "macro_recall": 0.9668,
-        "balanced_accuracy": 0.9668,
+        "macro_precision": 0.9907,
+        "macro_recall": 0.9669,
+        "balanced_accuracy": 0.9669,
         "neurite_macro_f1": 0.967,
-        "neurite_balanced_accuracy": 0.9502,
+        "neurite_balanced_accuracy": 0.9503,
         "per_label": {
           "soma": {
             "precision": 1.0,
@@ -20,13 +20,13 @@
           },
           "axon": {
             "precision": 0.9791,
-            "recall": 0.9987,
+            "recall": 0.9986,
             "f1": 0.9888,
             "support": 1548397
           },
           "basal/dendrite": {
-            "precision": 0.9933,
-            "recall": 0.9017,
+            "precision": 0.9929,
+            "recall": 0.902,
             "f1": 0.9453,
             "support": 336752
           }
@@ -39,24 +39,24 @@
           },
           "axon": {
             "soma": 0,
-            "axon": 1546354,
-            "basal/dendrite": 2043
+            "axon": 1546227,
+            "basal/dendrite": 2170
           },
           "basal/dendrite": {
             "soma": 0,
-            "axon": 33086,
-            "basal/dendrite": 303666
+            "axon": 33000,
+            "basal/dendrite": 303752
           }
         }
       },
       "stage23": {
-        "accuracy": 0.9962,
+        "accuracy": 0.9961,
         "n": 1885308,
-        "macro_f1": 0.9956,
-        "macro_precision": 0.9968,
+        "macro_f1": 0.9955,
+        "macro_precision": 0.9967,
         "macro_recall": 0.9944,
         "balanced_accuracy": 0.9944,
-        "neurite_macro_f1": 0.9934,
+        "neurite_macro_f1": 0.9933,
         "neurite_balanced_accuracy": 0.9916,
         "per_label": {
           "soma": {
@@ -66,15 +66,15 @@
             "support": 159
           },
           "axon": {
-            "precision": 0.9967,
-            "recall": 0.9987,
-            "f1": 0.9977,
+            "precision": 0.9966,
+            "recall": 0.9986,
+            "f1": 0.9976,
             "support": 1548397
           },
           "basal/dendrite": {
-            "precision": 0.9939,
-            "recall": 0.9846,
-            "f1": 0.9892,
+            "precision": 0.9935,
+            "recall": 0.9845,
+            "f1": 0.989,
             "support": 336752
           }
         },
@@ -86,88 +86,88 @@
           },
           "axon": {
             "soma": 0,
-            "axon": 1546354,
-            "basal/dendrite": 2043
+            "axon": 1546227,
+            "basal/dendrite": 2170
           },
           "basal/dendrite": {
             "soma": 0,
-            "axon": 5192,
-            "basal/dendrite": 331560
+            "axon": 5213,
+            "basal/dendrite": 331539
           }
         }
       },
       "per_file_stage2": {
         "n_files": 159,
-        "mean": 0.9575,
+        "mean": 0.9577,
         "median": 0.9999,
         "p10": 0.8802,
-        "min": 0.2345,
+        "min": 0.2521,
         "worst_files": [
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/interneuron/swc/neuromorpho__homo-7.swc",
+            "path": "data\\v9_merged_dataset\\interneuron\\swc\\neuromorpho__homo-7.swc",
             "cell_type": "interneuron",
             "n_nodes": 2136,
-            "neurite_macro_f1": 0.2345
+            "neurite_macro_f1": 0.2521
           },
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/interneuron/swc/neuromorpho__Cell-5-1.swc",
+            "path": "data\\v9_merged_dataset\\interneuron\\swc\\neuromorpho__Cell-5-1.swc",
             "cell_type": "interneuron",
             "n_nodes": 556,
             "neurite_macro_f1": 0.4633
           },
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/interneuron/swc/neuromorpho__14-1-15-A-A4.swc",
+            "path": "data\\v9_merged_dataset\\interneuron\\swc\\neuromorpho__14-1-15-A-A4.swc",
             "cell_type": "interneuron",
             "n_nodes": 3583,
             "neurite_macro_f1": 0.4671
           },
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/interneuron/swc/allen__Htr3a-Cre_NO152_Ai14-286731.04.02.01_561553133.swc",
+            "path": "data\\v9_merged_dataset\\interneuron\\swc\\allen__Htr3a-Cre_NO152_Ai14-286731.04.02.01_561553133.swc",
             "cell_type": "interneuron",
             "n_nodes": 2807,
             "neurite_macro_f1": 0.5975
           },
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/interneuron/swc/allen__H17.06.005.12.10.04_571435969.swc",
+            "path": "data\\v9_merged_dataset\\interneuron\\swc\\neuromorpho__T44a.swc",
             "cell_type": "interneuron",
-            "n_nodes": 2966,
-            "neurite_macro_f1": 0.6684
+            "n_nodes": 4277,
+            "neurite_macro_f1": 0.6761
           }
         ]
       },
       "per_file_stage23": {
         "n_files": 159,
-        "mean": 0.9814,
+        "mean": 0.9812,
         "median": 1.0,
-        "p10": 0.9955,
-        "min": 0.2378,
+        "p10": 0.9886,
+        "min": 0.2521,
         "worst_files": [
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/interneuron/swc/neuromorpho__homo-7.swc",
+            "path": "data\\v9_merged_dataset\\interneuron\\swc\\neuromorpho__homo-7.swc",
             "cell_type": "interneuron",
             "n_nodes": 2136,
-            "neurite_macro_f1": 0.2378
+            "neurite_macro_f1": 0.2521
           },
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/interneuron/swc/neuromorpho__Cell-5-1.swc",
+            "path": "data\\v9_merged_dataset\\interneuron\\swc\\neuromorpho__Cell-5-1.swc",
             "cell_type": "interneuron",
             "n_nodes": 556,
             "neurite_macro_f1": 0.4633
           },
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/interneuron/swc/neuromorpho__14-1-15-A-A4.swc",
+            "path": "data\\v9_merged_dataset\\interneuron\\swc\\neuromorpho__14-1-15-A-A4.swc",
             "cell_type": "interneuron",
             "n_nodes": 3583,
             "neurite_macro_f1": 0.4671
           },
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/interneuron/swc/allen__Vip-IRES-Cre_Ai14(IVSCC)-253382.05.01.01_524689239.swc",
+            "path": "data\\v9_merged_dataset\\interneuron\\swc\\allen__Vip-IRES-Cre_Ai14(IVSCC)-253382.05.01.01_524689239.swc",
             "cell_type": "interneuron",
             "n_nodes": 5404,
-            "neurite_macro_f1": 0.6835
+            "neurite_macro_f1": 0.6881
           },
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/interneuron/swc/allen__H17.06.005.12.10.04_571435969.swc",
+            "path": "data\\v9_merged_dataset\\interneuron\\swc\\allen__H17.06.005.12.10.04_571435969.swc",
             "cell_type": "interneuron",
             "n_nodes": 2966,
             "neurite_macro_f1": 0.7143
@@ -175,420 +175,420 @@
         ]
       },
       "improvement_accuracy": 0.0148,
-      "improvement_macro_f1": 0.0176,
-      "improvement_neurite_macro_f1": 0.0264
+      "improvement_macro_f1": 0.0175,
+      "improvement_neurite_macro_f1": 0.0263
     },
     "pyramidal": {
       "stage2": {
-        "accuracy": 0.9734,
-        "n": 3292310,
-        "macro_f1": 0.9373,
-        "macro_precision": 0.9704,
-        "macro_recall": 0.9095,
-        "balanced_accuracy": 0.9095,
-        "neurite_macro_f1": 0.9164,
-        "neurite_balanced_accuracy": 0.8793,
+        "accuracy": 0.9856,
+        "n": 11782952,
+        "macro_f1": 0.9589,
+        "macro_precision": 0.9866,
+        "macro_recall": 0.9345,
+        "balanced_accuracy": 0.9345,
+        "neurite_macro_f1": 0.9452,
+        "neurite_balanced_accuracy": 0.9127,
         "per_label": {
           "soma": {
             "precision": 1.0,
             "recall": 1.0,
             "f1": 1.0,
-            "support": 169
+            "support": 397
           },
           "axon": {
-            "precision": 0.9766,
-            "recall": 0.9995,
-            "f1": 0.9879,
-            "support": 2815936
+            "precision": 0.9864,
+            "recall": 0.9997,
+            "f1": 0.993,
+            "support": 10545992
           },
           "basal/dendrite": {
-            "precision": 0.9874,
-            "recall": 0.8288,
-            "f1": 0.9012,
-            "support": 230097
+            "precision": 0.9895,
+            "recall": 0.8921,
+            "f1": 0.9383,
+            "support": 519176
           },
           "apical": {
-            "precision": 0.9174,
-            "recall": 0.8097,
-            "f1": 0.8602,
-            "support": 246108
+            "precision": 0.9706,
+            "recall": 0.8463,
+            "f1": 0.9042,
+            "support": 717387
           }
         },
         "confusion": {
           "soma": {
-            "soma": 169,
+            "soma": 397,
             "axon": 0,
             "basal/dendrite": 0,
             "apical": 0
           },
           "axon": {
             "soma": 0,
-            "axon": 2814459,
-            "basal/dendrite": 348,
-            "apical": 1129
+            "axon": 10543066,
+            "basal/dendrite": 668,
+            "apical": 2258
           },
           "basal/dendrite": {
             "soma": 0,
-            "axon": 22566,
-            "basal/dendrite": 190711,
-            "apical": 16820
+            "axon": 39889,
+            "basal/dendrite": 463169,
+            "apical": 16118
           },
           "apical": {
             "soma": 0,
-            "axon": 44755,
-            "basal/dendrite": 2084,
-            "apical": 199269
+            "axon": 105999,
+            "basal/dendrite": 4234,
+            "apical": 607154
           }
         }
       },
       "stage23": {
-        "accuracy": 0.9892,
-        "n": 3292310,
-        "macro_f1": 0.9699,
-        "macro_precision": 0.976,
-        "macro_recall": 0.9641,
-        "balanced_accuracy": 0.9641,
-        "neurite_macro_f1": 0.9598,
-        "neurite_balanced_accuracy": 0.9522,
+        "accuracy": 0.9943,
+        "n": 11782952,
+        "macro_f1": 0.9782,
+        "macro_precision": 0.981,
+        "macro_recall": 0.9758,
+        "balanced_accuracy": 0.9758,
+        "neurite_macro_f1": 0.971,
+        "neurite_balanced_accuracy": 0.9678,
         "per_label": {
           "soma": {
             "precision": 1.0,
             "recall": 1.0,
             "f1": 1.0,
-            "support": 169
+            "support": 397
           },
           "axon": {
-            "precision": 0.9952,
-            "recall": 0.9995,
-            "f1": 0.9973,
-            "support": 2815936
+            "precision": 0.9977,
+            "recall": 0.9997,
+            "f1": 0.9987,
+            "support": 10545992
           },
           "basal/dendrite": {
-            "precision": 0.9748,
-            "recall": 0.9215,
-            "f1": 0.9474,
-            "support": 230097
+            "precision": 0.9467,
+            "recall": 0.9725,
+            "f1": 0.9594,
+            "support": 519176
           },
           "apical": {
-            "precision": 0.934,
-            "recall": 0.9355,
-            "f1": 0.9348,
-            "support": 246108
+            "precision": 0.9798,
+            "recall": 0.9311,
+            "f1": 0.9548,
+            "support": 717387
           }
         },
         "confusion": {
           "soma": {
-            "soma": 169,
+            "soma": 397,
             "axon": 0,
             "basal/dendrite": 0,
             "apical": 0
           },
           "axon": {
             "soma": 0,
-            "axon": 2814415,
-            "basal/dendrite": 387,
-            "apical": 1134
+            "axon": 10543028,
+            "basal/dendrite": 519,
+            "apical": 2445
           },
           "basal/dendrite": {
             "soma": 0,
-            "axon": 2921,
-            "basal/dendrite": 212039,
-            "apical": 15137
+            "axon": 2941,
+            "basal/dendrite": 504918,
+            "apical": 11317
           },
           "apical": {
             "soma": 0,
-            "axon": 10765,
-            "basal/dendrite": 5102,
-            "apical": 230241
+            "axon": 21530,
+            "basal/dendrite": 27932,
+            "apical": 667925
           }
         }
       },
       "per_file_stage2": {
-        "n_files": 169,
-        "mean": 0.8683,
-        "median": 0.9504,
-        "p10": 0.6195,
-        "min": 0.3176,
+        "n_files": 397,
+        "mean": 0.9195,
+        "median": 0.9838,
+        "p10": 0.6912,
+        "min": 0.2526,
         "worst_files": [
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/neuromorpho__241-2-35VN.swc",
+            "path": "data\\v9_merged_dataset\\pyramidal\\swc\\neuromorpho__11224c3.swc",
+            "cell_type": "pyramidal",
+            "n_nodes": 1238,
+            "neurite_macro_f1": 0.2526
+          },
+          {
+            "path": "data\\v9_merged_dataset\\pyramidal\\swc\\neuromorpho__241-2-35VN.swc",
             "cell_type": "pyramidal",
             "n_nodes": 410,
             "neurite_macro_f1": 0.3176
           },
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/lab__210107_029_edited.swc",
+            "path": "data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__210107_029_edited.swc",
             "cell_type": "pyramidal",
             "n_nodes": 12725,
             "neurite_macro_f1": 0.3336
           },
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/neuromorpho__11224c3.swc",
+            "path": "data\\v9_merged_dataset\\pyramidal\\swc\\lab__210107_029_edited.swc",
             "cell_type": "pyramidal",
-            "n_nodes": 1238,
-            "neurite_macro_f1": 0.3772
+            "n_nodes": 12725,
+            "neurite_macro_f1": 0.3336
           },
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/neuromorpho__236-2a-13-AW.swc",
+            "path": "data\\v9_merged_dataset\\pyramidal\\swc\\neuromorpho__236-2a-13-AW.swc",
             "cell_type": "pyramidal",
             "n_nodes": 576,
             "neurite_macro_f1": 0.439
-          },
-          {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/neuromorpho__236-2-66LS.swc",
-            "cell_type": "pyramidal",
-            "n_nodes": 460,
-            "neurite_macro_f1": 0.4494
           }
         ]
       },
       "per_file_stage23": {
-        "n_files": 169,
-        "mean": 0.9485,
+        "n_files": 397,
+        "mean": 0.9568,
         "median": 1.0,
-        "p10": 0.7885,
+        "p10": 0.8984,
         "min": 0.1877,
         "worst_files": [
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/neuromorpho__11224c3.swc",
+            "path": "data\\v9_merged_dataset\\pyramidal\\swc\\neuromorpho__11224c3.swc",
             "cell_type": "pyramidal",
             "n_nodes": 1238,
             "neurite_macro_f1": 0.1877
           },
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/lab__210107_029_edited.swc",
+            "path": "data\\v9_merged_dataset\\pyramidal\\swc\\neuromorpho__236-1a-12-AW.swc",
+            "cell_type": "pyramidal",
+            "n_nodes": 288,
+            "neurite_macro_f1": 0.2263
+          },
+          {
+            "path": "data\\v9_merged_dataset\\pyramidal\\swc\\neuromorpho__241-2-18VN.swc",
+            "cell_type": "pyramidal",
+            "n_nodes": 917,
+            "neurite_macro_f1": 0.2486
+          },
+          {
+            "path": "data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__210107_029_edited.swc",
             "cell_type": "pyramidal",
             "n_nodes": 12725,
             "neurite_macro_f1": 0.3333
           },
           {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/neuromorpho__10315c1.swc",
+            "path": "data\\v9_merged_dataset\\pyramidal\\swc\\lab__210107_029_edited.swc",
             "cell_type": "pyramidal",
-            "n_nodes": 914,
-            "neurite_macro_f1": 0.5264
-          },
-          {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/neuromorpho__10o27c2.swc",
-            "cell_type": "pyramidal",
-            "n_nodes": 1686,
-            "neurite_macro_f1": 0.543
-          },
-          {
-            "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/lab__210248_012_edited.swc",
-            "cell_type": "pyramidal",
-            "n_nodes": 66196,
-            "neurite_macro_f1": 0.5623
+            "n_nodes": 12725,
+            "neurite_macro_f1": 0.3333
           }
         ]
       },
-      "improvement_accuracy": 0.0158,
-      "improvement_macro_f1": 0.0326,
-      "improvement_neurite_macro_f1": 0.0434
+      "improvement_accuracy": 0.0087,
+      "improvement_macro_f1": 0.0193,
+      "improvement_neurite_macro_f1": 0.0258
     }
   },
   "overall_stage2": {
-    "accuracy": 0.9763,
-    "n": 5177618,
-    "macro_f1": 0.944,
-    "macro_precision": 0.9715,
-    "macro_recall": 0.9203,
-    "balanced_accuracy": 0.9203,
-    "neurite_macro_f1": 0.9254,
-    "neurite_balanced_accuracy": 0.8937,
+    "accuracy": 0.9851,
+    "n": 13668260,
+    "macro_f1": 0.9594,
+    "macro_precision": 0.9867,
+    "macro_recall": 0.9355,
+    "balanced_accuracy": 0.9355,
+    "neurite_macro_f1": 0.9459,
+    "neurite_balanced_accuracy": 0.914,
     "per_label": {
       "soma": {
         "precision": 1.0,
         "recall": 1.0,
         "f1": 1.0,
-        "support": 328
+        "support": 556
       },
       "axon": {
-        "precision": 0.9775,
-        "recall": 0.9992,
-        "f1": 0.9882,
-        "support": 4364333
+        "precision": 0.9854,
+        "recall": 0.9996,
+        "f1": 0.9924,
+        "support": 12094389
       },
       "basal/dendrite": {
-        "precision": 0.991,
-        "recall": 0.8721,
-        "f1": 0.9278,
-        "support": 566849
+        "precision": 0.9909,
+        "recall": 0.896,
+        "f1": 0.9411,
+        "support": 855928
       },
       "apical": {
-        "precision": 0.9174,
-        "recall": 0.8097,
-        "f1": 0.8602,
-        "support": 246108
+        "precision": 0.9706,
+        "recall": 0.8463,
+        "f1": 0.9042,
+        "support": 717387
       }
     },
     "confusion": {
       "soma": {
-        "soma": 328,
+        "soma": 556,
         "axon": 0,
         "basal/dendrite": 0,
         "apical": 0
       },
       "axon": {
         "soma": 0,
-        "axon": 4360813,
-        "basal/dendrite": 2391,
-        "apical": 1129
+        "axon": 12089293,
+        "basal/dendrite": 2838,
+        "apical": 2258
       },
       "basal/dendrite": {
         "soma": 0,
-        "axon": 55652,
-        "basal/dendrite": 494377,
-        "apical": 16820
+        "axon": 72889,
+        "basal/dendrite": 766921,
+        "apical": 16118
       },
       "apical": {
         "soma": 0,
-        "axon": 44755,
-        "basal/dendrite": 2084,
-        "apical": 199269
+        "axon": 105999,
+        "basal/dendrite": 4234,
+        "apical": 607154
       }
     }
   },
   "overall_stage23": {
-    "accuracy": 0.9918,
-    "n": 5177618,
-    "macro_f1": 0.9762,
-    "macro_precision": 0.979,
-    "macro_recall": 0.9734,
-    "balanced_accuracy": 0.9734,
-    "neurite_macro_f1": 0.9682,
-    "neurite_balanced_accuracy": 0.9646,
+    "accuracy": 0.9946,
+    "n": 13668260,
+    "macro_f1": 0.9811,
+    "macro_precision": 0.9855,
+    "macro_recall": 0.977,
+    "balanced_accuracy": 0.977,
+    "neurite_macro_f1": 0.9748,
+    "neurite_balanced_accuracy": 0.9693,
     "per_label": {
       "soma": {
         "precision": 1.0,
         "recall": 1.0,
         "f1": 1.0,
-        "support": 328
+        "support": 556
       },
       "axon": {
-        "precision": 0.9957,
-        "recall": 0.9992,
-        "f1": 0.9974,
-        "support": 4364333
+        "precision": 0.9976,
+        "recall": 0.9996,
+        "f1": 0.9986,
+        "support": 12094389
       },
       "basal/dendrite": {
-        "precision": 0.9863,
-        "recall": 0.959,
-        "f1": 0.9725,
-        "support": 566849
+        "precision": 0.9647,
+        "recall": 0.9773,
+        "f1": 0.9709,
+        "support": 855928
       },
       "apical": {
-        "precision": 0.934,
-        "recall": 0.9355,
-        "f1": 0.9348,
-        "support": 246108
+        "precision": 0.9798,
+        "recall": 0.9311,
+        "f1": 0.9548,
+        "support": 717387
       }
     },
     "confusion": {
       "soma": {
-        "soma": 328,
+        "soma": 556,
         "axon": 0,
         "basal/dendrite": 0,
         "apical": 0
       },
       "axon": {
         "soma": 0,
-        "axon": 4360769,
-        "basal/dendrite": 2430,
-        "apical": 1134
+        "axon": 12089255,
+        "basal/dendrite": 2689,
+        "apical": 2445
       },
       "basal/dendrite": {
         "soma": 0,
-        "axon": 8113,
-        "basal/dendrite": 543599,
-        "apical": 15137
+        "axon": 8154,
+        "basal/dendrite": 836457,
+        "apical": 11317
       },
       "apical": {
         "soma": 0,
-        "axon": 10765,
-        "basal/dendrite": 5102,
-        "apical": 230241
+        "axon": 21530,
+        "basal/dendrite": 27932,
+        "apical": 667925
       }
     }
   },
   "overall_per_file_stage2": {
-    "n_files": 328,
-    "mean": 0.9116,
-    "median": 0.9905,
-    "p10": 0.6754,
-    "min": 0.2345,
+    "n_files": 556,
+    "mean": 0.9304,
+    "median": 0.9893,
+    "p10": 0.7507,
+    "min": 0.2521,
     "worst_files": [
       {
-        "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/interneuron/swc/neuromorpho__homo-7.swc",
+        "path": "data\\v9_merged_dataset\\interneuron\\swc\\neuromorpho__homo-7.swc",
         "cell_type": "interneuron",
         "n_nodes": 2136,
-        "neurite_macro_f1": 0.2345
+        "neurite_macro_f1": 0.2521
       },
       {
-        "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/neuromorpho__241-2-35VN.swc",
+        "path": "data\\v9_merged_dataset\\pyramidal\\swc\\neuromorpho__11224c3.swc",
+        "cell_type": "pyramidal",
+        "n_nodes": 1238,
+        "neurite_macro_f1": 0.2526
+      },
+      {
+        "path": "data\\v9_merged_dataset\\pyramidal\\swc\\neuromorpho__241-2-35VN.swc",
         "cell_type": "pyramidal",
         "n_nodes": 410,
         "neurite_macro_f1": 0.3176
       },
       {
-        "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/lab__210107_029_edited.swc",
+        "path": "data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__210107_029_edited.swc",
         "cell_type": "pyramidal",
         "n_nodes": 12725,
         "neurite_macro_f1": 0.3336
       },
       {
-        "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/neuromorpho__11224c3.swc",
+        "path": "data\\v9_merged_dataset\\pyramidal\\swc\\lab__210107_029_edited.swc",
         "cell_type": "pyramidal",
-        "n_nodes": 1238,
-        "neurite_macro_f1": 0.3772
-      },
-      {
-        "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/neuromorpho__236-2a-13-AW.swc",
-        "cell_type": "pyramidal",
-        "n_nodes": 576,
-        "neurite_macro_f1": 0.439
+        "n_nodes": 12725,
+        "neurite_macro_f1": 0.3336
       }
     ]
   },
   "overall_per_file_stage23": {
-    "n_files": 328,
-    "mean": 0.9644,
+    "n_files": 556,
+    "mean": 0.9638,
     "median": 1.0,
-    "p10": 0.9093,
+    "p10": 0.9618,
     "min": 0.1877,
     "worst_files": [
       {
-        "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/neuromorpho__11224c3.swc",
+        "path": "data\\v9_merged_dataset\\pyramidal\\swc\\neuromorpho__11224c3.swc",
         "cell_type": "pyramidal",
         "n_nodes": 1238,
         "neurite_macro_f1": 0.1877
       },
       {
-        "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/interneuron/swc/neuromorpho__homo-7.swc",
-        "cell_type": "interneuron",
-        "n_nodes": 2136,
-        "neurite_macro_f1": 0.2378
+        "path": "data\\v9_merged_dataset\\pyramidal\\swc\\neuromorpho__236-1a-12-AW.swc",
+        "cell_type": "pyramidal",
+        "n_nodes": 288,
+        "neurite_macro_f1": 0.2263
       },
       {
-        "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/pyramidal/swc/lab__210107_029_edited.swc",
+        "path": "data\\v9_merged_dataset\\pyramidal\\swc\\neuromorpho__241-2-18VN.swc",
+        "cell_type": "pyramidal",
+        "n_nodes": 917,
+        "neurite_macro_f1": 0.2486
+      },
+      {
+        "path": "data\\v9_merged_dataset\\interneuron\\swc\\neuromorpho__homo-7.swc",
+        "cell_type": "interneuron",
+        "n_nodes": 2136,
+        "neurite_macro_f1": 0.2521
+      },
+      {
+        "path": "data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__210107_029_edited.swc",
         "cell_type": "pyramidal",
         "n_nodes": 12725,
         "neurite_macro_f1": 0.3333
-      },
-      {
-        "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/interneuron/swc/neuromorpho__Cell-5-1.swc",
-        "cell_type": "interneuron",
-        "n_nodes": 556,
-        "neurite_macro_f1": 0.4633
-      },
-      {
-        "path": "/Users/tuo/Desktop/SWC-Studio/data/benchmark_pyramidal_interneuron_v1_qc_diag_pruned/interneuron/swc/neuromorpho__14-1-15-A-A4.swc",
-        "cell_type": "interneuron",
-        "n_nodes": 3583,
-        "neurite_macro_f1": 0.4671
       }
     ]
   },
-  "overall_improvement_accuracy": 0.0155,
-  "overall_improvement_macro_f1": 0.0322,
-  "overall_improvement_neurite_macro_f1": 0.0428
+  "overall_improvement_accuracy": 0.0095,
+  "overall_improvement_macro_f1": 0.0217,
+  "overall_improvement_neurite_macro_f1": 0.0289
 }

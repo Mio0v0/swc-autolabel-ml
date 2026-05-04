@@ -466,7 +466,8 @@ def _print_results(results: dict) -> None:
         # Confusion matrix
         print(f"\n  Confusion matrix:")
         labels = list(ct_data["confusion"].keys())
-        print(f"  {'GT \\ Pred':<16}", end="")
+        header = "GT \\ Pred"
+        print(f"  {header:<16}", end="")
         for l in labels:
             print(f" {l:>12}", end="")
         print()
