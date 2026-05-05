@@ -482,6 +482,232 @@ def _extract_subtree_dataset(files_by_ct: dict[str, list[Path]], label: str):
     return X_arr, np.array(y, dtype=np.int64)
 
 
+# =============================================================================
+# BASELINE 3 — L-Measure-style per-subtree morphometrics + RandomForest
+#
+# L-Measure (Scorcioni et al. 2008, Nature Protocols) is the canonical
+# whole-cell morphometric tool reviewers ask about. The actual L-Measure
+# binary is Java-based and operates per-cell only, so it can't directly
+# produce per-node labels. This baseline computes the L-Measure feature
+# *content* per primary subtree using NeuroM-equivalent metrics, trains
+# an RF on those features, and propagates the subtree label to every
+# node. Same task setup as sholl_rf but with a different feature space:
+# no Sholl intersections, just classical L-Measure aggregate
+# morphometrics (lengths, diameters, branch counts, asymmetries, etc.).
+# =============================================================================
+
+def _lmeasure_subtree_features(
+    topo: _Topo,
+    proxy: int,
+    sub_root: int,
+    cell_type: str,
+) -> np.ndarray:
+    """L-Measure-style 23-dim feature vector for one primary subtree.
+
+    Mirrors L-Measure's standard per-cell metric set (Scorcioni et al.
+    2008) computed at the subtree level so it can produce a per-node
+    label. No Sholl-derived features — those live in
+    ``_sholl_subtree_features`` and ``sholl_rf`` already covers that
+    ablation row.
+    """
+    nodes = topo.nodes
+    sub = _subtree_indices(topo, sub_root)
+    if not sub:
+        return np.zeros(23, dtype=np.float64)
+
+    sub_root_node = nodes[sub_root]
+    n_sub_nodes = len(sub)
+
+    # Branch / tip / bifurcation counts (L-Measure: N_bifs, N_tips, N_branch).
+    n_bifs = sum(1 for i in sub if len(topo.children[i]) >= 2)
+    n_tips = sum(1 for i in sub if len(topo.children[i]) == 0)
+    n_branches = max(1, n_bifs * 2 + 1)  # planar-tree identity
+
+    # Total length / surface / volume (L-Measure: Length, Surface, Volume).
+    total_length = 0.0
+    total_surface = 0.0
+    total_volume = 0.0
+    for i in sub:
+        pi = topo.parent_idx[i]
+        if pi is None:
+            continue
+        seg_len = _euclid(nodes[pi], nodes[i])
+        seg_radius = 0.5 * (nodes[pi].radius + nodes[i].radius)
+        total_length += seg_len
+        total_surface += 2.0 * math.pi * seg_radius * seg_len
+        total_volume += math.pi * (seg_radius ** 2) * seg_len
+
+    # Diameter statistics (L-Measure: Diameter mean/min/max).
+    radii = np.array([nodes[i].radius for i in sub], dtype=np.float64)
+    diameter_mean = float(2.0 * radii.mean())
+    diameter_min = float(2.0 * radii.min())
+    diameter_max = float(2.0 * radii.max())
+
+    # Bounding-box dimensions (L-Measure: Width, Height, Depth).
+    coords = np.array([(nodes[i].x, nodes[i].y, nodes[i].z) for i in sub], dtype=np.float64)
+    span = coords.max(axis=0) - coords.min(axis=0)
+    bbox_x, bbox_y, bbox_z = float(span[0]), float(span[1]), float(span[2])
+
+    # Euclidean / path distance (L-Measure: EucDistance, PathDistance).
+    euc_max = float(np.max(np.linalg.norm(coords - coords[0], axis=1))) if coords.shape[0] >= 2 else 0.0
+    dist_along: dict[int, float] = {sub_root: 0.0}
+    stack = [sub_root]
+    seen: set[int] = set()
+    while stack:
+        idx = stack.pop()
+        if idx in seen:
+            continue
+        seen.add(idx)
+        d = dist_along.get(idx, 0.0)
+        for c in topo.children[idx]:
+            dist_along[c] = d + _euclid(nodes[idx], nodes[c])
+            stack.append(c)
+    path_max = float(max(dist_along.values())) if dist_along else 0.0
+
+    # Branch order — max depth from sub_root, treating bifurcations as +1.
+    order_at: dict[int, int] = {sub_root: 0}
+    stack2 = [sub_root]
+    seen2: set[int] = set()
+    while stack2:
+        idx = stack2.pop()
+        if idx in seen2:
+            continue
+        seen2.add(idx)
+        d = order_at.get(idx, 0)
+        for c in topo.children[idx]:
+            inc = 1 if len(topo.children[idx]) >= 2 else 0
+            order_at[c] = d + inc
+            stack2.append(c)
+    max_branch_order = float(max(order_at.values())) if order_at else 0.0
+
+    # Partition asymmetry across all bifurcations (L-Measure: Partition_asymmetry).
+    pa_vals: list[float] = []
+    for i in sub:
+        kids = topo.children[i]
+        if len(kids) < 2:
+            continue
+        sizes = sorted((len(_subtree_indices(topo, k)) for k in kids), reverse=True)
+        a, b = sizes[0], sizes[1]
+        pa_vals.append(abs(a - b) / max(1, a + b))
+    pa_mean = float(np.mean(pa_vals)) if pa_vals else 0.0
+    pa_max = float(np.max(pa_vals)) if pa_vals else 0.0
+
+    # Contraction (mean ratio of euclidean to path-length per branch segment).
+    contractions: list[float] = []
+    for i in sub:
+        kids = topo.children[i]
+        if len(kids) != 1:
+            continue
+        # Walk linear segment until next bifurcation/leaf.
+        path = 0.0
+        cur = i
+        while True:
+            nxt_kids = topo.children[cur]
+            if len(nxt_kids) != 1:
+                break
+            nxt = nxt_kids[0]
+            path += _euclid(nodes[cur], nodes[nxt])
+            cur = nxt
+        if path > 0:
+            euc = _euclid(nodes[i], nodes[cur])
+            contractions.append(euc / path)
+    contraction_mean = float(np.mean(contractions)) if contractions else 1.0
+
+    # Taper rate (mean fractional radius drop along linear sub-segments).
+    parent_rad = nodes[topo.parent_idx[sub_root]].radius if topo.parent_idx[sub_root] is not None else sub_root_node.radius
+    tapers: list[float] = []
+    for i in sub:
+        pi = topo.parent_idx[i]
+        if pi is None or len(topo.children[i]) > 1:
+            continue
+        rp = nodes[pi].radius
+        ri = nodes[i].radius
+        if rp > 1e-6:
+            tapers.append((rp - ri) / rp)
+    taper_mean = float(np.mean(tapers)) if tapers else 0.0
+
+    # Cell type one-hot.
+    is_pyr = 1.0 if cell_type == "pyramidal" else 0.0
+
+    return np.array([
+        float(n_sub_nodes), float(n_bifs), float(n_tips), float(n_branches),
+        total_length, total_surface, total_volume,
+        diameter_mean, diameter_min, diameter_max,
+        bbox_x, bbox_y, bbox_z,
+        euc_max, path_max, max_branch_order,
+        pa_mean, pa_max, contraction_mean, taper_mean,
+        float(parent_rad), float(sub_root_node.radius),
+        is_pyr,
+    ], dtype=np.float64)
+
+
+def _extract_lmeasure_dataset(files_by_ct: dict[str, list[Path]], label: str):
+    X: list[np.ndarray] = []
+    y: list[int] = []
+    print(f"  [{label}] extracting per-subtree L-Measure-style features over {sum(len(v) for v in files_by_ct.values())} files...")
+    for ct, files in files_by_ct.items():
+        for f in files:
+            try:
+                nodes = parse_swc(f)
+            except Exception:
+                continue
+            if not nodes:
+                continue
+            topo = _build_topo(nodes)
+            proxy = _select_proxy_root(topo)
+            for sub_root in topo.children[proxy]:
+                X.append(_lmeasure_subtree_features(topo, proxy, sub_root, ct))
+                y.append(_subtree_majority_label(topo, sub_root))
+    X_arr = np.vstack(X) if X else np.zeros((0, 23))
+    return X_arr, np.array(y, dtype=np.int64)
+
+
+def predict_lmeasure_rf(train_files: dict[str, list[Path]], seed: int = 42):
+    from sklearn.ensemble import RandomForestClassifier  # noqa: PLC0415
+    Xtr, ytr = _extract_lmeasure_dataset(train_files, "train")
+    print(f"  fitting RandomForest on {Xtr.shape[0]} subtrees, {Xtr.shape[1]} features...")
+    clf = RandomForestClassifier(
+        n_estimators=400, max_depth=None, n_jobs=-1, random_state=seed,
+        class_weight="balanced",
+    )
+    clf.fit(Xtr, ytr)
+    return _make_lmeasure_predictor(clf)
+
+
+def _make_lmeasure_predictor(clf):
+    """Wrap a fitted L-Measure-style classifier into a per-node predictor."""
+    def fn(nodes, cell_type):
+        if not nodes:
+            return []
+        topo = _build_topo(nodes)
+        proxy = _select_proxy_root(topo)
+        out = [int(n.type) for n in nodes]
+        for i, nd in enumerate(nodes):
+            if nd.type == 1:
+                out[i] = 1
+        out[proxy] = 1
+        valid = set(CELL_TYPE_LABEL_SETS.get(cell_type, {1, 2, 3}))
+
+        sub_roots = list(topo.children[proxy])
+        if not sub_roots:
+            return out
+        X = np.vstack([
+            _lmeasure_subtree_features(topo, proxy, sub_root, cell_type)
+            for sub_root in sub_roots
+        ])
+        preds = clf.predict(X).astype(int).tolist()
+        fallback = 3 if 3 in valid else next(iter(valid - {1}), 3)
+        for sub_root, pred in zip(sub_roots, preds):
+            if pred not in valid:
+                pred = fallback
+            for i in _subtree_indices(topo, sub_root):
+                if topo.nodes[i].type == 1:
+                    continue
+                out[i] = pred
+        return out
+    return fn
+
+
 def _make_sholl_predictor(clf):
     """Wrap a fitted classifier into a `(nodes, cell_type) -> labels` fn.
     Batches all primary-subtree features per cell into one predict() call."""
@@ -581,6 +807,8 @@ def _run_one(method: str, data_dir: Path, seed: int) -> tuple[dict, list[dict]]:
         predict_fn = predict_sholl_rf(train_files, seed=seed)
     elif method == "sholl_mlp":
         predict_fn = predict_sholl_mlp(train_files, seed=seed)
+    elif method == "lmeasure_rf":
+        predict_fn = predict_lmeasure_rf(train_files, seed=seed)
     else:
         raise ValueError(f"Unknown method: {method}")
 
@@ -597,7 +825,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "method", nargs="?", default="all",
-        choices=("all", "neurom_rf", "sholl_rf", "sholl_mlp"),
+        choices=("all", "neurom_rf", "sholl_rf", "sholl_mlp", "lmeasure_rf"),
     )
     parser.add_argument("--data-dir", type=Path, default=DEFAULT_DATA_DIR)
     parser.add_argument("--seed", type=int, default=42)
@@ -622,7 +850,11 @@ def main():
         print(f"ERROR: data dir not found: {args.data_dir}", file=sys.stderr)
         return 2
 
-    methods = ["neurom_rf", "sholl_rf", "sholl_mlp"] if args.method == "all" else [args.method]
+    methods = (
+        ["neurom_rf", "lmeasure_rf", "sholl_rf", "sholl_mlp"]
+        if args.method == "all"
+        else [args.method]
+    )
     all_results: dict[str, dict] = {}
     all_file_rows: list[dict] = []
     for method in methods:

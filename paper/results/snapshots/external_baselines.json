@@ -160,5 +160,59 @@
         "apical": 674712
       }
     }
+  },
+  "lmeasure_rf": {
+    "method": "lmeasure_rf",
+    "accuracy": 0.9913,
+    "macro_f1": 0.9734,
+    "neurite_macro_f1": 0.9645,
+    "per_class_f1": {
+      "soma": 1.0,
+      "axon": 0.9967,
+      "basal/dendrite": 0.9537,
+      "apical": 0.9433
+    },
+    "per_cell_type": {
+      "interneuron": {
+        "accuracy": 0.9886,
+        "neurite_macro_f1": 0.9802
+      },
+      "pyramidal": {
+        "accuracy": 0.9917,
+        "neurite_macro_f1": 0.9618
+      }
+    },
+    "per_file": {
+      "mean": 0.9379,
+      "median": 1.0,
+      "p10": 0.6522,
+      "n_files": 556
+    },
+    "confusion": {
+      "soma": {
+        "soma": 556,
+        "axon": 0,
+        "basal/dendrite": 0,
+        "apical": 0
+      },
+      "axon": {
+        "soma": 0,
+        "axon": 12082412,
+        "basal/dendrite": 6875,
+        "apical": 5102
+      },
+      "basal/dendrite": {
+        "soma": 0,
+        "axon": 32550,
+        "basal/dendrite": 801626,
+        "apical": 21752
+      },
+      "apical": {
+        "soma": 0,
+        "axon": 36277,
+        "basal/dendrite": 16728,
+        "apical": 664382
+      }
+    }
   }
 }

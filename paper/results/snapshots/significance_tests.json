@@ -1,6 +1,6 @@
 {
   "alpha": 0.05,
-  "bonferroni_correction_n": 15,
+  "bonferroni_correction_n": 21,
   "method_summaries": {
     "v6": {
       "n_files": 328,
@@ -43,9 +43,94 @@
       "median_f1": 1.0,
       "p10": 0.58945,
       "p25": 1.0
+    },
+    "lmeasure_rf": {
+      "n_files": 556,
+      "mean_f1": 0.9378661870503598,
+      "median_f1": 1.0,
+      "p10": 0.65215,
+      "p25": 1.0
     }
   },
   "pairwise_tests": [
+    {
+      "n_pairs": 556,
+      "mean_diff": 0.05575413669064748,
+      "median_diff": 0.025749999999999995,
+      "p_value": 7.654641544699831e-22,
+      "wins": 315,
+      "losses": 63,
+      "ties": 178,
+      "method_a": "lmeasure_rf",
+      "method_b": "neurom_rf",
+      "p_value_bonferroni": 1.6074747243869645e-20,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 556,
+      "mean_diff": 0.02434334532374101,
+      "median_diff": 0.0,
+      "p_value": 0.00012551713505698465,
+      "wins": 47,
+      "losses": 15,
+      "ties": 494,
+      "method_a": "lmeasure_rf",
+      "method_b": "sholl_mlp",
+      "p_value_bonferroni": 0.002635859836196678,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 556,
+      "mean_diff": 0.009660251798561151,
+      "median_diff": 0.0,
+      "p_value": 0.02679696305194918,
+      "wins": 23,
+      "losses": 8,
+      "ties": 525,
+      "method_a": "lmeasure_rf",
+      "method_b": "sholl_rf",
+      "p_value_bonferroni": 0.5627362240909328,
+      "significant_alpha_corrected": false
+    },
+    {
+      "n_pairs": 328,
+      "mean_diff": -0.05075701219512195,
+      "median_diff": 0.0,
+      "p_value": 6.7557067750521205e-09,
+      "wins": 12,
+      "losses": 55,
+      "ties": 261,
+      "method_a": "lmeasure_rf",
+      "method_b": "v6",
+      "p_value_bonferroni": 1.4186984227609454e-07,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 556,
+      "mean_diff": -0.02595431654676259,
+      "median_diff": 0.0,
+      "p_value": 8.657217558925684e-06,
+      "wins": 25,
+      "losses": 62,
+      "ties": 469,
+      "method_a": "lmeasure_rf",
+      "method_b": "v9_final",
+      "p_value_bonferroni": 0.00018180156873743935,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 556,
+      "mean_diff": -0.026752697841726618,
+      "median_diff": 0.0,
+      "p_value": 2.2277305225943603e-06,
+      "wins": 24,
+      "losses": 58,
+      "ties": 474,
+      "method_a": "lmeasure_rf",
+      "method_b": "v9_no_gnn",
+      "p_value_bonferroni": 4.678234097448157e-05,
+      "significant_alpha_corrected": true
+    },
     {
       "n_pairs": 556,
       "mean_diff": -0.03141079136690647,
@@ -56,7 +141,7 @@
       "ties": 175,
       "method_a": "neurom_rf",
       "method_b": "sholl_mlp",
-      "p_value_bonferroni": 2.5706281792859103e-09,
+      "p_value_bonferroni": 3.598879451000275e-09,
       "significant_alpha_corrected": true
     },
     {
@@ -69,7 +154,7 @@
       "ties": 177,
       "method_a": "neurom_rf",
       "method_b": "sholl_rf",
-      "p_value_bonferroni": 2.0505525678213366e-14,
+      "p_value_bonferroni": 2.870773594949871e-14,
       "significant_alpha_corrected": true
     },
     {
@@ -82,7 +167,7 @@
       "ties": 115,
       "method_a": "neurom_rf",
       "method_b": "v6",
-      "p_value_bonferroni": 1.0886734734891836e-24,
+      "p_value_bonferroni": 1.524142862884857e-24,
       "significant_alpha_corrected": true
     },
     {
@@ -95,7 +180,7 @@
       "ties": 180,
       "method_a": "neurom_rf",
       "method_b": "v9_final",
-      "p_value_bonferroni": 1.1066425298174024e-35,
+      "p_value_bonferroni": 1.5492995417443634e-35,
       "significant_alpha_corrected": true
     },
     {
@@ -108,7 +193,7 @@
       "ties": 180,
       "method_a": "neurom_rf",
       "method_b": "v9_no_gnn",
-      "p_value_bonferroni": 1.692537168113717e-38,
+      "p_value_bonferroni": 2.3695520353592035e-38,
       "significant_alpha_corrected": true
     },
     {
@@ -121,7 +206,7 @@
       "ties": 509,
       "method_a": "sholl_mlp",
       "method_b": "sholl_rf",
-      "p_value_bonferroni": 0.051501342709872715,
+      "p_value_bonferroni": 0.0721018797938218,
       "significant_alpha_corrected": false
     },
     {
@@ -134,7 +219,7 @@
       "ties": 238,
       "method_a": "sholl_mlp",
       "method_b": "v6",
-      "p_value_bonferroni": 8.073519954873591e-13,
+      "p_value_bonferroni": 1.1302927936823027e-12,
       "significant_alpha_corrected": true
     },
     {
@@ -147,7 +232,7 @@
       "ties": 439,
       "method_a": "sholl_mlp",
       "method_b": "v9_final",
-      "p_value_bonferroni": 1.2351683661010724e-09,
+      "p_value_bonferroni": 1.7292357125415013e-09,
       "significant_alpha_corrected": true
     },
     {
@@ -160,7 +245,7 @@
       "ties": 449,
       "method_a": "sholl_mlp",
       "method_b": "v9_no_gnn",
-      "p_value_bonferroni": 1.6346647698582048e-10,
+      "p_value_bonferroni": 2.2885306778014868e-10,
       "significant_alpha_corrected": true
     },
     {
@@ -173,7 +258,7 @@
       "ties": 251,
       "method_a": "sholl_rf",
       "method_b": "v6",
-      "p_value_bonferroni": 2.6319876821338054e-10,
+      "p_value_bonferroni": 3.6847827549873275e-10,
       "significant_alpha_corrected": true
     },
     {
@@ -186,7 +271,7 @@
       "ties": 456,
       "method_a": "sholl_rf",
       "method_b": "v9_final",
-      "p_value_bonferroni": 1.997929893628353e-06,
+      "p_value_bonferroni": 2.7971018510796943e-06,
       "significant_alpha_corrected": true
     },
     {
@@ -199,7 +284,7 @@
       "ties": 466,
       "method_a": "sholl_rf",
       "method_b": "v9_no_gnn",
-      "p_value_bonferroni": 3.631705575798318e-07,
+      "p_value_bonferroni": 5.084387806117645e-07,
       "significant_alpha_corrected": true
     },
     {
@@ -225,7 +310,7 @@
       "ties": 308,
       "method_a": "v6",
       "method_b": "v9_no_gnn",
-      "p_value_bonferroni": 0.6567804038536615,
+      "p_value_bonferroni": 0.919492565395126,
       "significant_alpha_corrected": false
     },
     {
