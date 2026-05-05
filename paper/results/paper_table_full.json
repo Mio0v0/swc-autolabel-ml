@@ -113,7 +113,7 @@
       "n_files": 328
     },
     {
-      "method": "v7_gnn_branch",
+      "method": "v7_gnn_branch (= no-subtree-stage2)",
       "source": "pipeline",
       "accuracy": 0.993,
       "macro_f1": 0.9809,
@@ -141,7 +141,7 @@
       "n_files": 328
     },
     {
-      "method": "v9_no_gnn",
+      "method": "v9_no_gnn (= no-gnn ablation)",
       "source": "pipeline",
       "accuracy": 0.9941,
       "macro_f1": 0.979,
@@ -166,6 +166,20 @@
       "apical_f1": 0.9548,
       "per_file_mean": 0.9638,
       "per_file_p10": 0.9618,
+      "n_files": 556
+    },
+    {
+      "method": "no_soft_handoff",
+      "source": "ablation",
+      "accuracy": 0.9945356294619359,
+      "macro_f1": 0.980349858821882,
+      "neurite_macro_f1": 0.9737998117625094,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9987333552563485,
+      "basal_f1": 0.9697708030307571,
+      "apical_f1": 0.9528952770004226,
+      "per_file_mean": 0.972746554370976,
+      "per_file_p10": 0.9994990407287947,
       "n_files": 556
     }
   ],

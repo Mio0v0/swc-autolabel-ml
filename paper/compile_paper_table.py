@@ -77,13 +77,54 @@ def _external_rows() -> list[dict]:
     return out
 
 
+def _ablation_rows() -> list[dict]:
+    """Pull metrics from the inference-only ablation eval snapshots
+    written by `paper.eval_engine_on_test`. These are the rows that
+    don't need a full retrain (no-soft-handoff via env var) plus the
+    retrained-with-feature-mask rows once the overnight queue
+    finishes (no_pca, no_trunk, multi_seed_*)."""
+    candidates = [
+        "no_soft_handoff",
+        "no_pca",
+        "no_trunk",
+        "multi_seed_123",
+        "multi_seed_456",
+    ]
+    out: list[dict] = []
+    for tag in candidates:
+        payload = _load_json(SNAPSHOTS / f"eval_{tag}.json")
+        if not payload:
+            continue
+        s = payload.get("summary", {})
+        overall = s.get("overall", {})
+        per_label = overall.get("per_label", {}) or {}
+        per_file = s.get("per_file", {}) or {}
+        out.append(_normalize_row({
+            "method": tag,
+            "accuracy": overall.get("accuracy"),
+            "macro_f1": overall.get("macro_f1"),
+            "neurite_macro_f1": overall.get("neurite_macro_f1"),
+            "per_class_f1": {
+                "soma": (per_label.get("soma") or {}).get("f1"),
+                "axon": (per_label.get("axon") or {}).get("f1"),
+                "basal/dendrite": (per_label.get("basal") or {}).get("f1"),
+                "apical": (per_label.get("apical") or {}).get("f1"),
+            },
+            "per_file": per_file,
+        }, source="ablation"))
+    return out
+
+
 def _v6789_rows() -> list[dict]:
-    """Pull headline metrics from the v6/v7/v8/v9 snapshot JSONs."""
+    """Pull headline metrics from the v6/v7/v8/v9 snapshot JSONs.
+    The v7 / v9_no_gnn rows double as the no-subtree-stage2 / no-gnn
+    ablation rows respectively — they have the same architecture
+    minus that one component."""
     files = [
         ("v6", SNAPSHOTS / "v6_full_pipeline.json"),
-        ("v7_gnn_branch", SNAPSHOTS / "v7_gnn_branch.json"),
+        ("v7_gnn_branch (= no-subtree-stage2)", SNAPSHOTS / "v7_gnn_branch.json"),
         ("v8_subtree_gnn", SNAPSHOTS / "v8_subtree_gnn.json"),
-        ("v9_no_gnn", SNAPSHOTS / "v9_baseline_no_gnn.json"),
+        ("v9_no_gnn (= no-gnn ablation)", SNAPSHOTS / "v9_baseline_no_gnn.json"),
         ("v9_final", SNAPSHOTS / "v9_final_subtree_gnn.json"),
     ]
     out = []
@@ -251,6 +292,7 @@ def main():
     rows.extend(_floor_rows())
     rows.extend(_external_rows())
     rows.extend(_v6789_rows())
+    rows.extend(_ablation_rows())
 
     wilcoxon = _wilcoxon_lookup()
     text = _format_table(rows, wilcoxon)

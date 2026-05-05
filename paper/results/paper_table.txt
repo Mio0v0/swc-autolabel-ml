@@ -8,10 +8,11 @@ sholl_rf                  external   0.9907    0.9727      0.9636  1.0000  0.996
 sholl_mlp                 external   0.9887    0.9662      0.9550  1.0000  0.9956  0.9355  0.9338    0.9135   0.5895    -0.0503   1.73e-09*
 lmeasure_rf               external   0.9913    0.9734      0.9645  1.0000  0.9967  0.9537  0.9433    0.9379   0.6522    -0.0260   1.82e-04*
 v6                        pipeline   0.9918    0.9762      0.9682  1.0000  0.9974  0.9725  0.9348    0.9644   0.9093    +0.0021   1.00e+00 
-v7_gnn_branch             pipeline   0.9930    0.9809      0.9745  1.0000  0.9974  0.9787  0.9476    0.9633   0.9192        -          -   
+v7_gnn_branch (= no-subtree-stage2)  pipeline   0.9930    0.9809      0.9745  1.0000  0.9974  0.9787  0.9476    0.9633   0.9192        -          -   
 v8_subtree_gnn            pipeline   0.9930    0.9809      0.9745  1.0000  0.9974  0.9787  0.9476    0.9633   0.9192        -          -   
-v9_no_gnn                 pipeline   0.9941    0.9790      0.9719  1.0000  0.9986  0.9666  0.9507    0.9646   0.9134    +0.0008   1.00e+00 
+v9_no_gnn (= no-gnn ablation)  pipeline   0.9941    0.9790      0.9719  1.0000  0.9986  0.9666  0.9507    0.9646   0.9134        -          -   
 v9_final                  pipeline   0.9946    0.9811      0.9748  1.0000  0.9986  0.9709  0.9548    0.9638   0.9618        -          -   
+no_soft_handoff           ablation   0.9945    0.9803      0.9738  1.0000  0.9987  0.9698  0.9529    0.9727   0.9995        -          -   
 
 vs v9 Δ = mean (method - v9_final) per-file F1; positive = method beats v9_final.
 p_bonf = paired-Wilcoxon p-value, Bonferroni-corrected over all pairwise tests.
