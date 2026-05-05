@@ -310,22 +310,27 @@ def predict_neurom_rf(train_files: dict[str, list[Path]], seed: int = 42):
             return []
         topo = _build_topo(nodes)
         proxy = _select_proxy_root(topo)
-        out = [int(n.type) for n in nodes]  # default keeps original
-        # Force soma label for the proxy and existing-soma nodes.
+        out = [int(n.type) for n in nodes]
         for i, nd in enumerate(nodes):
             if nd.type == 1:
                 out[i] = 1
         out[proxy] = 1
-        # Predict per-branch then propagate to all branch nodes.
         valid = set(CELL_TYPE_LABEL_SETS.get(cell_type, {1, 2, 3}))
-        for seg in _branch_segments(topo, proxy):
-            if not seg:
-                continue
-            feats = _branch_neurom_features(topo, proxy, seg, cell_type)
-            pred = int(clf.predict(feats[np.newaxis, :])[0])
+
+        # Batch all branch features into one matrix → one predict() call.
+        # Per-branch predict() calls are 100-1000x slower because of the
+        # Python ↔ sklearn boundary overhead per call.
+        segs = [s for s in _branch_segments(topo, proxy) if s]
+        if not segs:
+            return out
+        X = np.vstack([
+            _branch_neurom_features(topo, proxy, seg, cell_type) for seg in segs
+        ])
+        preds = clf.predict(X).astype(int).tolist()
+        fallback = 3 if 3 in valid else next(iter(valid - {1}), 3)
+        for seg, pred in zip(segs, preds):
             if pred not in valid:
-                # Re-map disallowed apicals on interneurons to basal.
-                pred = 3 if 3 in valid else next(iter(valid - {1}), 3)
+                pred = fallback
             for i in seg:
                 if topo.nodes[i].type == 1:
                     continue
@@ -477,8 +482,9 @@ def _extract_subtree_dataset(files_by_ct: dict[str, list[Path]], label: str):
     return X_arr, np.array(y, dtype=np.int64)
 
 
-def _make_sholl_predictor(clf, predict_fn):
-    """Wrap a fitted classifier into a `(nodes, cell_type) -> labels` fn."""
+def _make_sholl_predictor(clf):
+    """Wrap a fitted classifier into a `(nodes, cell_type) -> labels` fn.
+    Batches all primary-subtree features per cell into one predict() call."""
     def fn(nodes, cell_type):
         if not nodes:
             return []
@@ -491,11 +497,18 @@ def _make_sholl_predictor(clf, predict_fn):
         out[proxy] = 1
         valid = set(CELL_TYPE_LABEL_SETS.get(cell_type, {1, 2, 3}))
 
-        for sub_root in topo.children[proxy]:
-            feats = _sholl_subtree_features(topo, proxy, sub_root, cell_type)
-            pred = int(predict_fn(clf, feats))
+        sub_roots = list(topo.children[proxy])
+        if not sub_roots:
+            return out
+        X = np.vstack([
+            _sholl_subtree_features(topo, proxy, sub_root, cell_type)
+            for sub_root in sub_roots
+        ])
+        preds = clf.predict(X).astype(int).tolist()
+        fallback = 3 if 3 in valid else next(iter(valid - {1}), 3)
+        for sub_root, pred in zip(sub_roots, preds):
             if pred not in valid:
-                pred = 3 if 3 in valid else next(iter(valid - {1}), 3)
+                pred = fallback
             for i in _subtree_indices(topo, sub_root):
                 if topo.nodes[i].type == 1:
                     continue
@@ -513,10 +526,7 @@ def predict_sholl_rf(train_files: dict[str, list[Path]], seed: int = 42):
         class_weight="balanced",
     )
     clf.fit(Xtr, ytr)
-
-    def predict(model, feats):
-        return model.predict(feats[np.newaxis, :])[0]
-    return _make_sholl_predictor(clf, predict)
+    return _make_sholl_predictor(clf)
 
 
 def predict_sholl_mlp(train_files: dict[str, list[Path]], seed: int = 42):
@@ -538,10 +548,7 @@ def predict_sholl_mlp(train_files: dict[str, list[Path]], seed: int = 42):
         )),
     ])
     pipe.fit(Xtr, ytr)
-
-    def predict(model, feats):
-        return model.predict(feats[np.newaxis, :])[0]
-    return _make_sholl_predictor(pipe, predict)
+    return _make_sholl_predictor(pipe)
 
 
 # =============================================================================

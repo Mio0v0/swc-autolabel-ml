@@ -5,6 +5,7 @@ Chains Stage 1 (cell-type detection) → Stage 2 (branch classification)
 """
 from __future__ import annotations
 
+import os
 import pickle
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,7 +26,13 @@ from .cell_type_detector import (
 # higher mean per-node confidence. This recovers borderline files (e.g.
 # slice-flat pyramidals, tall interneurons) that would otherwise be
 # locked into the wrong Stage 2 branch by a hard Stage-1 label.
-DEFAULT_SOFT_HANDOFF_THRESHOLD = 0.65
+#
+# Set env var ``SWCAL_NO_SOFT_HANDOFF=1`` to force a hard cascade for
+# the ablation row in the paper. Module-level env-read keeps the
+# evaluator-side change to one CLI flag (see paper/run_ablations.py).
+DEFAULT_SOFT_HANDOFF_THRESHOLD = (
+    0.0 if os.environ.get("SWCAL_NO_SOFT_HANDOFF") == "1" else 0.65
+)
 from .branch_features import (
     extract_branches,
 )
