@@ -156,6 +156,21 @@ FEATURE_NAMES: list[str] = [
     "subtree_pc1_top_alignment",   # mean signed PC1 projection of top subtree, normalized to pc1_radial_max
 ]
 
+# Ablation hook: paper/run_ablations.py sets SWCAL_NO_PCA=1 to retrain
+# Stage 1 without the PCA features. Filter the names list so both
+# training and inference use the same reduced dimensionality. The
+# extraction code below still populates the PCA keys in the feature
+# dict (they're cheap), but extract_feature_vector reads only the
+# filtered FEATURE_NAMES so the trained model's input shape matches.
+import os as _os  # noqa: E402
+if _os.environ.get("SWCAL_NO_PCA") == "1":
+    _PCA_KEYS = {
+        "pc1_span", "pc1_asymmetry", "pc1_max_above_soma",
+        "pc1_max_below_soma", "pc1_radial_max",
+        "subtree_pc1_concentration", "subtree_pc1_top_alignment",
+    }
+    FEATURE_NAMES = [n for n in FEATURE_NAMES if n not in _PCA_KEYS]
+
 
 def extract_global_features(nodes: list[SWCNode]) -> dict[str, float]:
     """Compute the full global feature vector for a morphology."""

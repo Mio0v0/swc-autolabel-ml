@@ -1,0 +1,154 @@
+{
+  "n_files": 556,
+  "by_celltype_and_source": {
+    "interneuron__allen": {
+      "cell_type": "interneuron",
+      "source": "allen",
+      "n": 41,
+      "mean": 0.9760829268292684,
+      "median": 1.0,
+      "p10": 0.9463,
+      "p25": 0.9904,
+      "min": 0.6881
+    },
+    "interneuron__neuromorpho": {
+      "cell_type": "interneuron",
+      "source": "neuromorpho",
+      "n": 118,
+      "mean": 0.9830152542372882,
+      "median": 1.0,
+      "p10": 1.0,
+      "p25": 1.0,
+      "min": 0.2521
+    },
+    "pyramidal__allen": {
+      "cell_type": "pyramidal",
+      "source": "allen",
+      "n": 17,
+      "mean": 0.9438411764705883,
+      "median": 1.0,
+      "p10": 0.8456,
+      "p25": 0.9012,
+      "min": 0.5785
+    },
+    "pyramidal__hpf_ca1": {
+      "cell_type": "pyramidal",
+      "source": "hpf_ca1",
+      "n": 228,
+      "mean": 0.9658894736842105,
+      "median": 1.0,
+      "p10": 0.99977,
+      "p25": 1.0,
+      "min": 0.3333
+    },
+    "pyramidal__lab": {
+      "cell_type": "pyramidal",
+      "source": "lab",
+      "n": 95,
+      "mean": 0.9840642105263158,
+      "median": 1.0,
+      "p10": 1.0,
+      "p25": 1.0,
+      "min": 0.3333
+    },
+    "pyramidal__neuromorpho": {
+      "cell_type": "pyramidal",
+      "source": "neuromorpho",
+      "n": 57,
+      "mean": 0.8792070175438597,
+      "median": 1.0,
+      "p10": 0.58892,
+      "p25": 0.8272,
+      "min": 0.1877
+    }
+  },
+  "worst_files": [
+    {
+      "path": "data\\v9_merged_dataset\\pyramidal\\swc\\neuromorpho__11224c3.swc",
+      "cell_type": "pyramidal",
+      "source": "neuromorpho",
+      "n_nodes": 1238,
+      "neurite_macro_f1": 0.1877
+    },
+    {
+      "path": "data\\v9_merged_dataset\\pyramidal\\swc\\neuromorpho__236-1a-12-AW.swc",
+      "cell_type": "pyramidal",
+      "source": "neuromorpho",
+      "n_nodes": 288,
+      "neurite_macro_f1": 0.2263
+    },
+    {
+      "path": "data\\v9_merged_dataset\\pyramidal\\swc\\neuromorpho__241-2-18VN.swc",
+      "cell_type": "pyramidal",
+      "source": "neuromorpho",
+      "n_nodes": 917,
+      "neurite_macro_f1": 0.2486
+    },
+    {
+      "path": "data\\v9_merged_dataset\\interneuron\\swc\\neuromorpho__homo-7.swc",
+      "cell_type": "interneuron",
+      "source": "neuromorpho",
+      "n_nodes": 2136,
+      "neurite_macro_f1": 0.2521
+    },
+    {
+      "path": "data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__210107_029_edited.swc",
+      "cell_type": "pyramidal",
+      "source": "hpf_ca1",
+      "n_nodes": 12725,
+      "neurite_macro_f1": 0.3333
+    },
+    {
+      "path": "data\\v9_merged_dataset\\pyramidal\\swc\\lab__210107_029_edited.swc",
+      "cell_type": "pyramidal",
+      "source": "lab",
+      "n_nodes": 12725,
+      "neurite_macro_f1": 0.3333
+    },
+    {
+      "path": "data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__210013_013_edited.swc",
+      "cell_type": "pyramidal",
+      "source": "hpf_ca1",
+      "n_nodes": 53051,
+      "neurite_macro_f1": 0.3509
+    },
+    {
+      "path": "data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__202224_005_edited.swc",
+      "cell_type": "pyramidal",
+      "source": "hpf_ca1",
+      "n_nodes": 15470,
+      "neurite_macro_f1": 0.4321
+    },
+    {
+      "path": "data\\v9_merged_dataset\\interneuron\\swc\\neuromorpho__Cell-5-1.swc",
+      "cell_type": "interneuron",
+      "source": "neuromorpho",
+      "n_nodes": 556,
+      "neurite_macro_f1": 0.4633
+    },
+    {
+      "path": "data\\v9_merged_dataset\\interneuron\\swc\\neuromorpho__14-1-15-A-A4.swc",
+      "cell_type": "interneuron",
+      "source": "neuromorpho",
+      "n_nodes": 3583,
+      "neurite_macro_f1": 0.4671
+    }
+  ],
+  "tail_vs_head": {
+    "tail_threshold_p10": 0.9618,
+    "n_tail": 56,
+    "n_head": 500,
+    "tail_f1_mean": 0.6447785714285715,
+    "head_f1_mean": 0.9995532,
+    "tail_source_counts": {
+      "neuromorpho": 22,
+      "hpf_ca1": 20,
+      "lab": 3,
+      "allen": 11
+    },
+    "tail_celltype_counts": {
+      "pyramidal": 45,
+      "interneuron": 11
+    }
+  }
+}

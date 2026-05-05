@@ -127,6 +127,32 @@ BRANCH_FEATURE_NAMES: list[str] = [
     "on_longest_path",                   # 1.0 if this branch is on its subtree's longest path (= trunk)
 ]
 
+# Ablation hooks: paper/run_ablations.py sets SWCAL_NO_PCA=1 and
+# SWCAL_NO_TRUNK=1 to retrain Stage 2 without those feature blocks.
+# Filter BRANCH_FEATURE_NAMES at module load so training and inference
+# use the same reduced dimensionality.
+import os as _os  # noqa: E402
+_NO_PCA = _os.environ.get("SWCAL_NO_PCA") == "1"
+_NO_TRUNK = _os.environ.get("SWCAL_NO_TRUNK") == "1"
+if _NO_PCA or _NO_TRUNK:
+    _DROP_KEYS: set[str] = set()
+    if _NO_PCA:
+        _DROP_KEYS |= {
+            "principal_axis_projection",
+            "polar_angle_from_principal_axis",
+            "principal_axis_alignment_strength",
+            "subtree_principal_projection",
+            "subtree_principal_rank",
+        }
+    if _NO_TRUNK:
+        _DROP_KEYS |= {
+            "is_trunk_primary",
+            "subtree_trunk_length_norm",
+            "subtree_trunk_fraction",
+            "on_longest_path",
+        }
+    BRANCH_FEATURE_NAMES = [n for n in BRANCH_FEATURE_NAMES if n not in _DROP_KEYS]
+
 
 @dataclass
 class BranchData:

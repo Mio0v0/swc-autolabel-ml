@@ -1,0 +1,298 @@
+{
+  "summary": {
+    "tag": "v9_inference_baseline",
+    "data_dir": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset",
+    "n_files": 30,
+    "env": {
+      "SWCAL_NO_SOFT_HANDOFF": "",
+      "SWCAL_NO_PCA": "",
+      "SWCAL_NO_TRUNK": ""
+    },
+    "overall": {
+      "accuracy": 0.9802761142195964,
+      "macro_f1": 0.9650143661002271,
+      "neurite_macro_f1": 0.953352488133636,
+      "per_label": {
+        "soma": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 30
+        },
+        "axon": {
+          "precision": 0.9933395175833576,
+          "recall": 1.0,
+          "f1": 0.996658631227701,
+          "support": 440110
+        },
+        "basal": {
+          "precision": 0.8800332663386236,
+          "recall": 0.9546220003608589,
+          "f1": 0.9158114141057171,
+          "support": 66508
+        },
+        "apical": {
+          "precision": 0.998462953397251,
+          "recall": 0.9016451260580687,
+          "f1": 0.9475874190674902,
+          "support": 87896
+        }
+      }
+    },
+    "per_file": {
+      "n_files": 30,
+      "mean": 0.9618345185005712,
+      "median": 0.999988804953345,
+      "p10": 0.899475357478807,
+      "p25": 0.9995811234734305
+    },
+    "timing": {
+      "total_sec": 167.99769649998052,
+      "median_per_file_sec": 5.888423349999357,
+      "p95_per_file_sec": 8.703473715027211,
+      "max_per_file_sec": 10.675263600016478
+    }
+  },
+  "rows": [
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H16.03.006.01.03.04_537313600.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 25936,
+      "neurite_macro_f1": 1.0,
+      "macro_f1": 1.0,
+      "elapsed_sec": 10.675263600016478
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H16.03.008.11.11.02_542137330.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 8238,
+      "neurite_macro_f1": 0.8998216383437048,
+      "macro_f1": 0.9248662287577786,
+      "elapsed_sec": 3.1669866000302136
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H16.03.011.11.16.03_558211203.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 5764,
+      "neurite_macro_f1": 1.0,
+      "macro_f1": 1.0,
+      "elapsed_sec": 3.670464999973774
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H16.06.004.01.03.05_508309649.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 31486,
+      "neurite_macro_f1": 1.0,
+      "macro_f1": 1.0,
+      "elapsed_sec": 6.166123100032564
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H16.06.004.01.04.03_508282493.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 10880,
+      "neurite_macro_f1": 1.0,
+      "macro_f1": 1.0,
+      "elapsed_sec": 5.194040599977598
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H16.06.007.01.07.01_531517732.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 17281,
+      "neurite_macro_f1": 1.0,
+      "macro_f1": 1.0,
+      "elapsed_sec": 6.205021399946418
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H16.06.008.01.20.05_528042185.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 7462,
+      "neurite_macro_f1": 0.9012430676142237,
+      "macro_f1": 0.9259323007106678,
+      "elapsed_sec": 3.6083389000268653
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H16.06.010.01.01.10.02_529898751.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 22644,
+      "neurite_macro_f1": 0.7693682364366908,
+      "macro_f1": 0.8270261773275182,
+      "elapsed_sec": 5.050958100007847
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H16.06.010.01.02.18.02_529845713.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 14807,
+      "neurite_macro_f1": 1.0,
+      "macro_f1": 1.0,
+      "elapsed_sec": 5.722202299977653
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H17.03.002.11.03.01_569820130.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 8509,
+      "neurite_macro_f1": 1.0,
+      "macro_f1": 1.0,
+      "elapsed_sec": 3.155176800035406
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H17.03.002.11.04.04_569844159.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 5107,
+      "neurite_macro_f1": 1.0,
+      "macro_f1": 1.0,
+      "elapsed_sec": 2.0890590000199154
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H17.03.010.11.13.06_601958555.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 10449,
+      "neurite_macro_f1": 1.0,
+      "macro_f1": 1.0,
+      "elapsed_sec": 4.973650400002953
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H17.06.005.12.15.04_571471295.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 17244,
+      "neurite_macro_f1": 0.8963588296947275,
+      "macro_f1": 0.9222691222710456,
+      "elapsed_sec": 6.19230019999668
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H17.06.005.12.16.03_571527806.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 8165,
+      "neurite_macro_f1": 1.0,
+      "macro_f1": 1.0,
+      "elapsed_sec": 4.115507300011814
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H17.06.005.13.05.06_571500474.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 5576,
+      "neurite_macro_f1": 1.0,
+      "macro_f1": 1.0,
+      "elapsed_sec": 3.0230434000259265
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__H17.06.006.11.08.02_571624532.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 26161,
+      "neurite_macro_f1": 1.0,
+      "macro_f1": 1.0,
+      "elapsed_sec": 6.551461499999277
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\allen__Nr5a1-Cre_Ai14-230422.05.01.01_502269786.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 9910,
+      "neurite_macro_f1": 1.0,
+      "macro_f1": 1.0,
+      "elapsed_sec": 6.48030740005197
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__201983_012_edited.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 9410,
+      "neurite_macro_f1": 0.9885120073742053,
+      "macro_f1": 0.991384005530654,
+      "elapsed_sec": 5.051328099973034
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__201990_029_edited.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 74990,
+      "neurite_macro_f1": 0.9998577299186877,
+      "macro_f1": 0.9998932974390158,
+      "elapsed_sec": 8.770049100043252
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__202217_014_edited.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 31115,
+      "neurite_macro_f1": 0.9999883400960776,
+      "macro_f1": 0.9999912550720582,
+      "elapsed_sec": 7.367029600020032
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__202217_020_edited.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 33093,
+      "neurite_macro_f1": 0.9999946059948973,
+      "macro_f1": 0.999995954496173,
+      "elapsed_sec": 6.616431100002956
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__202217_022_edited.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 13624,
+      "neurite_macro_f1": 0.9999249215430125,
+      "macro_f1": 0.9999436911572593,
+      "elapsed_sec": 6.100588099972811
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__202217_023_edited.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 16882,
+      "neurite_macro_f1": 0.9999877157422762,
+      "macro_f1": 0.9999907868067072,
+      "elapsed_sec": 6.054644400021061
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__202219_002_edited.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 18678,
+      "neurite_macro_f1": 0.9999892698106122,
+      "macro_f1": 0.9999919523579591,
+      "elapsed_sec": 8.294490700005554
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__202219_010_edited.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 31281,
+      "neurite_macro_f1": 0.9689086951213518,
+      "macro_f1": 0.9766815213410138,
+      "elapsed_sec": 8.007933100045193
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__202219_031_edited.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 15259,
+      "neurite_macro_f1": 0.9997570979740216,
+      "macro_f1": 0.9998178234805162,
+      "elapsed_sec": 3.140169100021012
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__202224_005_edited.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 15471,
+      "neurite_macro_f1": 0.43205615004027154,
+      "macro_f1": 0.5740421125302037,
+      "elapsed_sec": 2.687586900021415
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__202225_004_edited.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 44311,
+      "neurite_macro_f1": 0.9997689929776546,
+      "macro_f1": 0.999826744733241,
+      "elapsed_sec": 8.622103800007608
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__202226_005_edited.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 30905,
+      "neurite_macro_f1": 0.9995224653065669,
+      "macro_f1": 0.9996418489799251,
+      "elapsed_sec": 4.441900399979204
+    },
+    {
+      "path": "D:\\Desktop\\SWC-Studio\\data\\v9_merged_dataset\\pyramidal\\swc\\hpf_ca1__202230_010_edited.swc",
+      "cell_type": "pyramidal",
+      "n_nodes": 23971,
+      "neurite_macro_f1": 0.999975791028155,
+      "macro_f1": 0.9999818432711163,
+      "elapsed_sec": 6.468072400020901
+    }
+  ]
+}
