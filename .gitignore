@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.pytest_cache/
+*.egg-info/
+data/
+*.pkl
+*.pt
+hybrid/models/*.pkl
+hybrid/models/*.pt
+hybrid/models/eval_tmp/
+paper/models/*.pkl
+paper/models/*.pt
+paper/models/snapshots/*.pkl
+paper/models/snapshots/*.pt
