@@ -98,10 +98,26 @@ def _v6789_rows() -> list[dict]:
 
 def _v9_snapshot_to_row(label: str, payload: dict) -> dict:
     """Re-shape an evaluate-style snapshot into the same row schema as
-    baselines_results.json so they stack cleanly."""
-    overall = payload.get("overall_metrics") or payload.get("overall") or {}
+    baselines_results.json so they stack cleanly. The evaluate.py output
+    uses ``overall_stage23`` (after Stage 3 refinement) for the headline
+    numbers and ``overall_per_file_stage23`` for the per-file summary."""
+    overall = (
+        payload.get("overall_stage23")
+        or payload.get("overall_metrics")
+        or payload.get("overall")
+        or {}
+    )
     per_label = overall.get("per_label") or payload.get("per_class_metrics") or {}
-    file_summary = payload.get("file_summary") or payload.get("per_file_summary") or {}
+    file_summary = (
+        payload.get("overall_per_file_stage23")
+        or payload.get("file_summary")
+        or payload.get("per_file_summary")
+        or {}
+    )
+
+    # The evaluate snapshot uses 'basal' for what the rest of the pipeline
+    # calls 'basal/dendrite'. Try both keys.
+    basal_key = "basal/dendrite" if "basal/dendrite" in per_label else "basal"
 
     return {
         "method": label,
@@ -111,7 +127,7 @@ def _v9_snapshot_to_row(label: str, payload: dict) -> dict:
         "per_class_f1": {
             "soma": (per_label.get("soma") or {}).get("f1"),
             "axon": (per_label.get("axon") or {}).get("f1"),
-            "basal/dendrite": (per_label.get("basal/dendrite") or {}).get("f1"),
+            "basal/dendrite": (per_label.get(basal_key) or {}).get("f1"),
             "apical": (per_label.get("apical") or {}).get("f1"),
         },
         "per_file": {
@@ -240,6 +256,7 @@ def main():
     text = _format_table(rows, wilcoxon)
 
     args.out_text.write_text(text, encoding="utf-8")
+    sys.stdout.reconfigure(encoding="utf-8")
     print(f"Wrote {args.out_text}")
     args.out_json.write_text(json.dumps({
         "rows": rows, "wilcoxon": wilcoxon,

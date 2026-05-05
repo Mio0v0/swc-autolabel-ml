@@ -1,0 +1,245 @@
+{
+  "alpha": 0.05,
+  "bonferroni_correction_n": 15,
+  "method_summaries": {
+    "v6": {
+      "n_files": 328,
+      "mean_f1": 0.9644381097560975,
+      "median_f1": 1.0,
+      "p10": 0.90925,
+      "p25": 1.0
+    },
+    "v9_no_gnn": {
+      "n_files": 556,
+      "mean_f1": 0.9646188848920862,
+      "median_f1": 1.0,
+      "p10": 0.9134,
+      "p25": 1.0
+    },
+    "v9_final": {
+      "n_files": 556,
+      "mean_f1": 0.9638205035971222,
+      "median_f1": 1.0,
+      "p10": 0.9618,
+      "p25": 1.0
+    },
+    "neurom_rf": {
+      "n_files": 556,
+      "mean_f1": 0.8821120503597122,
+      "median_f1": 0.9254,
+      "p10": 0.6912,
+      "p25": 0.8305
+    },
+    "sholl_rf": {
+      "n_files": 556,
+      "mean_f1": 0.9282059352517985,
+      "median_f1": 1.0,
+      "p10": 0.6232,
+      "p25": 1.0
+    },
+    "sholl_mlp": {
+      "n_files": 556,
+      "mean_f1": 0.9135228417266188,
+      "median_f1": 1.0,
+      "p10": 0.58945,
+      "p25": 1.0
+    }
+  },
+  "pairwise_tests": [
+    {
+      "n_pairs": 556,
+      "mean_diff": -0.03141079136690647,
+      "median_diff": -0.003149999999999986,
+      "p_value": 1.7137521195239403e-10,
+      "wins": 90,
+      "losses": 291,
+      "ties": 175,
+      "method_a": "neurom_rf",
+      "method_b": "sholl_mlp",
+      "p_value_bonferroni": 2.5706281792859103e-09,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 556,
+      "mean_diff": -0.04609388489208633,
+      "median_diff": -0.012300000000000033,
+      "p_value": 1.3670350452142244e-15,
+      "wins": 77,
+      "losses": 302,
+      "ties": 177,
+      "method_a": "neurom_rf",
+      "method_b": "sholl_rf",
+      "p_value_bonferroni": 2.0505525678213366e-14,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 328,
+      "mean_diff": -0.09118567073170733,
+      "median_diff": -0.01715,
+      "p_value": 7.257823156594557e-26,
+      "wins": 23,
+      "losses": 190,
+      "ties": 115,
+      "method_a": "neurom_rf",
+      "method_b": "v6",
+      "p_value_bonferroni": 1.0886734734891836e-24,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 556,
+      "mean_diff": -0.08170845323741008,
+      "median_diff": -0.05235000000000001,
+      "p_value": 7.377616865449349e-37,
+      "wins": 48,
+      "losses": 328,
+      "ties": 180,
+      "method_a": "neurom_rf",
+      "method_b": "v9_final",
+      "p_value_bonferroni": 1.1066425298174024e-35,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 556,
+      "mean_diff": -0.0825068345323741,
+      "median_diff": -0.05299999999999999,
+      "p_value": 1.1283581120758112e-39,
+      "wins": 46,
+      "losses": 330,
+      "ties": 180,
+      "method_a": "neurom_rf",
+      "method_b": "v9_no_gnn",
+      "p_value_bonferroni": 1.692537168113717e-38,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 556,
+      "mean_diff": -0.014683093525179856,
+      "median_diff": 0.0,
+      "p_value": 0.0034334228473248476,
+      "wins": 14,
+      "losses": 33,
+      "ties": 509,
+      "method_a": "sholl_mlp",
+      "method_b": "sholl_rf",
+      "p_value_bonferroni": 0.051501342709872715,
+      "significant_alpha_corrected": false
+    },
+    {
+      "n_pairs": 328,
+      "mean_diff": -0.09026158536585366,
+      "median_diff": 0.0,
+      "p_value": 5.382346636582394e-14,
+      "wins": 11,
+      "losses": 79,
+      "ties": 238,
+      "method_a": "sholl_mlp",
+      "method_b": "v6",
+      "p_value_bonferroni": 8.073519954873591e-13,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 556,
+      "mean_diff": -0.05029766187050359,
+      "median_diff": 0.0,
+      "p_value": 8.234455774007149e-11,
+      "wins": 27,
+      "losses": 90,
+      "ties": 439,
+      "method_a": "sholl_mlp",
+      "method_b": "v9_final",
+      "p_value_bonferroni": 1.2351683661010724e-09,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 556,
+      "mean_diff": -0.051096043165467626,
+      "median_diff": 0.0,
+      "p_value": 1.0897765132388032e-11,
+      "wins": 24,
+      "losses": 83,
+      "ties": 449,
+      "method_a": "sholl_mlp",
+      "method_b": "v9_no_gnn",
+      "p_value_bonferroni": 1.6346647698582048e-10,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 328,
+      "mean_diff": -0.06960853658536585,
+      "median_diff": 0.0,
+      "p_value": 1.7546584547558704e-11,
+      "wins": 10,
+      "losses": 67,
+      "ties": 251,
+      "method_a": "sholl_rf",
+      "method_b": "v6",
+      "p_value_bonferroni": 2.6319876821338054e-10,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 556,
+      "mean_diff": -0.035614568345323734,
+      "median_diff": 0.0,
+      "p_value": 1.331953262418902e-07,
+      "wins": 26,
+      "losses": 74,
+      "ties": 456,
+      "method_a": "sholl_rf",
+      "method_b": "v9_final",
+      "p_value_bonferroni": 1.997929893628353e-06,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 556,
+      "mean_diff": -0.03641294964028777,
+      "median_diff": 0.0,
+      "p_value": 2.421137050532212e-08,
+      "wins": 23,
+      "losses": 67,
+      "ties": 466,
+      "method_a": "sholl_rf",
+      "method_b": "v9_no_gnn",
+      "p_value_bonferroni": 3.631705575798318e-07,
+      "significant_alpha_corrected": true
+    },
+    {
+      "n_pairs": 328,
+      "mean_diff": 0.0020557926829268317,
+      "median_diff": 0.0,
+      "p_value": 0.45639152337417754,
+      "wins": 11,
+      "losses": 16,
+      "ties": 301,
+      "method_a": "v6",
+      "method_b": "v9_final",
+      "p_value_bonferroni": 1.0,
+      "significant_alpha_corrected": false
+    },
+    {
+      "n_pairs": 328,
+      "mean_diff": 0.004335365853658537,
+      "median_diff": 0.0,
+      "p_value": 0.043785360256910766,
+      "wins": 13,
+      "losses": 7,
+      "ties": 308,
+      "method_a": "v6",
+      "method_b": "v9_no_gnn",
+      "p_value_bonferroni": 0.6567804038536615,
+      "significant_alpha_corrected": false
+    },
+    {
+      "n_pairs": 556,
+      "mean_diff": -0.0007983812949640291,
+      "median_diff": 0.0,
+      "p_value": 0.5861743444807836,
+      "wins": 11,
+      "losses": 6,
+      "ties": 539,
+      "method_a": "v9_final",
+      "method_b": "v9_no_gnn",
+      "p_value_bonferroni": 1.0,
+      "significant_alpha_corrected": false
+    }
+  ]
+}

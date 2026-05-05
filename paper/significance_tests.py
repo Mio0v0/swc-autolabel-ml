@@ -256,7 +256,7 @@ def main():
         )
 
     text = "\n".join(lines)
-    args.out_text.write_text(text)
+    args.out_text.write_text(text, encoding="utf-8")
     print(f"Wrote {args.out_text}")
     print()
     print(text)

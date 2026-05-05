@@ -1,0 +1,195 @@
+{
+  "rows": [
+    {
+      "method": "random",
+      "source": "floor",
+      "accuracy": 0.7917,
+      "macro_f1": 0.502,
+      "neurite_macro_f1": 0.336,
+      "soma_f1": 1.0,
+      "axon_f1": 0.8855,
+      "basal_f1": 0.0661,
+      "apical_f1": 0.0564,
+      "per_file_mean": 0.3271,
+      "per_file_p10": 0.129,
+      "n_files": 556
+    },
+    {
+      "method": "majority",
+      "source": "floor",
+      "accuracy": 0.8849,
+      "macro_f1": 0.4847,
+      "neurite_macro_f1": 0.313,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9389,
+      "basal_f1": 0.0,
+      "apical_f1": 0.0,
+      "per_file_mean": 0.2922,
+      "per_file_p10": 0.012,
+      "n_files": 556
+    },
+    {
+      "method": "heuristic",
+      "source": "floor",
+      "accuracy": 0.5761,
+      "macro_f1": 0.5935,
+      "neurite_macro_f1": 0.458,
+      "soma_f1": 1.0,
+      "axon_f1": 0.7331,
+      "basal_f1": 0.6219,
+      "apical_f1": 0.0189,
+      "per_file_mean": 0.525,
+      "per_file_p10": 0.1331,
+      "n_files": 556
+    },
+    {
+      "method": "neurom_rf",
+      "source": "external",
+      "accuracy": 0.9722,
+      "macro_f1": 0.9175,
+      "neurite_macro_f1": 0.89,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9882,
+      "basal_f1": 0.8761,
+      "apical_f1": 0.8057,
+      "per_file_mean": 0.8821,
+      "per_file_p10": 0.6912,
+      "n_files": 556
+    },
+    {
+      "method": "sholl_rf",
+      "source": "external",
+      "accuracy": 0.9907,
+      "macro_f1": 0.9727,
+      "neurite_macro_f1": 0.9636,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9961,
+      "basal_f1": 0.9547,
+      "apical_f1": 0.9399,
+      "per_file_mean": 0.9282,
+      "per_file_p10": 0.6232,
+      "n_files": 556
+    },
+    {
+      "method": "sholl_mlp",
+      "source": "external",
+      "accuracy": 0.9887,
+      "macro_f1": 0.9662,
+      "neurite_macro_f1": 0.955,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9956,
+      "basal_f1": 0.9355,
+      "apical_f1": 0.9338,
+      "per_file_mean": 0.9135,
+      "per_file_p10": 0.5895,
+      "n_files": 556
+    },
+    {
+      "method": "v6",
+      "source": "pipeline",
+      "accuracy": 0.9918,
+      "macro_f1": 0.9762,
+      "neurite_macro_f1": 0.9682,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9974,
+      "basal_f1": 0.9725,
+      "apical_f1": 0.9348,
+      "per_file_mean": 0.9644,
+      "per_file_p10": 0.9093,
+      "n_files": 328
+    },
+    {
+      "method": "v7_gnn_branch",
+      "source": "pipeline",
+      "accuracy": 0.993,
+      "macro_f1": 0.9809,
+      "neurite_macro_f1": 0.9745,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9974,
+      "basal_f1": 0.9787,
+      "apical_f1": 0.9476,
+      "per_file_mean": 0.9633,
+      "per_file_p10": 0.9192,
+      "n_files": 328
+    },
+    {
+      "method": "v8_subtree_gnn",
+      "source": "pipeline",
+      "accuracy": 0.993,
+      "macro_f1": 0.9809,
+      "neurite_macro_f1": 0.9745,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9974,
+      "basal_f1": 0.9787,
+      "apical_f1": 0.9476,
+      "per_file_mean": 0.9633,
+      "per_file_p10": 0.9192,
+      "n_files": 328
+    },
+    {
+      "method": "v9_no_gnn",
+      "source": "pipeline",
+      "accuracy": 0.9941,
+      "macro_f1": 0.979,
+      "neurite_macro_f1": 0.9719,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9986,
+      "basal_f1": 0.9666,
+      "apical_f1": 0.9507,
+      "per_file_mean": 0.9646,
+      "per_file_p10": 0.9134,
+      "n_files": 556
+    },
+    {
+      "method": "v9_final",
+      "source": "pipeline",
+      "accuracy": 0.9946,
+      "macro_f1": 0.9811,
+      "neurite_macro_f1": 0.9748,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9986,
+      "basal_f1": 0.9709,
+      "apical_f1": 0.9548,
+      "per_file_mean": 0.9638,
+      "per_file_p10": 0.9618,
+      "n_files": 556
+    }
+  ],
+  "wilcoxon": {
+    "neurom_rf": {
+      "n_pairs": 556,
+      "mean_diff_vs_v9": -0.08170845323741008,
+      "p_value": 7.377616865449349e-37,
+      "p_value_bonferroni": 1.1066425298174024e-35,
+      "significant": true
+    },
+    "sholl_mlp": {
+      "n_pairs": 556,
+      "mean_diff_vs_v9": -0.05029766187050359,
+      "p_value": 8.234455774007149e-11,
+      "p_value_bonferroni": 1.2351683661010724e-09,
+      "significant": true
+    },
+    "sholl_rf": {
+      "n_pairs": 556,
+      "mean_diff_vs_v9": -0.035614568345323734,
+      "p_value": 1.331953262418902e-07,
+      "p_value_bonferroni": 1.997929893628353e-06,
+      "significant": true
+    },
+    "v6": {
+      "n_pairs": 328,
+      "mean_diff_vs_v9": 0.0020557926829268317,
+      "p_value": 0.45639152337417754,
+      "p_value_bonferroni": 1.0,
+      "significant": false
+    },
+    "v9_no_gnn": {
+      "n_pairs": 556,
+      "mean_diff_vs_v9": 0.0007983812949640291,
+      "p_value": 0.5861743444807836,
+      "p_value_bonferroni": 1.0,
+      "significant": false
+    }
+  }
+}
