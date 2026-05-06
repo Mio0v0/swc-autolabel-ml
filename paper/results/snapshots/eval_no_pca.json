@@ -1,0 +1,115 @@
+{
+  "cell_type_accuracy": null,
+  "overall_stage23": {
+    "accuracy": 0.9944,
+    "macro_f1": 0.9805,
+    "balanced_accuracy": 0.9764,
+    "neurite_macro_f1": 0.9739,
+    "neurite_balanced_accuracy": 0.9686,
+    "per_label": {
+      "soma": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 556
+      },
+      "axon": {
+        "precision": 0.9976,
+        "recall": 0.9996,
+        "f1": 0.9986,
+        "support": 12094389
+      },
+      "basal/dendrite": {
+        "precision": 0.9648,
+        "recall": 0.9745,
+        "f1": 0.9696,
+        "support": 855928
+      },
+      "apical": {
+        "precision": 0.9767,
+        "recall": 0.9316,
+        "f1": 0.9536,
+        "support": 717387
+      }
+    },
+    "confusion": {
+      "soma": {
+        "soma": 556,
+        "axon": 0,
+        "basal/dendrite": 0,
+        "apical": 0
+      },
+      "axon": {
+        "soma": 0,
+        "axon": 12089255,
+        "basal/dendrite": 2866,
+        "apical": 2268
+      },
+      "basal/dendrite": {
+        "soma": 0,
+        "axon": 8154,
+        "basal/dendrite": 834126,
+        "apical": 13648
+      },
+      "apical": {
+        "soma": 0,
+        "axon": 21530,
+        "basal/dendrite": 27558,
+        "apical": 668299
+      }
+    }
+  },
+  "overall_stage2": {
+    "accuracy": 0.985,
+    "macro_f1": 0.9594,
+    "balanced_accuracy": 0.9354,
+    "neurite_macro_f1": 0.9459,
+    "neurite_balanced_accuracy": 0.9139,
+    "per_label": {
+      "soma": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 556
+      },
+      "axon": {
+        "precision": 0.9854,
+        "recall": 0.9996,
+        "f1": 0.9924,
+        "support": 12094389
+      },
+      "basal/dendrite": {
+        "precision": 0.9909,
+        "recall": 0.8959,
+        "f1": 0.941,
+        "support": 855928
+      },
+      "apical": {
+        "precision": 0.9706,
+        "recall": 0.8463,
+        "f1": 0.9042,
+        "support": 717387
+      }
+    }
+  },
+  "overall_per_file_stage23": {
+    "n_files": 556,
+    "mean": 0.9639,
+    "median": 1.0,
+    "p10": 0.9451,
+    "min": 0.1877
+  },
+  "overall_per_file_stage2": {
+    "n_files": 556,
+    "mean": 0.9304,
+    "median": 0.9893,
+    "p10": 0.7507,
+    "min": 0.2521
+  },
+  "overall_improvement_neurite_macro_f1": 0.028,
+  "_provenance": {
+    "source": "parsed from paper/results/overnight_queue.log no_pca block 2026-05-05 23:04..01:25",
+    "reason": "hybrid.evaluate crashed on Stage-3 delta print before json.dump fired",
+    "fix_commit": "cfcb4ea"
+  }
+}

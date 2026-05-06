@@ -78,11 +78,16 @@ def _external_rows() -> list[dict]:
 
 
 def _ablation_rows() -> list[dict]:
-    """Pull metrics from the inference-only ablation eval snapshots
-    written by `paper.eval_engine_on_test`. These are the rows that
-    don't need a full retrain (no-soft-handoff via env var) plus the
-    retrained-with-feature-mask rows once the overnight queue
-    finishes (no_pca, no_trunk, multi_seed_*)."""
+    """Pull metrics from ablation eval snapshots. Two schemas land in
+    snapshots/ depending on which evaluator wrote them:
+
+    * ``paper.eval_engine_on_test`` (inference-only) writes
+      ``{"summary": {"overall": {...}, "per_file": {...}}}``.
+    * ``hybrid.evaluate`` (full retrain + eval) writes the v9-style
+      schema ``{"overall_stage23": {...}, "overall_per_file_stage23": {...}}``.
+
+    We accept either shape so the no-soft-handoff (cheap), no_pca,
+    no_trunk, and multi_seed_* rows all merge cleanly."""
     candidates = [
         "no_soft_handoff",
         "no_pca",
@@ -95,6 +100,14 @@ def _ablation_rows() -> list[dict]:
         payload = _load_json(SNAPSHOTS / f"eval_{tag}.json")
         if not payload:
             continue
+
+        # Try v9-style schema first (hybrid.evaluate output), then fall
+        # back to eval_engine_on_test's nested shape.
+        if "overall_stage23" in payload or "overall_metrics" in payload:
+            row = _v9_snapshot_to_row(tag, payload)
+            out.append(_normalize_row(row, source="ablation"))
+            continue
+
         s = payload.get("summary", {})
         overall = s.get("overall", {})
         per_label = overall.get("per_label", {}) or {}
