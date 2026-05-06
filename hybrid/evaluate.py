@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import pickle
 import sys
 import time
@@ -590,11 +591,45 @@ def evaluate(
         }, f, indent=2)
     print(f"  test split written to {split_path}")
 
-    # Train models on train split only
+    # Train models on train split only.
+    #
+    # The cache (eval_tmp/s{1,2}_eval.pkl) was previously keyed on file
+    # existence alone, which silently reused models trained under one
+    # ablation env-var setting (e.g. SWCAL_NO_PCA=1) under a different
+    # one (SWCAL_NO_TRUNK=1, multi-seed=123). The trained model's
+    # feature set then mismatched the env-driven eval-time extraction
+    # and produced nonsense predictions without raising. Now we record
+    # a fingerprint sidecar (env vars that affect features + seed) and
+    # invalidate the cache when the fingerprint changes.
     eval_dir = Path(__file__).parent / "models" / "eval_tmp"
     eval_dir.mkdir(parents=True, exist_ok=True)
     s1_model = eval_dir / "s1_eval.pkl"
     s2_model = eval_dir / "s2_eval.pkl"
+    fingerprint_path = eval_dir / "fingerprint.json"
+
+    current_fp = {
+        "seed": int(seed),
+        "test_size": float(test_size),
+        "data_dir": str(data_dir),
+        "SWCAL_NO_PCA": os.environ.get("SWCAL_NO_PCA", ""),
+        "SWCAL_NO_TRUNK": os.environ.get("SWCAL_NO_TRUNK", ""),
+        "SWCAL_NO_SOFT_HANDOFF": os.environ.get("SWCAL_NO_SOFT_HANDOFF", ""),
+    }
+    cached_fp: dict | None = None
+    if fingerprint_path.is_file():
+        try:
+            cached_fp = json.loads(fingerprint_path.read_text(encoding="utf-8"))
+        except Exception:
+            cached_fp = None
+    fingerprint_matches = cached_fp == current_fp
+
+    if not fingerprint_matches and (s1_model.exists() or s2_model.exists()):
+        print(f"\nCache fingerprint mismatch — retraining from scratch.")
+        print(f"  cached:   {cached_fp}")
+        print(f"  current:  {current_fp}")
+        for p in (s1_model, s2_model):
+            if p.exists():
+                p.unlink()
 
     if s1_model.exists():
         print(f"\nReusing cached Stage 1 eval model: {s1_model}")
@@ -611,6 +646,10 @@ def evaluate(
         t0 = time.time()
         _train_stage2(train_files, s2_model)
         print(f"  done in {time.time() - t0:.1f}s")
+
+    # Record fingerprint AFTER successful training so a crash mid-train
+    # leaves the cache invalid for the next run too.
+    fingerprint_path.write_text(json.dumps(current_fp, indent=2), encoding="utf-8")
 
     # Optional binary B1 swap: replaces the cached 3-class Stage 2 with a
     # binary axon-vs-dendrite classifier (trained separately by
