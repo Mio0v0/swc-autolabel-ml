@@ -774,7 +774,7 @@ def evaluate(
     neurite_delta = overall_s23["neurite_macro_f1"] - overall_s2["neurite_macro_f1"]
     print(f"\n  Overall Stage-3 delta (HEADLINE = neurite-macro-F1): "
           f"{neurite_delta:+.4f}")
-    print(f"  (ref)  macro-F1 Δ {macro_delta:+.4f}   accuracy Δ {acc_delta:+.4f}")
+    print(f"  (ref)  macro-F1 delta {macro_delta:+.4f}   accuracy delta {acc_delta:+.4f}")
 
     print(f"\n{'#'*70}")
     print(f"# FINAL HEADLINE NUMBERS (pure per-node, axon-bias-free)")

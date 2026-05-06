@@ -231,6 +231,16 @@ def _run_stage(
     log_fh.write(banner)
     log_fh.flush()
 
+    # Track result-file mtimes BEFORE the stage so we can detect "the
+    # stage produced fresh results, then crashed on a print" — the
+    # metrics are still valid and worth snapshotting.
+    eval_json = HYBRID_MODELS / "evaluation_results.json"
+    eval_csv = HYBRID_MODELS / "per_file_scores.csv"
+    pre_mtimes: dict[Path, float] = {
+        p: (p.stat().st_mtime if p.is_file() else 0.0)
+        for p in (eval_json, eval_csv)
+    }
+
     t0 = time.perf_counter()
     ok = True
     for i, cmd in enumerate(commands, start=1):
@@ -252,8 +262,21 @@ def _run_stage(
 
     elapsed = time.perf_counter() - t0
 
-    if ok and snapshot_results:
-        _snapshot_results(name, log_fh)
+    # Snapshot if requested AND fresh results landed during this stage,
+    # regardless of exit code. Late-stage prints (Unicode chars on
+    # cp1252 Windows stdout) can crash hybrid.evaluate AFTER it has
+    # already written valid metrics to disk — we still want those.
+    if snapshot_results:
+        result_was_updated = any(
+            p.is_file() and p.stat().st_mtime > pre_mtimes.get(p, 0.0)
+            for p in (eval_json, eval_csv)
+        )
+        if result_was_updated:
+            _snapshot_results(name, log_fh)
+        else:
+            msg = f"  no fresh results detected (mtimes unchanged); skipping snapshot\n"
+            print(msg, end="", flush=True)
+            log_fh.write(msg)
 
     footer = (
         f"\n----- {name} finished: ok={ok} "
