@@ -1,36 +1,86 @@
 Paired Wilcoxon signed-rank tests (per-file neurite-macro-F1)
-  alpha=0.05, Bonferroni n=21
+  alpha=0.05, Bonferroni n=66
 
 Method summaries:
   method                      n     mean   median      p10      p25
+  no_soft_handoff           556   0.9727   1.0000   0.9995   1.0000
+  no_trunk                  556   0.9655   1.0000   0.9655   1.0000
   v9_no_gnn                 556   0.9646   1.0000   0.9134   1.0000
   v6                        328   0.9644   1.0000   0.9093   1.0000
   v9_final                  556   0.9638   1.0000   0.9618   1.0000
+  no_pca                    556   0.9638   1.0000   0.9618   1.0000
+  multi_seed_123            564   0.9434   1.0000   0.6646   1.0000
   lmeasure_rf               556   0.9379   1.0000   0.6522   1.0000
+  multi_seed_456            538   0.9365   1.0000   0.6503   1.0000
   sholl_rf                  556   0.9282   1.0000   0.6232   1.0000
   sholl_mlp                 556   0.9135   1.0000   0.5895   1.0000
   neurom_rf                 556   0.8821   0.9254   0.6912   0.8305
 
 Pairwise comparisons (a vs b; positive mean_diff means a > b):
-  a                      vs b                          n     meanΔ    medianΔ   wins/loss/tie          p     p_bonf  sig
-  neurom_rf              vs v9_no_gnn                556   -0.0825    -0.0530    46/330/180   1.13e-39   2.37e-38  **
-  neurom_rf              vs v9_final                 556   -0.0817    -0.0524    48/328/180   7.38e-37   1.55e-35  **
-  neurom_rf              vs v6                       328   -0.0912    -0.0171    23/190/115   7.26e-26   1.52e-24  **
-  lmeasure_rf            vs neurom_rf                556   +0.0558    +0.0257   315/ 63/178   7.65e-22   1.61e-20  **
-  neurom_rf              vs sholl_rf                 556   -0.0461    -0.0123    77/302/177   1.37e-15   2.87e-14  **
-  sholl_mlp              vs v6                       328   -0.0903    +0.0000    11/ 79/238   5.38e-14   1.13e-12  **
-  sholl_mlp              vs v9_no_gnn                556   -0.0511    +0.0000    24/ 83/449   1.09e-11   2.29e-10  **
-  sholl_rf               vs v6                       328   -0.0696    +0.0000    10/ 67/251   1.75e-11   3.68e-10  **
-  sholl_mlp              vs v9_final                 556   -0.0503    +0.0000    27/ 90/439   8.23e-11   1.73e-09  **
-  neurom_rf              vs sholl_mlp                556   -0.0314    -0.0031    90/291/175   1.71e-10   3.60e-09  **
-  lmeasure_rf            vs v6                       328   -0.0508    +0.0000    12/ 55/261   6.76e-09   1.42e-07  **
-  sholl_rf               vs v9_no_gnn                556   -0.0364    +0.0000    23/ 67/466   2.42e-08   5.08e-07  **
-  sholl_rf               vs v9_final                 556   -0.0356    +0.0000    26/ 74/456   1.33e-07   2.80e-06  **
-  lmeasure_rf            vs v9_no_gnn                556   -0.0268    +0.0000    24/ 58/474   2.23e-06   4.68e-05  **
-  lmeasure_rf            vs v9_final                 556   -0.0260    +0.0000    25/ 62/469   8.66e-06   1.82e-04  **
-  lmeasure_rf            vs sholl_mlp                556   +0.0243    +0.0000    47/ 15/494   1.26e-04   2.64e-03  **
-  sholl_mlp              vs sholl_rf                 556   -0.0147    +0.0000    14/ 33/509   3.43e-03   7.21e-02  
-  lmeasure_rf            vs sholl_rf                 556   +0.0097    +0.0000    23/  8/525   2.68e-02   5.63e-01  
-  v6                     vs v9_no_gnn                328   +0.0043    +0.0000    13/  7/308   4.38e-02   9.19e-01  
+  a                      vs b                          n  meandelta  mediandelta   wins/loss/tie          p     p_bonf  sig
+  neurom_rf              vs v9_no_gnn                556   -0.0825    -0.0530    46/330/180   1.13e-39   7.45e-38  **
+  neurom_rf              vs no_soft_handoff          556   -0.0906    -0.0583    39/338/179   3.78e-39   2.50e-37  **
+  neurom_rf              vs no_trunk                 556   -0.0834    -0.0530    45/331/180   7.74e-39   5.11e-37  **
+  neurom_rf              vs no_pca                   556   -0.0817    -0.0524    48/328/180   7.38e-37   4.87e-35  **
+  neurom_rf              vs v9_final                 556   -0.0817    -0.0524    48/328/180   7.38e-37   4.87e-35  **
+  neurom_rf              vs v6                       328   -0.0912    -0.0171    23/190/115   7.26e-26   4.79e-24  **
+  lmeasure_rf            vs neurom_rf                556   +0.0558    +0.0257   315/ 63/178   7.65e-22   5.05e-20  **
+  neurom_rf              vs sholl_rf                 556   -0.0461    -0.0123    77/302/177   1.37e-15   9.02e-14  **
+  sholl_mlp              vs v6                       328   -0.0903    +0.0000    11/ 79/238   5.38e-14   3.55e-12  **
+  no_trunk               vs sholl_mlp                556   +0.0520    +0.0000    89/ 25/442   5.97e-12   3.94e-10  **
+  sholl_mlp              vs v9_no_gnn                556   -0.0511    +0.0000    24/ 83/449   1.09e-11   7.19e-10  **
+  sholl_rf               vs v6                       328   -0.0696    +0.0000    10/ 67/251   1.75e-11   1.16e-09  **
+  no_pca                 vs sholl_mlp                556   +0.0503    +0.0000    90/ 27/439   8.23e-11   5.43e-09  **
+  sholl_mlp              vs v9_final                 556   -0.0503    +0.0000    27/ 90/439   8.23e-11   5.43e-09  **
+  neurom_rf              vs sholl_mlp                556   -0.0314    -0.0031    90/291/175   1.71e-10   1.13e-08  **
+  lmeasure_rf            vs v6                       328   -0.0508    +0.0000    12/ 55/261   6.76e-09   4.46e-07  **
+  no_trunk               vs sholl_rf                 556   +0.0373    +0.0000    74/ 24/458   9.53e-09   6.29e-07  **
+  sholl_rf               vs v9_no_gnn                556   -0.0364    +0.0000    23/ 67/466   2.42e-08   1.60e-06  **
+  no_pca                 vs sholl_rf                 556   +0.0356    +0.0000    74/ 26/456   1.33e-07   8.79e-06  **
+  sholl_rf               vs v9_final                 556   -0.0356    +0.0000    26/ 74/456   1.33e-07   8.79e-06  **
+  no_soft_handoff        vs v6                       328   +0.0202    +0.0000    46/ 13/269   5.39e-07   3.56e-05  **
+  lmeasure_rf            vs no_trunk                 556   -0.0277    +0.0000    23/ 62/471   8.72e-07   5.75e-05  **
+  no_soft_handoff        vs sholl_mlp                556   +0.0592    +0.0000   105/101/350   1.37e-06   9.06e-05  **
+  multi_seed_456         vs neurom_rf                101   +0.0721    +0.0499    56/ 12/ 33   1.57e-06   1.03e-04  **
+  lmeasure_rf            vs v9_no_gnn                556   -0.0268    +0.0000    24/ 58/474   2.23e-06   1.47e-04  **
+  multi_seed_123         vs neurom_rf                113   +0.0659    +0.0014    57/ 12/ 44   6.73e-06   4.44e-04  **
+  lmeasure_rf            vs no_pca                   556   -0.0260    +0.0000    25/ 62/469   8.66e-06   5.71e-04  **
+  lmeasure_rf            vs v9_final                 556   -0.0260    +0.0000    25/ 62/469   8.66e-06   5.71e-04  **
+  lmeasure_rf            vs sholl_mlp                556   +0.0243    +0.0000    47/ 15/494   1.26e-04   8.28e-03  **
+  no_soft_handoff        vs sholl_rf                 556   +0.0445    +0.0000    90/106/360   1.09e-03   7.17e-02  
+  multi_seed_456         vs sholl_mlp                101   +0.0557    +0.0000    19/  8/ 74   2.28e-03   1.50e-01  
+  sholl_mlp              vs sholl_rf                 556   -0.0147    +0.0000    14/ 33/509   3.43e-03   2.27e-01  
+  lmeasure_rf            vs multi_seed_123           113   -0.0015    +0.0000     6/  7/100   9.72e-01   1.00e+00  
+  lmeasure_rf            vs multi_seed_456           101   -0.0258    +0.0000    10/ 12/ 79   1.40e-01   1.00e+00  
+  lmeasure_rf            vs no_soft_handoff          556   -0.0349    +0.0000   106/ 77/373   4.45e-02   1.00e+00  
+  lmeasure_rf            vs sholl_rf                 556   +0.0097    +0.0000    23/  8/525   2.68e-02   1.00e+00  
+  multi_seed_123         vs multi_seed_456           103   -0.0008    +0.0000     4/  6/ 93   7.99e-01   1.00e+00  
+  multi_seed_123         vs no_pca                   113   -0.0134    +0.0000     3/  5/105   1.61e-01   1.00e+00  
+  multi_seed_123         vs no_soft_handoff          113   -0.0066    +0.0000    18/  8/ 87   1.91e-01   1.00e+00  
+  multi_seed_123         vs no_trunk                 113   -0.0136    +0.0000     3/  5/105   1.23e-01   1.00e+00  
+  multi_seed_123         vs sholl_mlp                113   +0.0299    +0.0000    15/  5/ 93   5.22e-02   1.00e+00  
+  multi_seed_123         vs sholl_rf                 113   +0.0167    +0.0000    10/  6/ 97   3.26e-01   1.00e+00  
+  multi_seed_123         vs v6                        57   +0.0049    +0.0000     6/  1/ 50   2.37e-01   1.00e+00  
+  multi_seed_123         vs v9_final                 113   -0.0134    +0.0000     3/  5/105   1.61e-01   1.00e+00  
+  multi_seed_123         vs v9_no_gnn                113   -0.0109    +0.0000     5/  5/103   3.86e-01   1.00e+00  
+  multi_seed_456         vs no_pca                   101   -0.0118    +0.0000     4/  6/ 91   3.33e-01   1.00e+00  
+  multi_seed_456         vs no_soft_handoff          101   -0.0062    +0.0000    23/ 13/ 65   4.89e-01   1.00e+00  
+  multi_seed_456         vs no_trunk                 101   -0.0097    +0.0000     5/  7/ 89   5.30e-01   1.00e+00  
+  multi_seed_456         vs sholl_rf                 101   +0.0237    +0.0000    12/ 10/ 79   1.49e-01   1.00e+00  
+  multi_seed_456         vs v6                        58   -0.0095    +0.0000     5/  6/ 47   1.00e+00   1.00e+00  
+  multi_seed_456         vs v9_final                 101   -0.0118    +0.0000     4/  6/ 91   3.33e-01   1.00e+00  
+  multi_seed_456         vs v9_no_gnn                101   -0.0068    +0.0000     6/  6/ 89   1.00e+00   1.00e+00  
+  no_pca                 vs no_soft_handoff          556   -0.0089    +0.0000   109/ 47/400   2.61e-02   1.00e+00  
+  no_pca                 vs no_trunk                 556   -0.0017    +0.0000     5/  7/544   4.33e-01   1.00e+00  
+  no_pca                 vs v6                       328   -0.0021    +0.0000    16/ 11/301   4.56e-01   1.00e+00  
+  no_pca                 vs v9_final                 556   +0.0000    +0.0000     0/  0/556   1.00e+00   1.00e+00  
+  no_pca                 vs v9_no_gnn                556   -0.0008    +0.0000    11/  6/539   5.86e-01   1.00e+00  
+  no_soft_handoff        vs no_trunk                 556   +0.0072    +0.0000    47/109/400   2.79e-02   1.00e+00  
+  no_soft_handoff        vs v9_final                 556   +0.0089    +0.0000    47/109/400   2.61e-02   1.00e+00  
+  no_soft_handoff        vs v9_no_gnn                556   +0.0081    +0.0000    55/111/390   2.13e-01   1.00e+00  
+  no_trunk               vs v6                       328   -0.0027    +0.0000    17/ 13/298   6.14e-01   1.00e+00  
+  no_trunk               vs v9_final                 556   +0.0017    +0.0000     7/  5/544   4.33e-01   1.00e+00  
+  no_trunk               vs v9_no_gnn                556   +0.0009    +0.0000    12/  5/539   2.27e-01   1.00e+00  
   v6                     vs v9_final                 328   +0.0021    +0.0000    11/ 16/301   4.56e-01   1.00e+00  
+  v6                     vs v9_no_gnn                328   +0.0043    +0.0000    13/  7/308   4.38e-02   1.00e+00  
   v9_final               vs v9_no_gnn                556   -0.0008    +0.0000    11/  6/539   5.86e-01   1.00e+00  

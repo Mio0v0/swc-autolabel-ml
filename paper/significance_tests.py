@@ -42,10 +42,21 @@ SNAPSHOT_DIR = ROOT / "paper" / "results" / "snapshots"
 
 
 # Per-file F1 CSVs to load. Maps method label → (csv_path, file_col, f1_col).
+# The hybrid.evaluate output uses ``neurite_macro_f1_stage23`` (Stage 2+3
+# refined). The eval_engine_on_test output (no-soft-handoff) uses
+# ``neurite_macro_f1`` directly because it only runs the inference path.
 PER_FILE_CSVS: dict[str, tuple[str, str, str]] = {
-    "v6":              ("v6_full_pipeline_per_file.csv", "path",   "neurite_macro_f1_stage23"),
-    "v9_no_gnn":       ("v9_baseline_no_gnn.csv",        "path",   "neurite_macro_f1_stage23"),
-    "v9_final":        ("v9_final_subtree_gnn.csv",      "path",   "neurite_macro_f1_stage23"),
+    "v6":              ("v6_full_pipeline_per_file.csv",      "path", "neurite_macro_f1_stage23"),
+    "v9_no_gnn":       ("v9_baseline_no_gnn.csv",             "path", "neurite_macro_f1_stage23"),
+    "v9_final":        ("v9_final_subtree_gnn.csv",           "path", "neurite_macro_f1_stage23"),
+    # Ablation rows from the overnight queue (full retrain under env vars
+    # / different seeds). Same schema as v9_final's per-file CSV.
+    "no_pca":          ("eval_no_pca_per_file.csv",           "path", "neurite_macro_f1_stage23"),
+    "no_trunk":        ("eval_no_trunk_per_file.csv",         "path", "neurite_macro_f1_stage23"),
+    "multi_seed_123":  ("eval_multi_seed_123_per_file.csv",   "path", "neurite_macro_f1_stage23"),
+    "multi_seed_456":  ("eval_multi_seed_456_per_file.csv",   "path", "neurite_macro_f1_stage23"),
+    # Inference-only ablation (no retrain) uses a slimmer schema.
+    "no_soft_handoff": ("eval_no_soft_handoff_per_file.csv",  "path", "neurite_macro_f1"),
 }
 
 # External baselines were dumped as a long-format CSV with a `method` column;
@@ -240,8 +251,8 @@ def main():
     lines.append("")
     lines.append("Pairwise comparisons (a vs b; positive mean_diff means a > b):")
     lines.append(
-        f"  {'a':<22s} vs {'b':<22s}  {'n':>4s}  {'meanΔ':>8s}  "
-        f"{'medianΔ':>9s}  {'wins/loss/tie':>14s}  {'p':>9s}  {'p_bonf':>9s}  sig"
+        f"  {'a':<22s} vs {'b':<22s}  {'n':>4s}  {'meandelta':>8s}  "
+        f"{'mediandelta':>9s}  {'wins/loss/tie':>14s}  {'p':>9s}  {'p_bonf':>9s}  sig"
     )
     for r in sorted(results, key=lambda r: r["p_value_bonferroni"] if isinstance(r["p_value_bonferroni"], float) and not np.isnan(r["p_value_bonferroni"]) else 1.0):
         sig = "**" if r["significant_alpha_corrected"] else ""
@@ -257,6 +268,10 @@ def main():
 
     text = "\n".join(lines)
     args.out_text.write_text(text, encoding="utf-8")
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
     print(f"Wrote {args.out_text}")
     print()
     print(text)

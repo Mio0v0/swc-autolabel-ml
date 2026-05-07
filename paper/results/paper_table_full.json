@@ -244,28 +244,63 @@
       "n_pairs": 556,
       "mean_diff_vs_v9": -0.02595431654676259,
       "p_value": 8.657217558925684e-06,
-      "p_value_bonferroni": 0.00018180156873743935,
+      "p_value_bonferroni": 0.0005713763588890952,
       "significant": true
+    },
+    "multi_seed_123": {
+      "n_pairs": 113,
+      "mean_diff_vs_v9": -0.013449557522123894,
+      "p_value": 0.16142946236708333,
+      "p_value_bonferroni": 1.0,
+      "significant": false
+    },
+    "multi_seed_456": {
+      "n_pairs": 101,
+      "mean_diff_vs_v9": -0.011805940594059405,
+      "p_value": 0.3328797545683888,
+      "p_value_bonferroni": 1.0,
+      "significant": false
     },
     "neurom_rf": {
       "n_pairs": 556,
       "mean_diff_vs_v9": -0.08170845323741008,
       "p_value": 7.377616865449349e-37,
-      "p_value_bonferroni": 1.5492995417443634e-35,
+      "p_value_bonferroni": 4.869227131196571e-35,
       "significant": true
+    },
+    "no_pca": {
+      "n_pairs": 556,
+      "mean_diff_vs_v9": 0.0,
+      "p_value": 1.0,
+      "p_value_bonferroni": 1.0,
+      "significant": false
+    },
+    "no_soft_handoff": {
+      "n_pairs": 556,
+      "mean_diff_vs_v9": 0.008926050773853679,
+      "p_value": 0.026140868030254675,
+      "p_value_bonferroni": 1.0,
+      "significant": false
+    },
+    "no_trunk": {
+      "n_pairs": 556,
+      "mean_diff_vs_v9": 0.001712410071942446,
+      "p_value": 0.43276758066778476,
+      "p_value_bonferroni": 1.0,
+      "significant": false
     },
     "sholl_mlp": {
       "n_pairs": 556,
       "mean_diff_vs_v9": -0.05029766187050359,
       "p_value": 8.234455774007149e-11,
-      "p_value_bonferroni": 1.7292357125415013e-09,
+      "p_value_bonferroni": 5.434740810844718e-09,
       "significant": true
     },
     "sholl_rf": {
       "n_pairs": 556,
       "mean_diff_vs_v9": -0.035614568345323734,
       "p_value": 1.331953262418902e-07,
-      "p_value_bonferroni": 2.7971018510796943e-06,
+      "p_value_bonferroni": 8.790891531964754e-06,
       "significant": true
     },
     "v6": {
