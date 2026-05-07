@@ -13,6 +13,10 @@ v8_subtree_gnn            pipeline   0.9930    0.9809      0.9745  1.0000  0.997
 v9_no_gnn (= no-gnn ablation)  pipeline   0.9941    0.9790      0.9719  1.0000  0.9986  0.9666  0.9507    0.9646   0.9134        -          -   
 v9_final                  pipeline   0.9946    0.9811      0.9748  1.0000  0.9986  0.9709  0.9548    0.9638   0.9618        -          -   
 no_soft_handoff           ablation   0.9945    0.9803      0.9738  1.0000  0.9987  0.9698  0.9529    0.9727   0.9995        -          -   
+no_pca                    ablation   0.9944    0.9805      0.9739  1.0000  0.9986  0.9696  0.9536    0.9639   0.9451        -          -   
+no_trunk                  ablation   0.9948    0.9819      0.9758  1.0000  0.9986  0.9723  0.9566    0.9655   0.9655        -          -   
+multi_seed_123            ablation   0.9927    0.9740      0.9653  1.0000  0.9982  0.9500  0.9478    0.9434   0.6646        -          -   
+multi_seed_456            ablation   0.9937    0.9779      0.9709  0.9991  0.9983  0.9599  0.9544    0.9365   0.6503        -          -   
 
 vs v9 Δ = mean (method - v9_final) per-file F1; positive = method beats v9_final.
 p_bonf = paired-Wilcoxon p-value, Bonferroni-corrected over all pairwise tests.
