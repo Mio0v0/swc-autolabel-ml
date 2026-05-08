@@ -157,6 +157,21 @@ def _build_stages(data_dir: Path) -> list[tuple[str, dict[str, str], list[list[s
             ],
             False,
         ),
+        # 6. Combined no_trunk + no_soft_handoff. Stage 1+2 retrain under
+        # SWCAL_NO_TRUNK=1 (SWCAL_NO_SOFT_HANDOFF is inference-only, but the
+        # fingerprint includes it so cache invalidates correctly). Reuses
+        # the existing no_trunk GNN — no GNN retrain step.
+        (
+            "no_trunk_plus_no_soft_handoff",
+            {"SWCAL_NO_TRUNK": "1", "SWCAL_NO_SOFT_HANDOFF": "1"},
+            [
+                _evaluate_cmd(
+                    data_dir,
+                    gnn_ckpt=GNN_MODEL_DIR / "gnn_apical_basal_no_trunk.pt",
+                ),
+            ],
+            True,
+        ),
     ]
 
 

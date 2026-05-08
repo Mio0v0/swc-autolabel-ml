@@ -51,10 +51,12 @@ PER_FILE_CSVS: dict[str, tuple[str, str, str]] = {
     "v9_final":        ("v9_final_subtree_gnn.csv",           "path", "neurite_macro_f1_stage23"),
     # Ablation rows from the overnight queue (full retrain under env vars
     # / different seeds). Same schema as v9_final's per-file CSV.
-    "no_pca":          ("eval_no_pca_per_file.csv",           "path", "neurite_macro_f1_stage23"),
-    "no_trunk":        ("eval_no_trunk_per_file.csv",         "path", "neurite_macro_f1_stage23"),
-    "multi_seed_123":  ("eval_multi_seed_123_per_file.csv",   "path", "neurite_macro_f1_stage23"),
-    "multi_seed_456":  ("eval_multi_seed_456_per_file.csv",   "path", "neurite_macro_f1_stage23"),
+    "no_pca":          ("eval_no_pca_per_file.csv",                      "path", "neurite_macro_f1_stage23"),
+    "no_trunk":        ("eval_no_trunk_per_file.csv",                    "path", "neurite_macro_f1_stage23"),
+    "no_trunk_plus_no_soft_handoff": (
+        "eval_no_trunk_plus_no_soft_handoff_per_file.csv",                "path", "neurite_macro_f1_stage23"),
+    "multi_seed_123":  ("eval_multi_seed_123_per_file.csv",              "path", "neurite_macro_f1_stage23"),
+    "multi_seed_456":  ("eval_multi_seed_456_per_file.csv",              "path", "neurite_macro_f1_stage23"),
     # Inference-only ablation (no retrain) uses a slimmer schema.
     "no_soft_handoff": ("eval_no_soft_handoff_per_file.csv",  "path", "neurite_macro_f1"),
 }

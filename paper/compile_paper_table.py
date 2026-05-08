@@ -92,6 +92,7 @@ def _ablation_rows() -> list[dict]:
         "no_soft_handoff",
         "no_pca",
         "no_trunk",
+        "no_trunk_plus_no_soft_handoff",
         "multi_seed_123",
         "multi_seed_456",
     ]

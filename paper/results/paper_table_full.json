@@ -211,6 +211,20 @@
       "n_files": 556
     },
     {
+      "method": "no_trunk_plus_no_soft_handoff",
+      "source": "ablation",
+      "accuracy": 0.9948,
+      "macro_f1": 0.9819,
+      "neurite_macro_f1": 0.9758,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9986,
+      "basal_f1": 0.9723,
+      "apical_f1": 0.9566,
+      "per_file_mean": 0.9655,
+      "per_file_p10": 0.9655,
+      "n_files": 556
+    },
+    {
       "method": "multi_seed_123",
       "source": "ablation",
       "accuracy": 0.9927,
@@ -244,7 +258,7 @@
       "n_pairs": 556,
       "mean_diff_vs_v9": -0.02595431654676259,
       "p_value": 8.657217558925684e-06,
-      "p_value_bonferroni": 0.0005713763588890952,
+      "p_value_bonferroni": 0.0006752629695962033,
       "significant": true
     },
     "multi_seed_123": {
@@ -265,7 +279,7 @@
       "n_pairs": 556,
       "mean_diff_vs_v9": -0.08170845323741008,
       "p_value": 7.377616865449349e-37,
-      "p_value_bonferroni": 4.869227131196571e-35,
+      "p_value_bonferroni": 5.754541155050492e-35,
       "significant": true
     },
     "no_pca": {
@@ -289,18 +303,25 @@
       "p_value_bonferroni": 1.0,
       "significant": false
     },
+    "no_trunk_plus_no_soft_handoff": {
+      "n_pairs": 556,
+      "mean_diff_vs_v9": 0.001712410071942446,
+      "p_value": 0.43276758066778476,
+      "p_value_bonferroni": 1.0,
+      "significant": false
+    },
     "sholl_mlp": {
       "n_pairs": 556,
       "mean_diff_vs_v9": -0.05029766187050359,
       "p_value": 8.234455774007149e-11,
-      "p_value_bonferroni": 5.434740810844718e-09,
+      "p_value_bonferroni": 6.422875503725576e-09,
       "significant": true
     },
     "sholl_rf": {
       "n_pairs": 556,
       "mean_diff_vs_v9": -0.035614568345323734,
       "p_value": 1.331953262418902e-07,
-      "p_value_bonferroni": 8.790891531964754e-06,
+      "p_value_bonferroni": 1.0389235446867435e-05,
       "significant": true
     },
     "v6": {

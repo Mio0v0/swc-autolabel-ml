@@ -80,6 +80,33 @@ cells, and that's exactly where they earn their place.
 Decision: **keep**. Aggregate test is uninformative because most cells
 are easy and tied. The P10 hit is real and matches the design intent.
 
+## Combined ablation: no_trunk + no_soft_handoff
+
+Ran a 4th ablation to check whether the gains from removing trunk
+features and soft-handoff stack. They do **not** — combining them
+gives the same predictions as no_trunk alone (per-file F1 identical
+on all 556 cells to 1e-6).
+
+|                                | mean Δ | P10 Δ | identical to |
+|--------------------------------|--------|--------|--------------|
+| no_trunk + no_soft_handoff     | +0.0017 | +0.0037 | no_trunk alone |
+
+Mechanism: Stage 1 cell-type confidence is unchanged by removing trunk
+features (Stage 1 uses cell-level features only; trunk features are
+branch-level). So soft-handoff fires on the same cells in v9_final and
+no_trunk runs. Once trunk features are removed, the Stage 2 RF is
+consistent enough that the alternative-cell-type's Stage 2 gives the
+SAME prediction as the original cell-type's Stage 2 — soft-handoff
+becomes a no-op.
+
+**Three real design options (NOT four):**
+- v9_final: trunk + soft_handoff (current headline)
+- no_trunk: drop trunk features → +0.0010 neurite-F1, +0.0037 P10
+- no_soft_handoff: drop soft_handoff → −0.0010 neurite-F1, **+0.0377 P10**
+
+Combining yields no_trunk's numbers, never the no_soft_handoff P10
+jump. Choose ONE of the two ablations, not both.
+
 ## One-sentence paper text (drop into methods section)
 
 > We additionally evaluated four trunk-detection features (longest
