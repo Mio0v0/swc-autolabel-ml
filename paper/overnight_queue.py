@@ -62,7 +62,7 @@ SNAPSHOT_DIR = ROOT / "paper" / "results" / "snapshots"
 GNN_MODEL_DIR = ROOT / "paper" / "models"
 HYBRID_MODELS = ROOT / "hybrid" / "models"
 LOG_PATH = ROOT / "paper" / "results" / "overnight_queue.log"
-DEFAULT_DATA_DIR = Path("D:/Desktop/SWC-Studio/data/v9_merged_dataset")
+DEFAULT_DATA_DIR = Path("D:/Desktop/SWC-Studio/data/v10_dedup_dataset")
 
 
 def _gnn_retrain_cmd(stage_name: str, data_dir: Path) -> list[str]:
@@ -103,71 +103,65 @@ def _evaluate_cmd(
 #   hybrid/models/evaluation_results.json -> snapshots/eval_<name>.json
 #   hybrid/models/per_file_scores.csv     -> snapshots/eval_<name>_per_file.csv
 def _build_stages(data_dir: Path) -> list[tuple[str, dict[str, str], list[list[str]], bool]]:
+    """Phase-1 v10 stages: clean retrain on the de-duplicated dataset.
+
+    Sequence:
+      1. v10_final               — main headline (Stage 1+2+GNN retrain on dedup data)
+      2. v10_no_pca              — drop 12 PCA features, full retrain
+      3. v10_no_trunk            — drop 4 trunk features, full retrain
+      4. v10_no_soft_handoff     — inference-only ablation; cache fingerprint
+                                    forces a Stage 1+2 retrain so nothing leaks
+    """
     return [
-        # 1. no-PCA: retrain GNN under env, then evaluate against the new GNN
+        # 1. v10_final: main retrain on de-duplicated dataset.
         (
-            "no_pca",
+            "v10_final",
+            {},
+            [
+                _gnn_retrain_cmd("v10_final", data_dir),
+                _evaluate_cmd(
+                    data_dir,
+                    gnn_ckpt=GNN_MODEL_DIR / "gnn_apical_basal_v10_final.pt",
+                ),
+            ],
+            True,
+        ),
+        # 2. no-PCA: retrain GNN under env, then evaluate against the new GNN
+        (
+            "v10_no_pca",
             {"SWCAL_NO_PCA": "1"},
             [
-                _gnn_retrain_cmd("no_pca", data_dir),
+                _gnn_retrain_cmd("v10_no_pca", data_dir),
                 _evaluate_cmd(
                     data_dir,
-                    gnn_ckpt=GNN_MODEL_DIR / "gnn_apical_basal_no_pca.pt",
+                    gnn_ckpt=GNN_MODEL_DIR / "gnn_apical_basal_v10_no_pca.pt",
                 ),
             ],
             True,
         ),
-        # 2. no-trunk: same shape as no-PCA
+        # 3. no-trunk: same shape as no-PCA
         (
-            "no_trunk",
+            "v10_no_trunk",
             {"SWCAL_NO_TRUNK": "1"},
             [
-                _gnn_retrain_cmd("no_trunk", data_dir),
+                _gnn_retrain_cmd("v10_no_trunk", data_dir),
                 _evaluate_cmd(
                     data_dir,
-                    gnn_ckpt=GNN_MODEL_DIR / "gnn_apical_basal_no_trunk.pt",
+                    gnn_ckpt=GNN_MODEL_DIR / "gnn_apical_basal_v10_no_trunk.pt",
                 ),
             ],
             True,
         ),
-        # 3-4. multi-seed: Stage 1+2 retrain only; GNN reused from production.
+        # 4. no-soft-handoff: inference-only, but force fresh Stage 1+2
+        # retrain via the env-var fingerprint so we never reuse a stale cache.
+        # Uses the v10_final GNN.
         (
-            "multi_seed_123",
-            {},
-            [_evaluate_cmd(data_dir, seed=123)],
-            True,
-        ),
-        (
-            "multi_seed_456",
-            {},
-            [_evaluate_cmd(data_dir, seed=456)],
-            True,
-        ),
-        # 5. v9 cross-dataset eval — separate script, writes its own snapshot
-        (
-            "v9_cross_dataset_hpf_ca1",
-            {},
-            [
-                [
-                    "{python}", "-u", "-m", "paper.cross_dataset_eval",
-                    "--data-dir", str(Path("D:/Desktop/SWC-Studio/data/hpf_ca1")),
-                    "--cell-type", "pyramidal",
-                    "--tag", "v9_hpf_ca1",
-                ],
-            ],
-            False,
-        ),
-        # 6. Combined no_trunk + no_soft_handoff. Stage 1+2 retrain under
-        # SWCAL_NO_TRUNK=1 (SWCAL_NO_SOFT_HANDOFF is inference-only, but the
-        # fingerprint includes it so cache invalidates correctly). Reuses
-        # the existing no_trunk GNN — no GNN retrain step.
-        (
-            "no_trunk_plus_no_soft_handoff",
-            {"SWCAL_NO_TRUNK": "1", "SWCAL_NO_SOFT_HANDOFF": "1"},
+            "v10_no_soft_handoff",
+            {"SWCAL_NO_SOFT_HANDOFF": "1"},
             [
                 _evaluate_cmd(
                     data_dir,
-                    gnn_ckpt=GNN_MODEL_DIR / "gnn_apical_basal_no_trunk.pt",
+                    gnn_ckpt=GNN_MODEL_DIR / "gnn_apical_basal_v10_final.pt",
                 ),
             ],
             True,
