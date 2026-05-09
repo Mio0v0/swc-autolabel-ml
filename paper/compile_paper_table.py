@@ -89,12 +89,17 @@ def _ablation_rows() -> list[dict]:
     We accept either shape so the no-soft-handoff (cheap), no_pca,
     no_trunk, and multi_seed_* rows all merge cleanly."""
     candidates = [
+        # v9 (leaked dataset) ablations — kept for historical comparison
         "no_soft_handoff",
         "no_pca",
         "no_trunk",
         "no_trunk_plus_no_soft_handoff",
         "multi_seed_123",
         "multi_seed_456",
+        # v10 (de-duplicated dataset) ablations — current paper-relevant rows
+        "v10_no_pca",
+        "v10_no_trunk",
+        "v10_no_soft_handoff",
     ]
     out: list[dict] = []
     for tag in candidates:
@@ -139,7 +144,8 @@ def _v6789_rows() -> list[dict]:
         ("v7_gnn_branch (= no-subtree-stage2)", SNAPSHOTS / "v7_gnn_branch.json"),
         ("v8_subtree_gnn", SNAPSHOTS / "v8_subtree_gnn.json"),
         ("v9_no_gnn (= no-gnn ablation)", SNAPSHOTS / "v9_baseline_no_gnn.json"),
-        ("v9_final", SNAPSHOTS / "v9_final_subtree_gnn.json"),
+        ("v9_final (leaked split)", SNAPSHOTS / "v9_final_subtree_gnn.json"),
+        ("v10_final (dedup split)", SNAPSHOTS / "eval_v10_final.json"),
     ]
     out = []
     for label, path in files:

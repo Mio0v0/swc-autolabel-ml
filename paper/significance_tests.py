@@ -58,7 +58,12 @@ PER_FILE_CSVS: dict[str, tuple[str, str, str]] = {
     "multi_seed_123":  ("eval_multi_seed_123_per_file.csv",              "path", "neurite_macro_f1_stage23"),
     "multi_seed_456":  ("eval_multi_seed_456_per_file.csv",              "path", "neurite_macro_f1_stage23"),
     # Inference-only ablation (no retrain) uses a slimmer schema.
-    "no_soft_handoff": ("eval_no_soft_handoff_per_file.csv",  "path", "neurite_macro_f1"),
+    "no_soft_handoff": ("eval_no_soft_handoff_per_file.csv",             "path", "neurite_macro_f1"),
+    # v10 dedup'd dataset (current paper-relevant rows)
+    "v10_final":             ("eval_v10_final_per_file.csv",             "path", "neurite_macro_f1_stage23"),
+    "v10_no_pca":            ("eval_v10_no_pca_per_file.csv",            "path", "neurite_macro_f1_stage23"),
+    "v10_no_trunk":          ("eval_v10_no_trunk_per_file.csv",          "path", "neurite_macro_f1_stage23"),
+    "v10_no_soft_handoff":   ("eval_v10_no_soft_handoff_per_file.csv",   "path", "neurite_macro_f1_stage23"),
 }
 
 # External baselines were dumped as a long-format CSV with a `method` column;

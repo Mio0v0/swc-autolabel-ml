@@ -45,58 +45,58 @@
     {
       "method": "neurom_rf",
       "source": "external",
-      "accuracy": 0.9722,
-      "macro_f1": 0.9175,
-      "neurite_macro_f1": 0.89,
+      "accuracy": 0.9684,
+      "macro_f1": 0.9036,
+      "neurite_macro_f1": 0.8715,
       "soma_f1": 1.0,
-      "axon_f1": 0.9882,
-      "basal_f1": 0.8761,
-      "apical_f1": 0.8057,
-      "per_file_mean": 0.8821,
-      "per_file_p10": 0.6912,
-      "n_files": 556
+      "axon_f1": 0.9876,
+      "basal_f1": 0.8654,
+      "apical_f1": 0.7615,
+      "per_file_mean": 0.8624,
+      "per_file_p10": 0.7072,
+      "n_files": 461
+    },
+    {
+      "method": "lmeasure_rf",
+      "source": "external",
+      "accuracy": 0.9918,
+      "macro_f1": 0.9758,
+      "neurite_macro_f1": 0.9677,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9969,
+      "basal_f1": 0.9542,
+      "apical_f1": 0.9521,
+      "per_file_mean": 0.9335,
+      "per_file_p10": 0.6242,
+      "n_files": 461
     },
     {
       "method": "sholl_rf",
       "source": "external",
       "accuracy": 0.9907,
-      "macro_f1": 0.9727,
-      "neurite_macro_f1": 0.9636,
+      "macro_f1": 0.9741,
+      "neurite_macro_f1": 0.9654,
       "soma_f1": 1.0,
-      "axon_f1": 0.9961,
-      "basal_f1": 0.9547,
-      "apical_f1": 0.9399,
-      "per_file_mean": 0.9282,
-      "per_file_p10": 0.6232,
-      "n_files": 556
+      "axon_f1": 0.996,
+      "basal_f1": 0.9531,
+      "apical_f1": 0.9472,
+      "per_file_mean": 0.9198,
+      "per_file_p10": 0.6064,
+      "n_files": 461
     },
     {
       "method": "sholl_mlp",
       "source": "external",
-      "accuracy": 0.9887,
-      "macro_f1": 0.9662,
-      "neurite_macro_f1": 0.955,
+      "accuracy": 0.9872,
+      "macro_f1": 0.9635,
+      "neurite_macro_f1": 0.9513,
       "soma_f1": 1.0,
-      "axon_f1": 0.9956,
-      "basal_f1": 0.9355,
-      "apical_f1": 0.9338,
-      "per_file_mean": 0.9135,
-      "per_file_p10": 0.5895,
-      "n_files": 556
-    },
-    {
-      "method": "lmeasure_rf",
-      "source": "external",
-      "accuracy": 0.9913,
-      "macro_f1": 0.9734,
-      "neurite_macro_f1": 0.9645,
-      "soma_f1": 1.0,
-      "axon_f1": 0.9967,
-      "basal_f1": 0.9537,
-      "apical_f1": 0.9433,
-      "per_file_mean": 0.9379,
-      "per_file_p10": 0.6522,
-      "n_files": 556
+      "axon_f1": 0.9949,
+      "basal_f1": 0.9287,
+      "apical_f1": 0.9303,
+      "per_file_mean": 0.8963,
+      "per_file_p10": 0.5239,
+      "n_files": 461
     },
     {
       "method": "v6",
@@ -155,7 +155,7 @@
       "n_files": 556
     },
     {
-      "method": "v9_final",
+      "method": "v9_final (leaked split)",
       "source": "pipeline",
       "accuracy": 0.9946,
       "macro_f1": 0.9811,
@@ -167,6 +167,20 @@
       "per_file_mean": 0.9638,
       "per_file_p10": 0.9618,
       "n_files": 556
+    },
+    {
+      "method": "v10_final (dedup split)",
+      "source": "pipeline",
+      "accuracy": 0.9934,
+      "macro_f1": 0.9756,
+      "neurite_macro_f1": 0.9675,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9988,
+      "basal_f1": 0.9593,
+      "apical_f1": 0.9444,
+      "per_file_mean": 0.9586,
+      "per_file_p10": 0.9012,
+      "n_files": 461
     },
     {
       "method": "no_soft_handoff",
@@ -251,14 +265,56 @@
       "per_file_mean": 0.9365,
       "per_file_p10": 0.6503,
       "n_files": 538
+    },
+    {
+      "method": "v10_no_pca",
+      "source": "ablation",
+      "accuracy": 0.9926,
+      "macro_f1": 0.9723,
+      "neurite_macro_f1": 0.963,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9988,
+      "basal_f1": 0.9539,
+      "apical_f1": 0.9364,
+      "per_file_mean": 0.9544,
+      "per_file_p10": 0.8964,
+      "n_files": 461
+    },
+    {
+      "method": "v10_no_trunk",
+      "source": "ablation",
+      "accuracy": 0.9934,
+      "macro_f1": 0.9756,
+      "neurite_macro_f1": 0.9675,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9988,
+      "basal_f1": 0.9593,
+      "apical_f1": 0.9444,
+      "per_file_mean": 0.9578,
+      "per_file_p10": 0.9012,
+      "n_files": 461
+    },
+    {
+      "method": "v10_no_soft_handoff",
+      "source": "ablation",
+      "accuracy": 0.9934,
+      "macro_f1": 0.9756,
+      "neurite_macro_f1": 0.9675,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9988,
+      "basal_f1": 0.9593,
+      "apical_f1": 0.9444,
+      "per_file_mean": 0.9586,
+      "per_file_p10": 0.9012,
+      "n_files": 461
     }
   ],
   "wilcoxon": {
     "lmeasure_rf": {
-      "n_pairs": 556,
-      "mean_diff_vs_v9": -0.02595431654676259,
-      "p_value": 8.657217558925684e-06,
-      "p_value_bonferroni": 0.0006752629695962033,
+      "n_pairs": 461,
+      "mean_diff_vs_v9": -0.02618937093275488,
+      "p_value": 0.00011302335008075882,
+      "p_value_bonferroni": 0.015371175610983199,
       "significant": true
     },
     "multi_seed_123": {
@@ -276,10 +332,10 @@
       "significant": false
     },
     "neurom_rf": {
-      "n_pairs": 556,
-      "mean_diff_vs_v9": -0.08170845323741008,
-      "p_value": 7.377616865449349e-37,
-      "p_value_bonferroni": 5.754541155050492e-35,
+      "n_pairs": 461,
+      "mean_diff_vs_v9": -0.09723058568329719,
+      "p_value": 1.1550942918353525e-42,
+      "p_value_bonferroni": 1.5709282368960794e-40,
       "significant": true
     },
     "no_pca": {
@@ -311,18 +367,46 @@
       "significant": false
     },
     "sholl_mlp": {
-      "n_pairs": 556,
-      "mean_diff_vs_v9": -0.05029766187050359,
-      "p_value": 8.234455774007149e-11,
-      "p_value_bonferroni": 6.422875503725576e-09,
+      "n_pairs": 461,
+      "mean_diff_vs_v9": -0.0633290672451193,
+      "p_value": 4.339100829862434e-11,
+      "p_value_bonferroni": 5.901177128612911e-09,
       "significant": true
     },
     "sholl_rf": {
-      "n_pairs": 556,
-      "mean_diff_vs_v9": -0.035614568345323734,
-      "p_value": 1.331953262418902e-07,
-      "p_value_bonferroni": 1.0389235446867435e-05,
+      "n_pairs": 461,
+      "mean_diff_vs_v9": -0.03989631236442517,
+      "p_value": 8.045018576611629e-07,
+      "p_value_bonferroni": 0.00010941225264191816,
       "significant": true
+    },
+    "v10_final": {
+      "n_pairs": 461,
+      "mean_diff_vs_v9": -0.001040130151843818,
+      "p_value": 0.6791156892928161,
+      "p_value_bonferroni": 1.0,
+      "significant": false
+    },
+    "v10_no_pca": {
+      "n_pairs": 461,
+      "mean_diff_vs_v9": -0.0052396963123644245,
+      "p_value": 0.10045796448967022,
+      "p_value_bonferroni": 1.0,
+      "significant": false
+    },
+    "v10_no_soft_handoff": {
+      "n_pairs": 461,
+      "mean_diff_vs_v9": -0.001040130151843818,
+      "p_value": 0.6791156892928161,
+      "p_value_bonferroni": 1.0,
+      "significant": false
+    },
+    "v10_no_trunk": {
+      "n_pairs": 461,
+      "mean_diff_vs_v9": -0.0018158351409978306,
+      "p_value": 0.499656379643342,
+      "p_value_bonferroni": 1.0,
+      "significant": false
     },
     "v6": {
       "n_pairs": 328,
