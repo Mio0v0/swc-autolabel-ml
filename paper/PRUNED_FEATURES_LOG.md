@@ -3,6 +3,55 @@
 One-page reference for the methods section. When writing the paper, grep
 this file for the feature group, copy the numbers, cite the source CSV.
 
+> **2026-05-08 update**: Numbers below are the original v9 (leaked split)
+> findings. We later discovered ~24% of the v9 test split was contaminated
+> by `lab__/hpf_ca1__` duplicates, rebuilt the dataset as v10_dedup
+> (2,267 cells, no duplicates), and re-ran every ablation.
+> **The v10 (clean) findings are at the top of this file —
+> see "v10 dedup-split ablation results" section.** v9 numbers below
+> are kept for the discussion of how leakage inflated certain effects.
+
+## v10 dedup-split ablation results (CURRENT, paper-relevant)
+
+Test set: 461 cells (159 interneuron + 302 pyramidal), seed=42,
+hash-bucket. Same configuration, same code, just with the
+de-duplicated dataset.
+
+|                            | neurite-F1 | per-file mean | per-file P10 | Δ vs v10_final |
+|----------------------------|------------|---------------|--------------|----------------|
+| **v10_final**              | **0.9675** | **0.9586**    | **0.9012**   | (ref)          |
+| v10_no_pca                 | 0.9630     | 0.9544        | 0.8964       | mean −0.004    |
+| v10_no_trunk               | 0.9675     | 0.9578        | 0.9012       | all ≈ 0        |
+| v10_no_soft_handoff        | 0.9675     | 0.9586        | 0.9012       | all = 0        |
+
+All three ablations have paired-Wilcoxon p_bonf = 1.00 vs v10_final
+(over 136 pairs in the full grid). None of the design choices we
+tested reach significance after correction.
+
+Key finding: **the dramatic v9 effects from removing soft_handoff
+(P10 +0.038) were a leakage artifact.** On clean data, soft_handoff
+has zero measurable effect. Same for trunk features. PCA features
+contribute the only measurable (but n.s.) gain — about 0.5pt on
+mean and P10.
+
+External baselines on the same v10 split:
+
+|             | neurite-F1 | pf_mean | pf_P10 | p_bonf vs v10_final |
+|-------------|------------|---------|--------|---------------------|
+| lmeasure_rf | 0.9677     | 0.9335  | 0.6242 | 1.54e-02 *          |
+| sholl_rf    | 0.9654     | 0.9198  | 0.6064 | 1.09e-04 *          |
+| sholl_mlp   | 0.9513     | 0.8963  | 0.5239 | 5.90e-09 *          |
+| neurom_rf   | 0.8715     | 0.8624  | 0.7072 | 1.57e-40 *          |
+
+v10_final ties lmeasure_rf on OVERALL neurite-F1 (Δ −0.0002), but
+wins per-file mean by +0.025 to +0.075 and per-file P10 by **+0.28
+to +0.39**. The hybrid pipeline's edge is robustness on the
+worst-decile cells, not average accuracy.
+
+---
+
+## Original v9 (leaked split) findings — kept for discussion
+
 Same held-out test split throughout: 556 cells (interneuron + pyramidal),
 seed=42, hash-bucket train/test split. Metric is per-file
 neurite-macro-F1 (Stage 2+3, soma excluded). Baseline = `v9_final`.
