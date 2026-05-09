@@ -134,6 +134,75 @@ def _ablation_rows() -> list[dict]:
     return out
 
 
+def _loso_rows() -> list[dict]:
+    """Pull metrics from leave-one-source-out cross-corpus eval snapshots
+    (paper.loso_eval). Each held-out source becomes one row.
+
+    LOSO snapshots have a `combined` block we computed post-hoc, plus
+    `per_cell_type` containing each cell-type's cross_dataset_eval JSON.
+    We aggregate these into a single row per held-out source.
+
+    Note: LOSO test sets are NOT the v10 hash-bucket test split, so
+    paired Wilcoxon vs v9/v10_final won't work — these rows have no
+    p_bonf column populated."""
+    out: list[dict] = []
+    for src in ("in_house", "neuromorpho", "allen"):
+        payload = _load_json(SNAPSHOTS / f"eval_loso_{src}.json")
+        if not payload:
+            continue
+        combined = payload.get("combined", {})
+        pct = payload.get("per_cell_type", {}) or {}
+
+        # Aggregate per-class F1 across cell types (weighted by support).
+        per_label_supports: dict[str, dict[str, float]] = {}
+        n_test = 0
+        # Track aggregate accuracy / macro_f1 / neurite_macro_f1 across cell types
+        # (weighted by file count).
+        agg_acc, agg_macro_f1, agg_neurite_f1 = 0.0, 0.0, 0.0
+        for ct, ct_payload in pct.items():
+            overall = ct_payload.get("overall", {})
+            n = ct_payload.get("n_files_seen", 0) or 0
+            if not n:
+                continue
+            n_test += n
+            agg_acc += overall.get("accuracy", 0.0) * n
+            agg_macro_f1 += overall.get("macro_f1", 0.0) * n
+            agg_neurite_f1 += overall.get("neurite_macro_f1", 0.0) * n
+            for label, stats in (overall.get("per_label") or {}).items():
+                if not isinstance(stats, dict):
+                    continue
+                support = stats.get("support", 0)
+                f1 = stats.get("f1", 0.0)
+                d = per_label_supports.setdefault(label, {"f1_sum": 0.0, "support": 0})
+                d["f1_sum"] += f1 * support
+                d["support"] += support
+        if n_test == 0:
+            continue
+        per_class_f1 = {
+            label: (d["f1_sum"] / max(1, d["support"]))
+            for label, d in per_label_supports.items()
+        }
+        out.append(_normalize_row({
+            "method": f"loso_{src}",
+            "accuracy": agg_acc / n_test,
+            "macro_f1": agg_macro_f1 / n_test,
+            "neurite_macro_f1": agg_neurite_f1 / n_test,
+            "per_class_f1": {
+                "soma": per_class_f1.get("soma"),
+                "axon": per_class_f1.get("axon"),
+                "basal/dendrite": per_class_f1.get("basal/dendrite") or per_class_f1.get("basal"),
+                "apical": per_class_f1.get("apical"),
+            },
+            "per_file": {
+                "mean": combined.get("per_file_neurite_macro_f1_mean"),
+                "median": combined.get("per_file_neurite_macro_f1_median"),
+                "p10": combined.get("per_file_neurite_macro_f1_p10"),
+                "n_files": combined.get("n_test_files", n_test),
+            },
+        }, source="LOSO"))
+    return out
+
+
 def _v6789_rows() -> list[dict]:
     """Pull headline metrics from the v6/v7/v8/v9 snapshot JSONs.
     The v7 / v9_no_gnn rows double as the no-subtree-stage2 / no-gnn
@@ -313,6 +382,7 @@ def main():
     rows.extend(_external_rows())
     rows.extend(_v6789_rows())
     rows.extend(_ablation_rows())
+    rows.extend(_loso_rows())
 
     wilcoxon = _wilcoxon_lookup()
     text = _format_table(rows, wilcoxon)

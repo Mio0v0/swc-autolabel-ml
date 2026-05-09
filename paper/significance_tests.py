@@ -64,6 +64,12 @@ PER_FILE_CSVS: dict[str, tuple[str, str, str]] = {
     "v10_no_pca":            ("eval_v10_no_pca_per_file.csv",            "path", "neurite_macro_f1_stage23"),
     "v10_no_trunk":          ("eval_v10_no_trunk_per_file.csv",          "path", "neurite_macro_f1_stage23"),
     "v10_no_soft_handoff":   ("eval_v10_no_soft_handoff_per_file.csv",   "path", "neurite_macro_f1_stage23"),
+    # LOSO cross-corpus rows. Test files don't overlap with v10's hash-bucket
+    # test split, so paired-Wilcoxon vs v10/v9 will yield 0 paired files.
+    # Included so we can see method summaries (mean/median/p10) per LOSO source.
+    "loso_in_house":         ("eval_loso_in_house_per_file.csv",         "path", "neurite_macro_f1_stage23"),
+    "loso_neuromorpho":      ("eval_loso_neuromorpho_per_file.csv",      "path", "neurite_macro_f1_stage23"),
+    "loso_allen":            ("eval_loso_allen_per_file.csv",            "path", "neurite_macro_f1_stage23"),
 }
 
 # External baselines were dumped as a long-format CSV with a `method` column;

@@ -1,0 +1,733 @@
+
+
+=== loso_eval start: 2026-05-08 22:48:41 ===
+
+==============================================================================
+LOSO held-out source: in_house
+  data_dir: D:\Desktop\SWC-Studio\data\v10_dedup_dataset
+  started:  2026-05-08 22:48:41
+==============================================================================
+
+  train: 1255 cells (sources != in_house)
+  test:  1012 cells (source = in_house)
+    interneuron:  train=805  test=0
+    pyramidal:  train=450  test=1012
+
+  Training Stage 1 on 1255 cells...
+    done in 72.7s
+  Training Stage 2 on 1255 cells...
+    done in 4513.9s
+
+  Training GNN on non-held-out pyramidals...
+Device: cpu
+Loading pyramidal graphs from D:\Desktop\SWC-Studio\data\v10_dedup_dataset ...
+  processed 200 files, kept 200, branches so far: 31854 (apical/basal labeled: 20692)
+  processed 400 files, kept 400, branches so far: 66875 (apical/basal labeled: 42136)
+  processed 600 files, kept 600, branches so far: 100046 (apical/basal labeled: 65506)
+  processed 800 files, kept 800, branches so far: 134664 (apical/basal labeled: 87591)
+  processed 1000 files, kept 1000, branches so far: 171177 (apical/basal labeled: 112852)
+  processed 1200 files, kept 1200, branches so far: 202657 (apical/basal labeled: 132407)
+  processed 1400 files, kept 1400, branches so far: 215200 (apical/basal labeled: 143360)
+  total=1462  train=450  test=1012  (expected: 763 / 169 from eval_split.json)
+  train apical/basal labeled branches: 28800
+  test  apical/basal labeled branches: 117935
+
+Train graphs: 450  apical/basal-labeled branches: 28800
+Input feature dim: 51
+Model: 2-layer GraphSAGE, hidden=64, dropout=0.2, params=14,978
+
+=== Fold 1/5  train=360  val=90 ===
+  fold0 ep000  loss=0.4422  val: macroF1=0.8142 apF1=0.7488 baF1=0.8795 cellF1=0.7506  (best ep0 F1=0.8142)
+  fold0 ep004  loss=0.1982  val: macroF1=0.8822 apF1=0.8504 baF1=0.9140 cellF1=0.8323  (best ep4 F1=0.8822)
+  fold0 ep009  loss=0.1621  val: macroF1=0.8842 apF1=0.8512 baF1=0.9172 cellF1=0.8224  (best ep9 F1=0.8842)
+  fold0 ep014  loss=0.1400  val: macroF1=0.8807 apF1=0.8495 baF1=0.9118 cellF1=0.8284  (best ep9 F1=0.8842)
+  fold0 ep019  loss=0.1169  val: macroF1=0.8844 apF1=0.8520 baF1=0.9167 cellF1=0.8276  (best ep19 F1=0.8844)
+  fold0 ep024  loss=0.0992  val: macroF1=0.8941 apF1=0.8628 baF1=0.9254 cellF1=0.8263  (best ep24 F1=0.8941)
+  fold0 ep029  loss=0.0920  val: macroF1=0.8907 apF1=0.8575 baF1=0.9239 cellF1=0.8240  (best ep24 F1=0.8941)
+  fold0 ep034  loss=0.0802  val: macroF1=0.8895 apF1=0.8565 baF1=0.9224 cellF1=0.8258  (best ep33 F1=0.8956)
+  fold0 ep039  loss=0.0700  val: macroF1=0.8921 apF1=0.8612 baF1=0.9230 cellF1=0.8319  (best ep33 F1=0.8956)
+  fold0 ep044  loss=0.0628  val: macroF1=0.8993 apF1=0.8694 baF1=0.9292 cellF1=0.8332  (best ep44 F1=0.8993)
+  fold0 ep049  loss=0.0637  val: macroF1=0.9004 apF1=0.8708 baF1=0.9301 cellF1=0.8337  (best ep48 F1=0.9077)
+  fold0 ep054  loss=0.0569  val: macroF1=0.8930 apF1=0.8603 baF1=0.9257 cellF1=0.8231  (best ep48 F1=0.9077)
+  fold0 ep059  loss=0.0566  val: macroF1=0.8900 apF1=0.8577 baF1=0.9223 cellF1=0.8265  (best ep48 F1=0.9077)
+  fold0 ep064  loss=0.0462  val: macroF1=0.8991 apF1=0.8680 baF1=0.9302 cellF1=0.8294  (best ep48 F1=0.9077)
+  fold0 ep069  loss=0.0438  val: macroF1=0.8991 apF1=0.8691 baF1=0.9290 cellF1=0.8322  (best ep48 F1=0.9077)
+  fold0 early stop at ep73 (no val improvement for 25 ep)
+  fold0 best ep=48  val macroF1=0.9077  (18s)
+
+=== Fold 2/5  train=360  val=90 ===
+  fold1 ep000  loss=0.5141  val: macroF1=0.8625 apF1=0.8329 baF1=0.8921 cellF1=0.7795  (best ep0 F1=0.8625)
+  fold1 ep004  loss=0.2301  val: macroF1=0.9386 apF1=0.9291 baF1=0.9481 cellF1=0.8782  (best ep4 F1=0.9386)
+  fold1 ep009  loss=0.1846  val: macroF1=0.9469 apF1=0.9379 baF1=0.9560 cellF1=0.8707  (best ep9 F1=0.9469)
+  fold1 ep014  loss=0.1671  val: macroF1=0.9507 apF1=0.9434 baF1=0.9580 cellF1=0.8861  (best ep13 F1=0.9533)
+  fold1 ep019  loss=0.1409  val: macroF1=0.9295 apF1=0.9155 baF1=0.9435 cellF1=0.8467  (best ep13 F1=0.9533)
+  fold1 ep024  loss=0.1214  val: macroF1=0.9374 apF1=0.9262 baF1=0.9486 cellF1=0.8613  (best ep13 F1=0.9533)
+  fold1 ep029  loss=0.1113  val: macroF1=0.9401 apF1=0.9295 baF1=0.9508 cellF1=0.8675  (best ep13 F1=0.9533)
+  fold1 ep034  loss=0.1003  val: macroF1=0.9280 apF1=0.9135 baF1=0.9425 cellF1=0.8593  (best ep13 F1=0.9533)
+  fold1 early stop at ep38 (no val improvement for 25 ep)
+  fold1 best ep=13  val macroF1=0.9533  (10s)
+
+=== Fold 3/5  train=360  val=90 ===
+  fold2 ep000  loss=0.4772  val: macroF1=0.8774 apF1=0.8388 baF1=0.9160 cellF1=0.7817  (best ep0 F1=0.8774)
+  fold2 ep004  loss=0.2064  val: macroF1=0.9102 apF1=0.8857 baF1=0.9346 cellF1=0.8230  (best ep4 F1=0.9102)
+  fold2 ep009  loss=0.1717  val: macroF1=0.9246 apF1=0.9026 baF1=0.9466 cellF1=0.8262  (best ep9 F1=0.9246)
+  fold2 ep014  loss=0.1430  val: macroF1=0.9351 apF1=0.9152 baF1=0.9551 cellF1=0.8303  (best ep14 F1=0.9351)
+  fold2 ep019  loss=0.1234  val: macroF1=0.9329 apF1=0.9131 baF1=0.9527 cellF1=0.8297  (best ep17 F1=0.9376)
+  fold2 ep024  loss=0.1039  val: macroF1=0.9396 apF1=0.9214 baF1=0.9577 cellF1=0.8345  (best ep24 F1=0.9396)
+  fold2 ep029  loss=0.0991  val: macroF1=0.9377 apF1=0.9177 baF1=0.9577 cellF1=0.8180  (best ep24 F1=0.9396)
+  fold2 ep034  loss=0.0937  val: macroF1=0.9405 apF1=0.9219 baF1=0.9591 cellF1=0.8204  (best ep33 F1=0.9405)
+  fold2 ep039  loss=0.0831  val: macroF1=0.9352 apF1=0.9162 baF1=0.9541 cellF1=0.8233  (best ep33 F1=0.9405)
+  fold2 ep044  loss=0.0749  val: macroF1=0.9394 apF1=0.9206 baF1=0.9582 cellF1=0.8150  (best ep43 F1=0.9443)
+  fold2 ep049  loss=0.0696  val: macroF1=0.9332 apF1=0.9139 baF1=0.9525 cellF1=0.8199  (best ep43 F1=0.9443)
+  fold2 ep054  loss=0.0604  val: macroF1=0.9402 apF1=0.9220 baF1=0.9584 cellF1=0.8216  (best ep43 F1=0.9443)
+  fold2 ep059  loss=0.0526  val: macroF1=0.9407 apF1=0.9232 baF1=0.9583 cellF1=0.8207  (best ep43 F1=0.9443)
+  fold2 ep064  loss=0.0704  val: macroF1=0.9404 apF1=0.9226 baF1=0.9582 cellF1=0.8204  (best ep43 F1=0.9443)
+  fold2 early stop at ep68 (no val improvement for 25 ep)
+  fold2 best ep=43  val macroF1=0.9443  (17s)
+
+=== Fold 4/5  train=360  val=90 ===
+  fold3 ep000  loss=0.4712  val: macroF1=0.8631 apF1=0.8316 baF1=0.8945 cellF1=0.8205  (best ep0 F1=0.8631)
+  fold3 ep004  loss=0.2037  val: macroF1=0.9057 apF1=0.8897 baF1=0.9217 cellF1=0.8490  (best ep4 F1=0.9057)
+  fold3 ep009  loss=0.1661  val: macroF1=0.9090 apF1=0.8917 baF1=0.9262 cellF1=0.8459  (best ep8 F1=0.9168)
+  fold3 ep014  loss=0.1448  val: macroF1=0.9271 apF1=0.9146 baF1=0.9396 cellF1=0.8606  (best ep14 F1=0.9271)
+  fold3 ep019  loss=0.1243  val: macroF1=0.9244 apF1=0.9112 baF1=0.9375 cellF1=0.8545  (best ep18 F1=0.9336)
+  fold3 ep024  loss=0.1123  val: macroF1=0.9313 apF1=0.9203 baF1=0.9423 cellF1=0.8634  (best ep18 F1=0.9336)
+  fold3 ep029  loss=0.0986  val: macroF1=0.9139 apF1=0.8968 baF1=0.9311 cellF1=0.8323  (best ep18 F1=0.9336)
+  fold3 ep034  loss=0.0994  val: macroF1=0.9128 apF1=0.8967 baF1=0.9289 cellF1=0.8572  (best ep18 F1=0.9336)
+  fold3 ep039  loss=0.0896  val: macroF1=0.9272 apF1=0.9150 baF1=0.9394 cellF1=0.8604  (best ep18 F1=0.9336)
+  fold3 early stop at ep43 (no val improvement for 25 ep)
+  fold3 best ep=18  val macroF1=0.9336  (11s)
+
+=== Fold 5/5  train=360  val=90 ===
+  fold4 ep000  loss=0.4576  val: macroF1=0.8296 apF1=0.7829 baF1=0.8763 cellF1=0.7325  (best ep0 F1=0.8296)
+  fold4 ep004  loss=0.2181  val: macroF1=0.9201 apF1=0.9033 baF1=0.9368 cellF1=0.8291  (best ep4 F1=0.9201)
+  fold4 ep009  loss=0.1727  val: macroF1=0.9289 apF1=0.9133 baF1=0.9445 cellF1=0.8337  (best ep9 F1=0.9289)
+  fold4 ep014  loss=0.1527  val: macroF1=0.9316 apF1=0.9157 baF1=0.9475 cellF1=0.8302  (best ep14 F1=0.9316)
+  fold4 ep019  loss=0.1260  val: macroF1=0.9333 apF1=0.9186 baF1=0.9479 cellF1=0.8431  (best ep19 F1=0.9333)
+  fold4 ep024  loss=0.1180  val: macroF1=0.9310 apF1=0.9149 baF1=0.9471 cellF1=0.8351  (best ep22 F1=0.9337)
+  fold4 ep029  loss=0.1068  val: macroF1=0.9339 apF1=0.9190 baF1=0.9489 cellF1=0.8386  (best ep28 F1=0.9364)
+  fold4 ep034  loss=0.0932  val: macroF1=0.9259 apF1=0.9080 baF1=0.9439 cellF1=0.8254  (best ep28 F1=0.9364)
+  fold4 ep039  loss=0.0811  val: macroF1=0.9362 apF1=0.9212 baF1=0.9512 cellF1=0.8392  (best ep36 F1=0.9378)
+  fold4 ep044  loss=0.0794  val: macroF1=0.9379 apF1=0.9234 baF1=0.9524 cellF1=0.8484  (best ep43 F1=0.9426)
+  fold4 ep049  loss=0.0684  val: macroF1=0.9299 apF1=0.9125 baF1=0.9473 cellF1=0.8251  (best ep43 F1=0.9426)
+  fold4 ep054  loss=0.0659  val: macroF1=0.9346 apF1=0.9186 baF1=0.9506 cellF1=0.8333  (best ep43 F1=0.9426)
+  fold4 ep059  loss=0.0576  val: macroF1=0.9336 apF1=0.9183 baF1=0.9489 cellF1=0.8415  (best ep43 F1=0.9426)
+  fold4 ep064  loss=0.0535  val: macroF1=0.9317 apF1=0.9148 baF1=0.9485 cellF1=0.8303  (best ep43 F1=0.9426)
+  fold4 early stop at ep68 (no val improvement for 25 ep)
+  fold4 best ep=43  val macroF1=0.9426  (17s)
+
+=== CV summary ===
+  branch macro-F1: 0.9363 +/- 0.0156
+  apical-F1      : 0.9212 +/- 0.0221
+  basal-F1       : 0.9514 +/- 0.0100
+  per-cell mean  : 0.8523 +/- 0.0239
+
+=== Final retrain on full train (n=450) for 44 epochs ===
+  ep000  train_loss=0.4267
+  ep009  train_loss=0.1767
+  ep019  train_loss=0.1323
+  ep029  train_loss=0.1051
+  ep039  train_loss=0.0859
+
+HELD-OUT TEST  branchMacroF1=0.7320  apF1=0.7203  baF1=0.7437  cellMeanF1=0.7188
+
+Saved checkpoint to D:\Desktop\swc-autolabel-ml\paper\models\loso\in_house\gnn.pt  (64.8 KB)
+
+  Running cross_dataset_eval on 1012 pyramidal cells...
+Found 1012 SWC files under D:\Desktop\swc-autolabel-ml\paper\models\loso\in_house\test_pyramidal
+Assumed cell type: pyramidal  (valid labels: [1, 2, 3, 4])
+Loading GNN from D:\Desktop\swc-autolabel-ml\paper\models\loso\in_house\gnn.pt ...
+  [  50/1012] elapsed=272s  rate=0.18 files/s  eta=5237s
+  [ 100/1012] elapsed=533s  rate=0.19 files/s  eta=4862s
+  [ 150/1012] elapsed=772s  rate=0.19 files/s  eta=4438s
+  [ 200/1012] elapsed=1020s  rate=0.20 files/s  eta=4140s
+  [ 250/1012] elapsed=1291s  rate=0.19 files/s  eta=3934s
+  [ 300/1012] elapsed=1573s  rate=0.19 files/s  eta=3732s
+  [ 350/1012] elapsed=1820s  rate=0.19 files/s  eta=3443s
+  [ 400/1012] elapsed=2105s  rate=0.19 files/s  eta=3221s
+  [ 450/1012] elapsed=2339s  rate=0.19 files/s  eta=2921s
+  [ 500/1012] elapsed=2629s  rate=0.19 files/s  eta=2692s
+  [ 550/1012] elapsed=2924s  rate=0.19 files/s  eta=2456s
+  [ 600/1012] elapsed=3190s  rate=0.19 files/s  eta=2190s
+  [ 650/1012] elapsed=3473s  rate=0.19 files/s  eta=1934s
+  [ 700/1012] elapsed=3692s  rate=0.19 files/s  eta=1646s
+  [ 750/1012] elapsed=3954s  rate=0.19 files/s  eta=1381s
+  [ 800/1012] elapsed=4201s  rate=0.19 files/s  eta=1113s
+  [ 850/1012] elapsed=4428s  rate=0.19 files/s  eta=844s
+  [ 900/1012] elapsed=4627s  rate=0.19 files/s  eta=576s
+  [ 950/1012] elapsed=4880s  rate=0.19 files/s  eta=318s
+  [1000/1012] elapsed=5087s  rate=0.20 files/s  eta=61s
+  [1012/1012] elapsed=5164s  rate=0.20 files/s  eta=0s
+
+Computing aggregate metrics...
+
+======================================================================
+CROSS-DATASET EVAL  (D:\Desktop\swc-autolabel-ml\paper\models\loso\in_house\test_pyramidal)
+assumed cell type: pyramidal
+files: 1012
+config: use_subtree_stage2=True  use_gnn=True
+======================================================================
+
+Stage 1 cell-type accuracy: 0.8518
+  predicted distribution: {'pyramidal': 862, 'interneuron': 150}
+
+Overall (Stage 2+3, full pipeline):
+  HEADLINE neurite-macro-F1:  0.6505
+           neurite-bal-acc:    0.7305
+  (ref)    macro-F1:           0.7375
+  (ref)    accuracy:           0.9521  (36,975,617 nodes)
+
+Per-class F1:
+  soma               F1=0.9985  (P=1.0000  R=0.9970  n=1,012)
+  axon               F1=0.9969  (P=0.9963  R=0.9975  n=33,579,917)
+  basal/dendrite     F1=0.6038  (P=0.4367  R=0.9780  n=1,278,701)
+  apical             F1=0.3508  (P=0.9295  R=0.2162  n=2,115,987)
+
+Per-file neurite-macro-F1:
+  n=1012  mean=0.6076  median=0.5242
+  P10=0.4759  P25=0.5029  P75=0.5760  P90=1.0000
+  min=0.0000  max=1.0000
+
+Worst-10 files:
+  hpf_ca1__202244_019_edited.swc                          F1=0.0000 n=  2467  ct_pred=pyramidal
+  hpf_ca1__210694_025_edited.swc                          F1=0.0000 n=  9723  ct_pred=pyramidal
+  hpf_ca1__202243_016_edited.swc                          F1=0.0762 n=  7203  ct_pred=pyramidal
+  hpf_ca1__210709_002_edited.swc                          F1=0.0806 n=  8063  ct_pred=pyramidal
+  hpf_ca1__202410_009_edited.swc                          F1=0.1030 n=  9216  ct_pred=pyramidal
+  hpf_ca1__201983_017_edited.swc                          F1=0.1063 n= 10101  ct_pred=pyramidal
+  hpf_ca1__202250_019_edited.swc                          F1=0.1196 n=  4493  ct_pred=pyramidal
+  hpf_ca1__202232_064_edited.swc                          F1=0.1330 n=  9458  ct_pred=pyramidal
+  hpf_ca1__202234_018_edited.swc                          F1=0.1622 n=  3764  ct_pred=pyramidal
+  hpf_ca1__202243_015_edited.swc                          F1=0.1748 n=  6058  ct_pred=pyramidal
+
+Saved D:\Desktop\swc-autolabel-ml\paper\results\cross_dataset_loso_in_house_pyramidal.json
+Saved D:\Desktop\swc-autolabel-ml\paper\results\cross_dataset_loso_in_house_pyramidal.csv
+
+  snapshot: D:\Desktop\swc-autolabel-ml\paper\results\snapshots\eval_loso_in_house.json
+  per-file CSV: D:\Desktop\swc-autolabel-ml\paper\results\snapshots\eval_loso_in_house_per_file.csv
+
+----- LOSO in_house finished — elapsed 170.6 min -----
+
+==============================================================================
+LOSO held-out source: neuromorpho
+  data_dir: D:\Desktop\SWC-Studio\data\v10_dedup_dataset
+  started:  2026-05-09 01:39:19
+==============================================================================
+
+  train: 1308 cells (sources != neuromorpho)
+  test:  959 cells (source = neuromorpho)
+    interneuron:  train=196  test=609
+    pyramidal:  train=1112  test=350
+
+  Training Stage 1 on 1308 cells...
+    done in 172.6s
+  Training Stage 2 on 1308 cells...
+    done in 7857.5s
+
+  Training GNN on non-held-out pyramidals...
+Device: cpu
+Loading pyramidal graphs from D:\Desktop\SWC-Studio\data\v10_dedup_dataset ...
+  processed 200 files, kept 200, branches so far: 31854 (apical/basal labeled: 20692)
+  processed 400 files, kept 400, branches so far: 66875 (apical/basal labeled: 42136)
+  processed 600 files, kept 600, branches so far: 100046 (apical/basal labeled: 65506)
+  processed 800 files, kept 800, branches so far: 134664 (apical/basal labeled: 87591)
+  processed 1000 files, kept 1000, branches so far: 171177 (apical/basal labeled: 112852)
+  processed 1200 files, kept 1200, branches so far: 202657 (apical/basal labeled: 132407)
+  processed 1400 files, kept 1400, branches so far: 215200 (apical/basal labeled: 143360)
+  total=1462  train=1112  test=350  (expected: 763 / 169 from eval_split.json)
+  train apical/basal labeled branches: 126878
+  test  apical/basal labeled branches: 19857
+
+Train graphs: 1112  apical/basal-labeled branches: 126878
+Input feature dim: 51
+Model: 2-layer GraphSAGE, hidden=64, dropout=0.2, params=14,978
+
+=== Fold 1/5  train=889  val=223 ===
+  fold0 ep000  loss=0.2329  val: macroF1=0.9614 apF1=0.9687 baF1=0.9542 cellF1=0.9493  (best ep0 F1=0.9614)
+  fold0 ep004  loss=0.0633  val: macroF1=0.9683 apF1=0.9742 baF1=0.9624 cellF1=0.9530  (best ep3 F1=0.9683)
+  fold0 ep009  loss=0.0507  val: macroF1=0.9688 apF1=0.9745 baF1=0.9630 cellF1=0.9570  (best ep8 F1=0.9716)
+  fold0 ep014  loss=0.0446  val: macroF1=0.9721 apF1=0.9774 baF1=0.9669 cellF1=0.9631  (best ep14 F1=0.9721)
+  fold0 ep019  loss=0.0393  val: macroF1=0.9685 apF1=0.9741 baF1=0.9629 cellF1=0.9587  (best ep17 F1=0.9722)
+  fold0 ep024  loss=0.0341  val: macroF1=0.9722 apF1=0.9773 baF1=0.9670 cellF1=0.9630  (best ep23 F1=0.9724)
+  fold0 ep029  loss=0.0323  val: macroF1=0.9725 apF1=0.9776 baF1=0.9675 cellF1=0.9635  (best ep28 F1=0.9739)
+  fold0 ep034  loss=0.0298  val: macroF1=0.9738 apF1=0.9787 baF1=0.9689 cellF1=0.9654  (best ep28 F1=0.9739)
+  fold0 ep039  loss=0.0281  val: macroF1=0.9720 apF1=0.9771 baF1=0.9669 cellF1=0.9637  (best ep35 F1=0.9742)
+  fold0 ep044  loss=0.0277  val: macroF1=0.9714 apF1=0.9766 baF1=0.9662 cellF1=0.9615  (best ep43 F1=0.9748)
+  fold0 ep049  loss=0.0228  val: macroF1=0.9744 apF1=0.9792 baF1=0.9696 cellF1=0.9659  (best ep43 F1=0.9748)
+  fold0 ep054  loss=0.0213  val: macroF1=0.9738 apF1=0.9786 baF1=0.9689 cellF1=0.9650  (best ep43 F1=0.9748)
+  fold0 ep059  loss=0.0205  val: macroF1=0.9734 apF1=0.9783 baF1=0.9684 cellF1=0.9649  (best ep43 F1=0.9748)
+  fold0 ep064  loss=0.0190  val: macroF1=0.9710 apF1=0.9762 baF1=0.9657 cellF1=0.9633  (best ep43 F1=0.9748)
+  fold0 early stop at ep68 (no val improvement for 25 ep)
+  fold0 best ep=43  val macroF1=0.9748  (51s)
+
+=== Fold 2/5  train=889  val=223 ===
+  fold1 ep000  loss=0.2818  val: macroF1=0.9640 apF1=0.9688 baF1=0.9593 cellF1=0.9511  (best ep0 F1=0.9640)
+  fold1 ep004  loss=0.0770  val: macroF1=0.9842 apF1=0.9865 baF1=0.9820 cellF1=0.9726  (best ep4 F1=0.9842)
+  fold1 ep009  loss=0.0596  val: macroF1=0.9859 apF1=0.9879 baF1=0.9839 cellF1=0.9815  (best ep8 F1=0.9864)
+  fold1 ep014  loss=0.0508  val: macroF1=0.9875 apF1=0.9893 baF1=0.9857 cellF1=0.9837  (best ep13 F1=0.9883)
+  fold1 ep019  loss=0.0453  val: macroF1=0.9880 apF1=0.9897 baF1=0.9863 cellF1=0.9827  (best ep15 F1=0.9888)
+  fold1 ep024  loss=0.0408  val: macroF1=0.9885 apF1=0.9901 baF1=0.9868 cellF1=0.9848  (best ep20 F1=0.9890)
+  fold1 ep029  loss=0.0364  val: macroF1=0.9890 apF1=0.9905 baF1=0.9874 cellF1=0.9854  (best ep27 F1=0.9894)
+  fold1 ep034  loss=0.0355  val: macroF1=0.9877 apF1=0.9894 baF1=0.9860 cellF1=0.9834  (best ep31 F1=0.9895)
+  fold1 ep039  loss=0.0342  val: macroF1=0.9895 apF1=0.9910 baF1=0.9880 cellF1=0.9860  (best ep39 F1=0.9895)
+  fold1 ep044  loss=0.0287  val: macroF1=0.9876 apF1=0.9894 baF1=0.9859 cellF1=0.9842  (best ep41 F1=0.9897)
+  fold1 ep049  loss=0.0290  val: macroF1=0.9905 apF1=0.9918 baF1=0.9892 cellF1=0.9866  (best ep49 F1=0.9905)
+  fold1 ep054  loss=0.0264  val: macroF1=0.9911 apF1=0.9923 baF1=0.9898 cellF1=0.9872  (best ep54 F1=0.9911)
+  fold1 ep059  loss=0.0257  val: macroF1=0.9886 apF1=0.9902 baF1=0.9871 cellF1=0.9844  (best ep54 F1=0.9911)
+  fold1 ep064  loss=0.0255  val: macroF1=0.9904 apF1=0.9918 baF1=0.9891 cellF1=0.9874  (best ep54 F1=0.9911)
+  fold1 ep069  loss=0.0263  val: macroF1=0.9894 apF1=0.9910 baF1=0.9879 cellF1=0.9858  (best ep54 F1=0.9911)
+  fold1 ep074  loss=0.0267  val: macroF1=0.9876 apF1=0.9893 baF1=0.9859 cellF1=0.9845  (best ep54 F1=0.9911)
+  fold1 ep079  loss=0.0215  val: macroF1=0.9887 apF1=0.9903 baF1=0.9871 cellF1=0.9850  (best ep54 F1=0.9911)
+  fold1 early stop at ep79 (no val improvement for 25 ep)
+  fold1 best ep=54  val macroF1=0.9911  (59s)
+
+=== Fold 3/5  train=890  val=222 ===
+  fold2 ep000  loss=0.2444  val: macroF1=0.9564 apF1=0.9629 baF1=0.9499 cellF1=0.9283  (best ep0 F1=0.9564)
+  fold2 ep004  loss=0.0706  val: macroF1=0.9712 apF1=0.9756 baF1=0.9668 cellF1=0.9427  (best ep3 F1=0.9722)
+  fold2 ep009  loss=0.0507  val: macroF1=0.9737 apF1=0.9780 baF1=0.9694 cellF1=0.9579  (best ep5 F1=0.9743)
+  fold2 ep014  loss=0.0432  val: macroF1=0.9740 apF1=0.9781 baF1=0.9698 cellF1=0.9571  (best ep5 F1=0.9743)
+  fold2 ep019  loss=0.0415  val: macroF1=0.9735 apF1=0.9777 baF1=0.9693 cellF1=0.9604  (best ep5 F1=0.9743)
+  fold2 ep024  loss=0.0362  val: macroF1=0.9740 apF1=0.9781 baF1=0.9698 cellF1=0.9576  (best ep23 F1=0.9754)
+  fold2 ep029  loss=0.0304  val: macroF1=0.9743 apF1=0.9784 baF1=0.9703 cellF1=0.9616  (best ep23 F1=0.9754)
+  fold2 ep034  loss=0.0293  val: macroF1=0.9750 apF1=0.9791 baF1=0.9709 cellF1=0.9618  (best ep23 F1=0.9754)
+  fold2 ep039  loss=0.0290  val: macroF1=0.9745 apF1=0.9788 baF1=0.9702 cellF1=0.9620  (best ep23 F1=0.9754)
+  fold2 ep044  loss=0.0257  val: macroF1=0.9753 apF1=0.9793 baF1=0.9713 cellF1=0.9624  (best ep23 F1=0.9754)
+  fold2 ep049  loss=0.0245  val: macroF1=0.9754 apF1=0.9795 baF1=0.9714 cellF1=0.9630  (best ep48 F1=0.9761)
+  fold2 ep054  loss=0.0250  val: macroF1=0.9752 apF1=0.9793 baF1=0.9711 cellF1=0.9622  (best ep48 F1=0.9761)
+  fold2 ep059  loss=0.0216  val: macroF1=0.9754 apF1=0.9793 baF1=0.9714 cellF1=0.9630  (best ep56 F1=0.9772)
+  fold2 ep064  loss=0.0218  val: macroF1=0.9768 apF1=0.9807 baF1=0.9729 cellF1=0.9634  (best ep56 F1=0.9772)
+  fold2 ep069  loss=0.0199  val: macroF1=0.9732 apF1=0.9779 baF1=0.9684 cellF1=0.9599  (best ep56 F1=0.9772)
+  fold2 ep074  loss=0.0175  val: macroF1=0.9765 apF1=0.9803 baF1=0.9726 cellF1=0.9644  (best ep56 F1=0.9772)
+  fold2 ep079  loss=0.0194  val: macroF1=0.9760 apF1=0.9801 baF1=0.9719 cellF1=0.9631  (best ep56 F1=0.9772)
+  fold2 early stop at ep81 (no val improvement for 25 ep)
+  fold2 best ep=56  val macroF1=0.9772  (64s)
+
+=== Fold 4/5  train=890  val=222 ===
+  fold3 ep000  loss=0.2575  val: macroF1=0.9639 apF1=0.9700 baF1=0.9578 cellF1=0.9509  (best ep0 F1=0.9639)
+  fold3 ep004  loss=0.0743  val: macroF1=0.9820 apF1=0.9850 baF1=0.9789 cellF1=0.9695  (best ep4 F1=0.9820)
+  fold3 ep009  loss=0.0586  val: macroF1=0.9799 apF1=0.9835 baF1=0.9764 cellF1=0.9737  (best ep5 F1=0.9829)
+  fold3 ep014  loss=0.0472  val: macroF1=0.9796 apF1=0.9830 baF1=0.9762 cellF1=0.9720  (best ep12 F1=0.9830)
+  fold3 ep019  loss=0.0394  val: macroF1=0.9785 apF1=0.9822 baF1=0.9748 cellF1=0.9712  (best ep12 F1=0.9830)
+  fold3 ep024  loss=0.0361  val: macroF1=0.9755 apF1=0.9797 baF1=0.9712 cellF1=0.9665  (best ep12 F1=0.9830)
+  fold3 ep029  loss=0.0327  val: macroF1=0.9763 apF1=0.9804 baF1=0.9722 cellF1=0.9687  (best ep12 F1=0.9830)
+  fold3 ep034  loss=0.0292  val: macroF1=0.9752 apF1=0.9794 baF1=0.9709 cellF1=0.9653  (best ep12 F1=0.9830)
+  fold3 early stop at ep37 (no val improvement for 25 ep)
+  fold3 best ep=12  val macroF1=0.9830  (28s)
+
+=== Fold 5/5  train=890  val=222 ===
+  fold4 ep000  loss=0.2731  val: macroF1=0.9595 apF1=0.9665 baF1=0.9524 cellF1=0.9522  (best ep0 F1=0.9595)
+  fold4 ep004  loss=0.0729  val: macroF1=0.9766 apF1=0.9809 baF1=0.9723 cellF1=0.9688  (best ep3 F1=0.9767)
+  fold4 ep009  loss=0.0571  val: macroF1=0.9782 apF1=0.9821 baF1=0.9742 cellF1=0.9699  (best ep8 F1=0.9788)
+  fold4 ep014  loss=0.0512  val: macroF1=0.9789 apF1=0.9827 baF1=0.9751 cellF1=0.9708  (best ep10 F1=0.9801)
+  fold4 ep019  loss=0.0421  val: macroF1=0.9808 apF1=0.9843 baF1=0.9773 cellF1=0.9731  (best ep17 F1=0.9817)
+  fold4 ep024  loss=0.0372  val: macroF1=0.9754 apF1=0.9803 baF1=0.9704 cellF1=0.9686  (best ep22 F1=0.9820)
+  fold4 ep029  loss=0.0339  val: macroF1=0.9823 apF1=0.9857 baF1=0.9789 cellF1=0.9769  (best ep28 F1=0.9842)
+  fold4 ep034  loss=0.0326  val: macroF1=0.9837 apF1=0.9867 baF1=0.9807 cellF1=0.9768  (best ep28 F1=0.9842)
+  fold4 ep039  loss=0.0295  val: macroF1=0.9802 apF1=0.9840 baF1=0.9763 cellF1=0.9742  (best ep28 F1=0.9842)
+  fold4 ep044  loss=0.0271  val: macroF1=0.9833 apF1=0.9863 baF1=0.9802 cellF1=0.9757  (best ep43 F1=0.9851)
+  fold4 ep049  loss=0.0257  val: macroF1=0.9838 apF1=0.9869 baF1=0.9808 cellF1=0.9778  (best ep43 F1=0.9851)
+  fold4 ep054  loss=0.0257  val: macroF1=0.9832 apF1=0.9862 baF1=0.9802 cellF1=0.9754  (best ep43 F1=0.9851)
+  fold4 ep059  loss=0.0233  val: macroF1=0.9841 apF1=0.9870 baF1=0.9812 cellF1=0.9769  (best ep43 F1=0.9851)
+  fold4 ep064  loss=0.0214  val: macroF1=0.9837 apF1=0.9867 baF1=0.9807 cellF1=0.9766  (best ep43 F1=0.9851)
+  fold4 early stop at ep68 (no val improvement for 25 ep)
+  fold4 best ep=43  val macroF1=0.9851  (50s)
+
+=== CV summary ===
+  branch macro-F1: 0.9822 +/- 0.0058
+  apical-F1      : 0.9853 +/- 0.0047
+  basal-F1       : 0.9792 +/- 0.0069
+  per-cell mean  : 0.9748 +/- 0.0083
+
+=== Final retrain on full train (n=1112) for 44 epochs ===
+  ep000  train_loss=0.2083
+  ep009  train_loss=0.0532
+  ep019  train_loss=0.0428
+  ep029  train_loss=0.0362
+  ep039  train_loss=0.0301
+
+HELD-OUT TEST  branchMacroF1=0.8287  apF1=0.7869  baF1=0.8706  cellMeanF1=0.7571
+
+Saved checkpoint to D:\Desktop\swc-autolabel-ml\paper\models\loso\neuromorpho\gnn.pt  (64.8 KB)
+
+  Running cross_dataset_eval on 609 interneuron cells...
+Found 609 SWC files under D:\Desktop\swc-autolabel-ml\paper\models\loso\neuromorpho\test_interneuron
+Assumed cell type: interneuron  (valid labels: [1, 2, 3])
+Loading GNN from D:\Desktop\swc-autolabel-ml\paper\models\loso\neuromorpho\gnn.pt ...
+  [  50/609] elapsed=293s  rate=0.17 files/s  eta=3278s
+  [ 100/609] elapsed=527s  rate=0.19 files/s  eta=2683s
+  [ 150/609] elapsed=1563s  rate=0.10 files/s  eta=4784s
+  [ 200/609] elapsed=1722s  rate=0.12 files/s  eta=3522s
+  [ 250/609] elapsed=2076s  rate=0.12 files/s  eta=2981s
+  [ 300/609] elapsed=2532s  rate=0.12 files/s  eta=2608s
+  [ 350/609] elapsed=2847s  rate=0.12 files/s  eta=2107s
+  [ 400/609] elapsed=3157s  rate=0.13 files/s  eta=1649s
+  [ 450/609] elapsed=3520s  rate=0.13 files/s  eta=1244s
+  [ 500/609] elapsed=3878s  rate=0.13 files/s  eta=845s
+  [ 550/609] elapsed=5848s  rate=0.09 files/s  eta=627s
+  [ 600/609] elapsed=6899s  rate=0.09 files/s  eta=103s
+  [ 609/609] elapsed=7026s  rate=0.09 files/s  eta=0s
+
+Computing aggregate metrics...
+
+======================================================================
+CROSS-DATASET EVAL  (D:\Desktop\swc-autolabel-ml\paper\models\loso\neuromorpho\test_interneuron)
+assumed cell type: interneuron
+files: 609
+config: use_subtree_stage2=True  use_gnn=True
+======================================================================
+
+Stage 1 cell-type accuracy: 0.8489
+  predicted distribution: {'pyramidal': 92, 'interneuron': 517}
+
+Overall (Stage 2+3, full pipeline):
+  HEADLINE neurite-macro-F1:  0.9386
+           neurite-bal-acc:    0.9124
+  (ref)    macro-F1:           0.9591
+  (ref)    accuracy:           0.9652  (8,438,395 nodes)
+
+Per-class F1:
+  soma               F1=1.0000  (P=1.0000  R=1.0000  n=609)
+  axon               F1=0.9822  (P=0.9730  R=0.9915  n=7,031,660)
+  basal/dendrite     F1=0.8950  (P=0.9666  R=0.8333  n=1,406,126)
+
+Per-file neurite-macro-F1:
+  n=609  mean=0.8289  median=1.0000
+  P10=0.4111  P25=0.7096  P75=1.0000  P90=1.0000
+  min=0.0000  max=1.0000
+
+Worst-10 files:
+  neuromorpho__neu-sc39struktur.swc                       F1=0.0000 n=   288  ct_pred=pyramidal
+  neuromorpho__p120107-07-AAC.swc                         F1=0.0000 n=   596  ct_pred=interneuron
+  neuromorpho__161212_SAC1updated.swc                     F1=0.0005 n=  4422  ct_pred=interneuron
+  neuromorpho__AAS14.swc                                  F1=0.0053 n=  2266  ct_pred=pyramidal
+  neuromorpho__161027_SAC5.swc                            F1=0.0058 n=  3779  ct_pred=interneuron
+  neuromorpho__AAS2.swc                                   F1=0.0078 n=  3325  ct_pred=pyramidal
+  neuromorpho__P120117-02-AAC.swc                         F1=0.0109 n=   549  ct_pred=interneuron
+  neuromorpho__neu-sc48struktur.swc                       F1=0.0132 n=   603  ct_pred=interneuron
+  neuromorpho__NAS5.swc                                   F1=0.0158 n=  1254  ct_pred=pyramidal
+  neuromorpho__gaoCell1.swc                               F1=0.0176 n=  4405  ct_pred=pyramidal
+
+Saved D:\Desktop\swc-autolabel-ml\paper\results\cross_dataset_loso_neuromorpho_interneuron.json
+Saved D:\Desktop\swc-autolabel-ml\paper\results\cross_dataset_loso_neuromorpho_interneuron.csv
+
+  Running cross_dataset_eval on 350 pyramidal cells...
+Found 350 SWC files under D:\Desktop\swc-autolabel-ml\paper\models\loso\neuromorpho\test_pyramidal
+Assumed cell type: pyramidal  (valid labels: [1, 2, 3, 4])
+Loading GNN from D:\Desktop\swc-autolabel-ml\paper\models\loso\neuromorpho\gnn.pt ...
+  [  50/350] elapsed=113s  rate=0.44 files/s  eta=679s
+  [ 100/350] elapsed=356s  rate=0.28 files/s  eta=890s
+  [ 150/350] elapsed=467s  rate=0.32 files/s  eta=623s
+  [ 200/350] elapsed=543s  rate=0.37 files/s  eta=407s
+  [ 250/350] elapsed=623s  rate=0.40 files/s  eta=249s
+  [ 300/350] elapsed=731s  rate=0.41 files/s  eta=122s
+  [ 350/350] elapsed=816s  rate=0.43 files/s  eta=0s
+
+Computing aggregate metrics...
+
+======================================================================
+CROSS-DATASET EVAL  (D:\Desktop\swc-autolabel-ml\paper\models\loso\neuromorpho\test_pyramidal)
+assumed cell type: pyramidal
+files: 350
+config: use_subtree_stage2=True  use_gnn=True
+======================================================================
+
+Stage 1 cell-type accuracy: 0.8771
+  predicted distribution: {'interneuron': 43, 'pyramidal': 307}
+
+Overall (Stage 2+3, full pipeline):
+  HEADLINE neurite-macro-F1:  0.7513
+           neurite-bal-acc:    0.7312
+  (ref)    macro-F1:           0.8135
+  (ref)    accuracy:           0.8933  (1,866,996 nodes)
+
+Per-class F1:
+  soma               F1=1.0000  (P=1.0000  R=1.0000  n=350)
+  axon               F1=0.9551  (P=0.9349  R=0.9762  n=1,377,496)
+  basal/dendrite     F1=0.7970  (P=0.7667  R=0.8298  n=301,120)
+  apical             F1=0.5019  (P=0.7116  R=0.3877  n=188,030)
+
+Per-file neurite-macro-F1:
+  n=350  mean=0.4815  median=0.4172
+  P10=0.2062  P25=0.3218  P75=0.6604  P90=0.9049
+  min=0.0000  max=1.0000
+
+Worst-10 files:
+  neuromorpho__22315_cell7.swc                            F1=0.0000 n=  1503  ct_pred=interneuron
+  neuromorpho__22315_cell5.swc                            F1=0.0203 n=  1143  ct_pred=interneuron
+  neuromorpho__110412-s3-1.swc                            F1=0.0313 n=  4621  ct_pred=pyramidal
+  neuromorpho__22411_cell6.swc                            F1=0.0372 n=  1831  ct_pred=interneuron
+  neuromorpho__18414_slide2_cell3.swc                     F1=0.0445 n=  1048  ct_pred=interneuron
+  neuromorpho__18414_slide2_cell4.swc                     F1=0.0686 n=  1316  ct_pred=interneuron
+  neuromorpho__22411_cell3.swc                            F1=0.0739 n=   903  ct_pred=interneuron
+  neuromorpho__22315_cell2.swc                            F1=0.0798 n=  1107  ct_pred=interneuron
+  neuromorpho__22411_cell12.swc                           F1=0.0872 n=   979  ct_pred=interneuron
+  neuromorpho__22411_cell1.swc                            F1=0.0936 n=  1118  ct_pred=interneuron
+
+Saved D:\Desktop\swc-autolabel-ml\paper\results\cross_dataset_loso_neuromorpho_pyramidal.json
+Saved D:\Desktop\swc-autolabel-ml\paper\results\cross_dataset_loso_neuromorpho_pyramidal.csv
+
+  snapshot: D:\Desktop\swc-autolabel-ml\paper\results\snapshots\eval_loso_neuromorpho.json
+  per-file CSV: D:\Desktop\swc-autolabel-ml\paper\results\snapshots\eval_loso_neuromorpho_per_file.csv
+
+----- LOSO neuromorpho finished — elapsed 275.3 min -----
+
+==============================================================================
+LOSO held-out source: allen
+  data_dir: D:\Desktop\SWC-Studio\data\v10_dedup_dataset
+  started:  2026-05-09 06:14:39
+==============================================================================
+
+  train: 1971 cells (sources != allen)
+  test:  296 cells (source = allen)
+    interneuron:  train=609  test=196
+    pyramidal:  train=1362  test=100
+
+  Training Stage 1 on 1971 cells...
+    done in 191.1s
+  Training Stage 2 on 1971 cells...
+    done in 10162.2s
+
+  Training GNN on non-held-out pyramidals...
+Device: cpu
+Loading pyramidal graphs from D:\Desktop\SWC-Studio\data\v10_dedup_dataset ...
+  processed 200 files, kept 200, branches so far: 31854 (apical/basal labeled: 20692)
+  processed 400 files, kept 400, branches so far: 66875 (apical/basal labeled: 42136)
+  processed 600 files, kept 600, branches so far: 100046 (apical/basal labeled: 65506)
+  processed 800 files, kept 800, branches so far: 134664 (apical/basal labeled: 87591)
+  processed 1000 files, kept 1000, branches so far: 171177 (apical/basal labeled: 112852)
+  processed 1200 files, kept 1200, branches so far: 202657 (apical/basal labeled: 132407)
+  processed 1400 files, kept 1400, branches so far: 215200 (apical/basal labeled: 143360)
+  total=1462  train=1362  test=100  (expected: 763 / 169 from eval_split.json)
+  train apical/basal labeled branches: 137792
+  test  apical/basal labeled branches: 8943
+
+Train graphs: 1362  apical/basal-labeled branches: 137792
+Input feature dim: 51
+Model: 2-layer GraphSAGE, hidden=64, dropout=0.2, params=14,978
+
+=== Fold 1/5  train=1089  val=273 ===
+  fold0 ep000  loss=0.2394  val: macroF1=0.9543 apF1=0.9600 baF1=0.9486 cellF1=0.9087  (best ep0 F1=0.9543)
+  fold0 ep004  loss=0.0989  val: macroF1=0.9629 apF1=0.9676 baF1=0.9582 cellF1=0.9182  (best ep4 F1=0.9629)
+  fold0 ep009  loss=0.0838  val: macroF1=0.9677 apF1=0.9719 baF1=0.9635 cellF1=0.9302  (best ep9 F1=0.9677)
+  fold0 ep014  loss=0.0762  val: macroF1=0.9683 apF1=0.9723 baF1=0.9643 cellF1=0.9297  (best ep12 F1=0.9687)
+  fold0 ep019  loss=0.0645  val: macroF1=0.9663 apF1=0.9708 baF1=0.9618 cellF1=0.9295  (best ep17 F1=0.9699)
+  fold0 ep024  loss=0.0597  val: macroF1=0.9697 apF1=0.9735 baF1=0.9660 cellF1=0.9322  (best ep23 F1=0.9701)
+  fold0 ep029  loss=0.0522  val: macroF1=0.9663 apF1=0.9705 baF1=0.9621 cellF1=0.9283  (best ep28 F1=0.9713)
+  fold0 ep034  loss=0.0498  val: macroF1=0.9705 apF1=0.9743 baF1=0.9666 cellF1=0.9330  (best ep31 F1=0.9718)
+  fold0 ep039  loss=0.0734  val: macroF1=0.9676 apF1=0.9718 baF1=0.9634 cellF1=0.9306  (best ep31 F1=0.9718)
+  fold0 ep044  loss=0.0479  val: macroF1=0.9689 apF1=0.9729 baF1=0.9649 cellF1=0.9324  (best ep42 F1=0.9739)
+  fold0 ep049  loss=0.0452  val: macroF1=0.9737 apF1=0.9769 baF1=0.9705 cellF1=0.9329  (best ep42 F1=0.9739)
+  fold0 ep054  loss=0.0421  val: macroF1=0.9732 apF1=0.9765 baF1=0.9698 cellF1=0.9340  (best ep42 F1=0.9739)
+  fold0 ep059  loss=0.0597  val: macroF1=0.9708 apF1=0.9745 baF1=0.9671 cellF1=0.9336  (best ep42 F1=0.9739)
+  fold0 ep064  loss=0.0445  val: macroF1=0.9689 apF1=0.9731 baF1=0.9648 cellF1=0.9326  (best ep42 F1=0.9739)
+  fold0 early stop at ep67 (no val improvement for 25 ep)
+  fold0 best ep=42  val macroF1=0.9739  (56s)
+
+=== Fold 2/5  train=1089  val=273 ===
+  fold1 ep000  loss=0.2778  val: macroF1=0.9495 apF1=0.9533 baF1=0.9457 cellF1=0.9086  (best ep0 F1=0.9495)
+  fold1 ep004  loss=0.0903  val: macroF1=0.9615 apF1=0.9640 baF1=0.9591 cellF1=0.9211  (best ep4 F1=0.9615)
+  fold1 ep009  loss=0.0758  val: macroF1=0.9627 apF1=0.9657 baF1=0.9598 cellF1=0.9242  (best ep9 F1=0.9627)
+  fold1 ep014  loss=0.0684  val: macroF1=0.9646 apF1=0.9673 baF1=0.9620 cellF1=0.9281  (best ep14 F1=0.9646)
+  fold1 ep019  loss=0.0623  val: macroF1=0.9648 apF1=0.9672 baF1=0.9624 cellF1=0.9263  (best ep19 F1=0.9648)
+  fold1 ep024  loss=0.0574  val: macroF1=0.9649 apF1=0.9678 baF1=0.9621 cellF1=0.9290  (best ep23 F1=0.9664)
+  fold1 ep029  loss=0.0540  val: macroF1=0.9668 apF1=0.9692 baF1=0.9644 cellF1=0.9284  (best ep29 F1=0.9668)
+  fold1 ep034  loss=0.0520  val: macroF1=0.9658 apF1=0.9684 baF1=0.9632 cellF1=0.9284  (best ep30 F1=0.9679)
+  fold1 ep039  loss=0.0476  val: macroF1=0.9682 apF1=0.9708 baF1=0.9656 cellF1=0.9332  (best ep35 F1=0.9683)
+  fold1 ep044  loss=0.0468  val: macroF1=0.9680 apF1=0.9703 baF1=0.9657 cellF1=0.9294  (best ep35 F1=0.9683)
+  fold1 ep049  loss=0.0387  val: macroF1=0.9657 apF1=0.9683 baF1=0.9631 cellF1=0.9286  (best ep46 F1=0.9686)
+  fold1 ep054  loss=0.0637  val: macroF1=0.9640 apF1=0.9669 baF1=0.9610 cellF1=0.9292  (best ep46 F1=0.9686)
+  fold1 ep059  loss=0.0373  val: macroF1=0.9675 apF1=0.9698 baF1=0.9653 cellF1=0.9294  (best ep46 F1=0.9686)
+  fold1 ep064  loss=0.0406  val: macroF1=0.9680 apF1=0.9704 baF1=0.9657 cellF1=0.9282  (best ep46 F1=0.9686)
+  fold1 ep069  loss=0.0361  val: macroF1=0.9672 apF1=0.9694 baF1=0.9651 cellF1=0.9267  (best ep46 F1=0.9686)
+  fold1 early stop at ep71 (no val improvement for 25 ep)
+  fold1 best ep=46  val macroF1=0.9686  (61s)
+
+=== Fold 3/5  train=1090  val=272 ===
+  fold2 ep000  loss=0.2476  val: macroF1=0.9494 apF1=0.9553 baF1=0.9435 cellF1=0.8992  (best ep0 F1=0.9494)
+  fold2 ep004  loss=0.0967  val: macroF1=0.9633 apF1=0.9675 baF1=0.9592 cellF1=0.9123  (best ep3 F1=0.9646)
+  fold2 ep009  loss=0.0767  val: macroF1=0.9694 apF1=0.9726 baF1=0.9662 cellF1=0.9194  (best ep9 F1=0.9694)
+  fold2 ep014  loss=0.0668  val: macroF1=0.9712 apF1=0.9744 baF1=0.9680 cellF1=0.9276  (best ep14 F1=0.9712)
+  fold2 ep019  loss=0.0614  val: macroF1=0.9716 apF1=0.9748 baF1=0.9684 cellF1=0.9313  (best ep18 F1=0.9725)
+  fold2 ep024  loss=0.0609  val: macroF1=0.9718 apF1=0.9749 baF1=0.9687 cellF1=0.9266  (best ep22 F1=0.9740)
+  fold2 ep029  loss=0.0582  val: macroF1=0.9733 apF1=0.9762 baF1=0.9704 cellF1=0.9295  (best ep27 F1=0.9756)
+  fold2 ep034  loss=0.0455  val: macroF1=0.9770 apF1=0.9794 baF1=0.9747 cellF1=0.9328  (best ep34 F1=0.9770)
+  fold2 ep039  loss=0.0434  val: macroF1=0.9750 apF1=0.9775 baF1=0.9724 cellF1=0.9306  (best ep34 F1=0.9770)
+  fold2 ep044  loss=0.0444  val: macroF1=0.9752 apF1=0.9779 baF1=0.9724 cellF1=0.9348  (best ep34 F1=0.9770)
+  fold2 ep049  loss=0.0413  val: macroF1=0.9747 apF1=0.9774 baF1=0.9720 cellF1=0.9291  (best ep46 F1=0.9774)
+  fold2 ep054  loss=0.0381  val: macroF1=0.9768 apF1=0.9792 baF1=0.9744 cellF1=0.9330  (best ep46 F1=0.9774)
+  fold2 ep059  loss=0.0390  val: macroF1=0.9780 apF1=0.9803 baF1=0.9758 cellF1=0.9334  (best ep59 F1=0.9780)
+  fold2 ep064  loss=0.0594  val: macroF1=0.9746 apF1=0.9774 baF1=0.9719 cellF1=0.9313  (best ep59 F1=0.9780)
+  fold2 ep069  loss=0.0366  val: macroF1=0.9754 apF1=0.9782 baF1=0.9727 cellF1=0.9358  (best ep59 F1=0.9780)
+  fold2 ep074  loss=0.0334  val: macroF1=0.9759 apF1=0.9785 baF1=0.9732 cellF1=0.9334  (best ep72 F1=0.9785)
+  fold2 ep079  loss=0.0365  val: macroF1=0.9745 apF1=0.9770 baF1=0.9720 cellF1=0.9313  (best ep72 F1=0.9785)
+  fold2 ep084  loss=0.0456  val: macroF1=0.9762 apF1=0.9787 baF1=0.9738 cellF1=0.9348  (best ep72 F1=0.9785)
+  fold2 ep089  loss=0.0290  val: macroF1=0.9765 apF1=0.9790 baF1=0.9741 cellF1=0.9360  (best ep72 F1=0.9785)
+  fold2 ep094  loss=0.0327  val: macroF1=0.9785 apF1=0.9808 baF1=0.9762 cellF1=0.9360  (best ep91 F1=0.9803)
+  fold2 ep099  loss=0.0308  val: macroF1=0.9765 apF1=0.9790 baF1=0.9739 cellF1=0.9346  (best ep91 F1=0.9803)
+  fold2 ep104  loss=0.0287  val: macroF1=0.9769 apF1=0.9792 baF1=0.9747 cellF1=0.9348  (best ep91 F1=0.9803)
+  fold2 ep109  loss=0.0279  val: macroF1=0.9760 apF1=0.9786 baF1=0.9735 cellF1=0.9316  (best ep91 F1=0.9803)
+  fold2 ep114  loss=0.0283  val: macroF1=0.9790 apF1=0.9812 baF1=0.9769 cellF1=0.9356  (best ep91 F1=0.9803)
+  fold2 early stop at ep116 (no val improvement for 25 ep)
+  fold2 best ep=91  val macroF1=0.9803  (105s)
+
+=== Fold 4/5  train=1090  val=272 ===
+  fold3 ep000  loss=0.2630  val: macroF1=0.9448 apF1=0.9498 baF1=0.9397 cellF1=0.9112  (best ep0 F1=0.9448)
+  fold3 ep004  loss=0.0938  val: macroF1=0.9649 apF1=0.9684 baF1=0.9615 cellF1=0.9312  (best ep4 F1=0.9649)
+  fold3 ep009  loss=0.0764  val: macroF1=0.9652 apF1=0.9685 baF1=0.9618 cellF1=0.9244  (best ep9 F1=0.9652)
+  fold3 ep014  loss=0.0703  val: macroF1=0.9637 apF1=0.9675 baF1=0.9599 cellF1=0.9249  (best ep12 F1=0.9675)
+  fold3 ep019  loss=0.0586  val: macroF1=0.9663 apF1=0.9692 baF1=0.9635 cellF1=0.9211  (best ep17 F1=0.9703)
+  fold3 ep024  loss=0.0535  val: macroF1=0.9689 apF1=0.9720 baF1=0.9658 cellF1=0.9293  (best ep17 F1=0.9703)
+  fold3 ep029  loss=0.0471  val: macroF1=0.9665 apF1=0.9692 baF1=0.9637 cellF1=0.9202  (best ep26 F1=0.9720)
+  fold3 ep034  loss=0.0443  val: macroF1=0.9621 apF1=0.9651 baF1=0.9592 cellF1=0.9204  (best ep26 F1=0.9720)
+  fold3 ep039  loss=0.0423  val: macroF1=0.9667 apF1=0.9697 baF1=0.9637 cellF1=0.9249  (best ep26 F1=0.9720)
+  fold3 ep044  loss=0.0409  val: macroF1=0.9660 apF1=0.9689 baF1=0.9632 cellF1=0.9196  (best ep26 F1=0.9720)
+  fold3 ep049  loss=0.0422  val: macroF1=0.9650 apF1=0.9678 baF1=0.9621 cellF1=0.9192  (best ep26 F1=0.9720)
+  fold3 early stop at ep51 (no val improvement for 25 ep)
+  fold3 best ep=26  val macroF1=0.9720  (45s)
+
+=== Fold 5/5  train=1090  val=272 ===
+  fold4 ep000  loss=0.2686  val: macroF1=0.9621 apF1=0.9668 baF1=0.9575 cellF1=0.9026  (best ep0 F1=0.9621)
+  fold4 ep004  loss=0.1028  val: macroF1=0.9700 apF1=0.9738 baF1=0.9662 cellF1=0.9200  (best ep3 F1=0.9743)
+  fold4 ep009  loss=0.0809  val: macroF1=0.9727 apF1=0.9762 baF1=0.9692 cellF1=0.9199  (best ep3 F1=0.9743)
+  fold4 ep014  loss=0.0769  val: macroF1=0.9745 apF1=0.9780 baF1=0.9711 cellF1=0.9295  (best ep11 F1=0.9748)
+  fold4 ep019  loss=0.0618  val: macroF1=0.9743 apF1=0.9776 baF1=0.9711 cellF1=0.9294  (best ep16 F1=0.9755)
+  fold4 ep024  loss=0.0593  val: macroF1=0.9764 apF1=0.9795 baF1=0.9733 cellF1=0.9301  (best ep24 F1=0.9764)
+  fold4 ep029  loss=0.0526  val: macroF1=0.9760 apF1=0.9793 baF1=0.9728 cellF1=0.9308  (best ep28 F1=0.9792)
+  fold4 ep034  loss=0.0486  val: macroF1=0.9766 apF1=0.9797 baF1=0.9735 cellF1=0.9324  (best ep28 F1=0.9792)
+  fold4 ep039  loss=0.0480  val: macroF1=0.9780 apF1=0.9809 baF1=0.9751 cellF1=0.9304  (best ep28 F1=0.9792)
+  fold4 ep044  loss=0.0441  val: macroF1=0.9791 apF1=0.9818 baF1=0.9764 cellF1=0.9332  (best ep43 F1=0.9797)
+  fold4 ep049  loss=0.0437  val: macroF1=0.9774 apF1=0.9804 baF1=0.9743 cellF1=0.9364  (best ep46 F1=0.9805)
+  fold4 ep054  loss=0.0404  val: macroF1=0.9785 apF1=0.9812 baF1=0.9757 cellF1=0.9311  (best ep46 F1=0.9805)
+  fold4 ep059  loss=0.0375  val: macroF1=0.9794 apF1=0.9821 baF1=0.9767 cellF1=0.9336  (best ep46 F1=0.9805)
+  fold4 ep064  loss=0.0394  val: macroF1=0.9803 apF1=0.9829 baF1=0.9777 cellF1=0.9357  (best ep62 F1=0.9805)
+  fold4 ep069  loss=0.0394  val: macroF1=0.9799 apF1=0.9826 baF1=0.9773 cellF1=0.9369  (best ep62 F1=0.9805)
+  fold4 ep074  loss=0.0391  val: macroF1=0.9784 apF1=0.9812 baF1=0.9756 cellF1=0.9343  (best ep62 F1=0.9805)
+  fold4 ep079  loss=0.0333  val: macroF1=0.9784 apF1=0.9813 baF1=0.9755 cellF1=0.9370  (best ep62 F1=0.9805)
+  fold4 ep084  loss=0.0358  val: macroF1=0.9789 apF1=0.9816 baF1=0.9761 cellF1=0.9345  (best ep62 F1=0.9805)
+  fold4 early stop at ep87 (no val improvement for 25 ep)
+  fold4 best ep=62  val macroF1=0.9805  (74s)
+
+=== CV summary ===
+  branch macro-F1: 0.9750 +/- 0.0047
+  apical-F1      : 0.9776 +/- 0.0047
+  basal-F1       : 0.9725 +/- 0.0048
+  per-cell mean  : 0.9335 +/- 0.0035
+
+=== Final retrain on full train (n=1362) for 47 epochs ===
+  ep000  train_loss=0.2295
+  ep009  train_loss=0.0775
+  ep019  train_loss=0.0688
+  ep029  train_loss=0.0542
+  ep039  train_loss=0.0483
+
+HELD-OUT TEST  branchMacroF1=0.7471  apF1=0.6864  baF1=0.8079  cellMeanF1=0.6620
+
+Saved checkpoint to D:\Desktop\swc-autolabel-ml\paper\models\loso\allen\gnn.pt  (64.8 KB)
+
+  Running cross_dataset_eval on 196 interneuron cells...
+Found 196 SWC files under D:\Desktop\swc-autolabel-ml\paper\models\loso\allen\test_interneuron
+Assumed cell type: interneuron  (valid labels: [1, 2, 3])
+Loading GNN from D:\Desktop\swc-autolabel-ml\paper\models\loso\allen\gnn.pt ...
+  [  50/196] elapsed=374s  rate=0.13 files/s  eta=1092s
+  [ 100/196] elapsed=686s  rate=0.15 files/s  eta=659s
+  [ 150/196] elapsed=1178s  rate=0.13 files/s  eta=361s
+  [ 196/196] elapsed=1603s  rate=0.12 files/s  eta=0s
+
+Computing aggregate metrics...
+
+======================================================================
+CROSS-DATASET EVAL  (D:\Desktop\swc-autolabel-ml\paper\models\loso\allen\test_interneuron)
+assumed cell type: interneuron
+files: 196
+config: use_subtree_stage2=True  use_gnn=True
+======================================================================
+
+Stage 1 cell-type accuracy: 0.9847
+  predicted distribution: {'interneuron': 193, 'pyramidal': 3}
+
+Overall (Stage 2+3, full pipeline):
+  HEADLINE neurite-macro-F1:  0.9306
+           neurite-bal-acc:    0.9073
+  (ref)    macro-F1:           0.9537
+  (ref)    accuracy:           0.9612  (2,523,891 nodes)
+
+Per-class F1:
+  soma               F1=1.0000  (P=1.0000  R=1.0000  n=196)
+  axon               F1=0.9767  (P=0.9622  R=0.9917  n=2,068,289)
+  basal/dendrite     F1=0.8845  (P=0.9560  R=0.8230  n=455,406)
+
+Per-file neurite-macro-F1:
+  n=196  mean=0.9103  median=1.0000
+  P10=0.7128  P25=0.8546  P75=1.0000  P90=1.0000
+  min=0.2770  max=1.0000
+
+Worst-10 files:
+  allen__Htr3a-Cre_NO152_Ai14-314467.03.02.01_584872371.swc F1=0.2770 n=  3567  ct_pred=interneuron
+  allen__Chat-IRES-Cre-neo_Ai14-313182.05.02.01_583146274.swc F1=0.3771 n=  3445  ct_pred=interneuron
+  allen__Vip-IRES-Cre_Ai14(IVSCC)-253382.05.01.01_524689239.swc F1=0.5844 n=  5405  ct_pred=interneuron
+  allen__Chat-IRES-Cre-neo_Ai14-313182.03.01.01_583138230.swc F1=0.5905 n=  6147  ct_pred=interneuron
+  allen__Chat-IRES-Cre-neo_Ai14-287662.04.02.01_562003142.swc F1=0.6015 n=  3841  ct_pred=interneuron
+  allen__Ndnf-IRES2-dgCre_Ai14-256187.05.02.01_527869035.swc F1=0.6056 n=  7952  ct_pred=interneuron
+  allen__Sst-IRES-Cre_Ai14-172534.04.02.01_323452196.swc  F1=0.6311 n=  7264  ct_pred=interneuron
+  allen__Chat-IRES-Cre-neo_Ai14-316042.03.01.01_586071425.swc F1=0.6684 n=  7603  ct_pred=interneuron
+  allen__Chat-IRES-Cre-neo_Ai14-313181.04.02.01_582644266.swc F1=0.6685 n=  4292  ct_pred=interneuron
+  allen__H17.03.010.11.13.01_601927090.swc                F1=0.6736 n=  1497  ct_pred=interneuron
+
+Saved D:\Desktop\swc-autolabel-ml\paper\results\cross_dataset_loso_allen_interneuron.json
+Saved D:\Desktop\swc-autolabel-ml\paper\results\cross_dataset_loso_allen_interneuron.csv
+
+  Running cross_dataset_eval on 100 pyramidal cells...
+Found 100 SWC files under D:\Desktop\swc-autolabel-ml\paper\models\loso\allen\test_pyramidal
+Assumed cell type: pyramidal  (valid labels: [1, 2, 3, 4])
+Loading GNN from D:\Desktop\swc-autolabel-ml\paper\models\loso\allen\gnn.pt ...
+  [  50/100] elapsed=203s  rate=0.25 files/s  eta=203s
+  [ 100/100] elapsed=400s  rate=0.25 files/s  eta=0s
+
+Computing aggregate metrics...
+
+======================================================================
+CROSS-DATASET EVAL  (D:\Desktop\swc-autolabel-ml\paper\models\loso\allen\test_pyramidal)
+assumed cell type: pyramidal
+files: 100
+config: use_subtree_stage2=True  use_gnn=True
+======================================================================
+
+Stage 1 cell-type accuracy: 0.6800
+  predicted distribution: {'pyramidal': 68, 'interneuron': 32}
+
+Overall (Stage 2+3, full pipeline):
+  HEADLINE neurite-macro-F1:  0.6556
+           neurite-bal-acc:    0.7212
+  (ref)    macro-F1:           0.7417
+  (ref)    accuracy:           0.7549  (1,378,107 nodes)
+
+Per-class F1:
+  soma               F1=1.0000  (P=1.0000  R=1.0000  n=100)
+  axon               F1=0.9537  (P=0.9267  R=0.9824  n=663,630)
+  basal/dendrite     F1=0.6776  (P=0.5179  R=0.9798  n=313,843)
+  apical             F1=0.3355  (P=1.0000  R=0.2015  n=400,534)
+
+Per-file neurite-macro-F1:
+  n=100  mean=0.5700  median=0.5439
+  P10=0.3800  P25=0.5096  P75=0.5761  P90=1.0000
+  min=0.1361  max=1.0000
+
+Worst-10 files:
+  allen__H16.06.012.11.06.02_548421866.swc                F1=0.1361 n=  9393  ct_pred=pyramidal
+  allen__H16.06.008.01.19.02_528022041.swc                F1=0.1743 n=  9178  ct_pred=pyramidal
+  allen__H16.06.012.11.06.06_548494556.swc                F1=0.2243 n=  9111  ct_pred=pyramidal
+  allen__H17.03.002.11.04.02_569820026.swc                F1=0.2358 n=  3806  ct_pred=pyramidal
+  allen__H17.03.002.11.04.01_569818704.swc                F1=0.2492 n=  8351  ct_pred=pyramidal
+  allen__H16.03.002.01.06.01_520454345.swc                F1=0.2606 n= 10817  ct_pred=pyramidal
+  allen__H17.03.002.11.04.04_569844159.swc                F1=0.2882 n=  5107  ct_pred=pyramidal
+  allen__H16.06.004.02.13.04_508417989.swc                F1=0.3282 n=  7839  ct_pred=interneuron
+  allen__H16.06.011.01.01.05.03_539653924.swc             F1=0.3312 n=  9458  ct_pred=pyramidal
+  allen__H16.06.010.01.02.18.02_529845713.swc             F1=0.3385 n= 14807  ct_pred=pyramidal
+
+Saved D:\Desktop\swc-autolabel-ml\paper\results\cross_dataset_loso_allen_pyramidal.json
+Saved D:\Desktop\swc-autolabel-ml\paper\results\cross_dataset_loso_allen_pyramidal.csv
+
+  snapshot: D:\Desktop\swc-autolabel-ml\paper\results\snapshots\eval_loso_allen.json
+  per-file CSV: D:\Desktop\swc-autolabel-ml\paper\results\snapshots\eval_loso_allen_per_file.csv
+
+----- LOSO allen finished — elapsed 218.2 min -----

@@ -1,0 +1,152 @@
+{
+  "data_dir": "D:\\Desktop\\swc-autolabel-ml\\paper\\models\\loso\\allen\\test_pyramidal",
+  "assumed_cell_type": "pyramidal",
+  "n_files_seen": 100,
+  "config": {
+    "use_subtree_stage2": true,
+    "use_gnn": true,
+    "stage1_model": "D:\\Desktop\\swc-autolabel-ml\\paper\\models\\loso\\allen\\s1.pkl",
+    "stage2_model": "D:\\Desktop\\swc-autolabel-ml\\paper\\models\\loso\\allen\\s2.pkl",
+    "gnn_model": "D:\\Desktop\\swc-autolabel-ml\\paper\\models\\loso\\allen\\gnn.pt"
+  },
+  "stage1_cell_type_accuracy": 0.68,
+  "stage1_predicted_distribution": {
+    "pyramidal": 68,
+    "interneuron": 32
+  },
+  "overall": {
+    "accuracy": 0.7549,
+    "n": 1378107,
+    "macro_f1": 0.7417,
+    "macro_precision": 0.8611,
+    "macro_recall": 0.7909,
+    "balanced_accuracy": 0.7909,
+    "neurite_macro_f1": 0.6556,
+    "neurite_balanced_accuracy": 0.7212,
+    "per_label": {
+      "soma": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 100
+      },
+      "axon": {
+        "precision": 0.9267,
+        "recall": 0.9824,
+        "f1": 0.9537,
+        "support": 663630
+      },
+      "basal/dendrite": {
+        "precision": 0.5179,
+        "recall": 0.9798,
+        "f1": 0.6776,
+        "support": 313843
+      },
+      "apical": {
+        "precision": 1.0,
+        "recall": 0.2015,
+        "f1": 0.3355,
+        "support": 400534
+      }
+    },
+    "confusion": {
+      "soma": {
+        "soma": 100,
+        "axon": 0,
+        "basal/dendrite": 0,
+        "apical": 0
+      },
+      "axon": {
+        "soma": 0,
+        "axon": 651950,
+        "basal/dendrite": 11680,
+        "apical": 0
+      },
+      "basal/dendrite": {
+        "soma": 0,
+        "axon": 6340,
+        "basal/dendrite": 307503,
+        "apical": 0
+      },
+      "apical": {
+        "soma": 0,
+        "axon": 45224,
+        "basal/dendrite": 274584,
+        "apical": 80726
+      }
+    }
+  },
+  "per_file_summary": {
+    "n_files": 100,
+    "mean": 0.57,
+    "median": 0.5439,
+    "p10": 0.38,
+    "p25": 0.5096,
+    "p75": 0.5761,
+    "p90": 1.0,
+    "min": 0.1361,
+    "max": 1.0
+  },
+  "worst_files": [
+    {
+      "name": "allen__H16.06.012.11.06.02_548421866.swc",
+      "n_nodes": 9393,
+      "neurite_macro_f1": 0.1361,
+      "predicted_cell_type": "pyramidal"
+    },
+    {
+      "name": "allen__H16.06.008.01.19.02_528022041.swc",
+      "n_nodes": 9178,
+      "neurite_macro_f1": 0.1743,
+      "predicted_cell_type": "pyramidal"
+    },
+    {
+      "name": "allen__H16.06.012.11.06.06_548494556.swc",
+      "n_nodes": 9111,
+      "neurite_macro_f1": 0.2243,
+      "predicted_cell_type": "pyramidal"
+    },
+    {
+      "name": "allen__H17.03.002.11.04.02_569820026.swc",
+      "n_nodes": 3806,
+      "neurite_macro_f1": 0.2358,
+      "predicted_cell_type": "pyramidal"
+    },
+    {
+      "name": "allen__H17.03.002.11.04.01_569818704.swc",
+      "n_nodes": 8351,
+      "neurite_macro_f1": 0.2492,
+      "predicted_cell_type": "pyramidal"
+    },
+    {
+      "name": "allen__H16.03.002.01.06.01_520454345.swc",
+      "n_nodes": 10817,
+      "neurite_macro_f1": 0.2606,
+      "predicted_cell_type": "pyramidal"
+    },
+    {
+      "name": "allen__H17.03.002.11.04.04_569844159.swc",
+      "n_nodes": 5107,
+      "neurite_macro_f1": 0.2882,
+      "predicted_cell_type": "pyramidal"
+    },
+    {
+      "name": "allen__H16.06.004.02.13.04_508417989.swc",
+      "n_nodes": 7839,
+      "neurite_macro_f1": 0.3282,
+      "predicted_cell_type": "interneuron"
+    },
+    {
+      "name": "allen__H16.06.011.01.01.05.03_539653924.swc",
+      "n_nodes": 9458,
+      "neurite_macro_f1": 0.3312,
+      "predicted_cell_type": "pyramidal"
+    },
+    {
+      "name": "allen__H16.06.010.01.02.18.02_529845713.swc",
+      "n_nodes": 14807,
+      "neurite_macro_f1": 0.3385,
+      "predicted_cell_type": "pyramidal"
+    }
+  ]
+}

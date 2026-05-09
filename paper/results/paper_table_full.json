@@ -307,6 +307,48 @@
       "per_file_mean": 0.9586,
       "per_file_p10": 0.9012,
       "n_files": 461
+    },
+    {
+      "method": "loso_in_house",
+      "source": "LOSO",
+      "accuracy": 0.9521,
+      "macro_f1": 0.7375,
+      "neurite_macro_f1": 0.6505,
+      "soma_f1": 0.9985,
+      "axon_f1": 0.9969,
+      "basal_f1": 0.6038,
+      "apical_f1": 0.3508,
+      "per_file_mean": 0.607600395256917,
+      "per_file_p10": 0.47592,
+      "n_files": 1012
+    },
+    {
+      "method": "loso_neuromorpho",
+      "source": "LOSO",
+      "accuracy": 0.9389591240875912,
+      "macro_f1": 0.9059613138686132,
+      "neurite_macro_f1": 0.8702423357664234,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9777607742798445,
+      "basal_f1": 0.8777149924498286,
+      "apical_f1": 0.5019,
+      "per_file_mean": 0.7021095933263817,
+      "per_file_p10": 0.26346,
+      "n_files": 959
+    },
+    {
+      "method": "loso_allen",
+      "source": "LOSO",
+      "accuracy": 0.8915040540540541,
+      "macro_f1": 0.8820783783783783,
+      "neurite_macro_f1": 0.8376945945945945,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9711129053606642,
+      "basal_f1": 0.8000876488627219,
+      "apical_f1": 0.3355,
+      "per_file_mean": 0.795331418918919,
+      "per_file_p10": 0.51095,
+      "n_files": 296
     }
   ],
   "wilcoxon": {
