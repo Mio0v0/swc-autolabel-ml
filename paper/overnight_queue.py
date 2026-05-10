@@ -113,6 +113,22 @@ def _build_stages(data_dir: Path) -> list[tuple[str, dict[str, str], list[list[s
                                     forces a Stage 1+2 retrain so nothing leaks
     """
     return [
+        # 0. v11_final: trunk features physically removed from branch_features.py.
+        # Functionally equivalent to v10_no_trunk (which used SWCAL_NO_TRUNK=1
+        # to filter at module load), but cleaner — the 4 trunk features no
+        # longer occupy any space in the schema or feature vector.
+        (
+            "v11_final",
+            {},
+            [
+                _gnn_retrain_cmd("v11_final", data_dir),
+                _evaluate_cmd(
+                    data_dir,
+                    gnn_ckpt=GNN_MODEL_DIR / "gnn_apical_basal_v11_final.pt",
+                ),
+            ],
+            True,
+        ),
         # 1. v10_final: main retrain on de-duplicated dataset.
         (
             "v10_final",

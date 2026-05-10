@@ -214,7 +214,8 @@ def _v6789_rows() -> list[dict]:
         ("v8_subtree_gnn", SNAPSHOTS / "v8_subtree_gnn.json"),
         ("v9_no_gnn (= no-gnn ablation)", SNAPSHOTS / "v9_baseline_no_gnn.json"),
         ("v9_final (leaked split)", SNAPSHOTS / "v9_final_subtree_gnn.json"),
-        ("v10_final (dedup split)", SNAPSHOTS / "eval_v10_final.json"),
+        ("v10_final (dedup, 61 feats)", SNAPSHOTS / "eval_v10_final.json"),
+        ("v11_final (dedup, 57 feats)", SNAPSHOTS / "eval_v11_final.json"),
     ]
     out = []
     for label, path in files:

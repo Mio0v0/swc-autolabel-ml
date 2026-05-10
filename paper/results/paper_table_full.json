@@ -169,7 +169,7 @@
       "n_files": 556
     },
     {
-      "method": "v10_final (dedup split)",
+      "method": "v10_final (dedup, 61 feats)",
       "source": "pipeline",
       "accuracy": 0.9934,
       "macro_f1": 0.9756,
@@ -180,6 +180,20 @@
       "apical_f1": 0.9444,
       "per_file_mean": 0.9586,
       "per_file_p10": 0.9012,
+      "n_files": 461
+    },
+    {
+      "method": "v11_final (dedup, 57 feats)",
+      "source": "pipeline",
+      "accuracy": 0.9934,
+      "macro_f1": 0.9755,
+      "neurite_macro_f1": 0.9673,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9988,
+      "basal_f1": 0.9591,
+      "apical_f1": 0.9441,
+      "per_file_mean": 0.9586,
+      "per_file_p10": 0.8998,
       "n_files": 461
     },
     {
@@ -356,7 +370,28 @@
       "n_pairs": 461,
       "mean_diff_vs_v9": -0.02618937093275488,
       "p_value": 0.00011302335008075882,
-      "p_value_bonferroni": 0.015371175610983199,
+      "p_value_bonferroni": 0.023734903516959352,
+      "significant": true
+    },
+    "loso_allen": {
+      "n_pairs": 58,
+      "mean_diff_vs_v9": -0.13885862068965515,
+      "p_value": 8.75128034540769e-07,
+      "p_value_bonferroni": 0.00018377688725356147,
+      "significant": true
+    },
+    "loso_in_house": {
+      "n_pairs": 228,
+      "mean_diff_vs_v9": -0.3679368421052632,
+      "p_value": 7.733323095568273e-31,
+      "p_value_bonferroni": 1.6239978500693374e-28,
+      "significant": true
+    },
+    "loso_neuromorpho": {
+      "n_pairs": 175,
+      "mean_diff_vs_v9": -0.24328971428571428,
+      "p_value": 3.613713636793365e-18,
+      "p_value_bonferroni": 7.588798637266067e-16,
       "significant": true
     },
     "multi_seed_123": {
@@ -377,7 +412,7 @@
       "n_pairs": 461,
       "mean_diff_vs_v9": -0.09723058568329719,
       "p_value": 1.1550942918353525e-42,
-      "p_value_bonferroni": 1.5709282368960794e-40,
+      "p_value_bonferroni": 2.42569801285424e-40,
       "significant": true
     },
     "no_pca": {
@@ -412,14 +447,14 @@
       "n_pairs": 461,
       "mean_diff_vs_v9": -0.0633290672451193,
       "p_value": 4.339100829862434e-11,
-      "p_value_bonferroni": 5.901177128612911e-09,
+      "p_value_bonferroni": 9.112111742711112e-09,
       "significant": true
     },
     "sholl_rf": {
       "n_pairs": 461,
       "mean_diff_vs_v9": -0.03989631236442517,
       "p_value": 8.045018576611629e-07,
-      "p_value_bonferroni": 0.00010941225264191816,
+      "p_value_bonferroni": 0.00016894539010884422,
       "significant": true
     },
     "v10_final": {
@@ -447,6 +482,13 @@
       "n_pairs": 461,
       "mean_diff_vs_v9": -0.0018158351409978306,
       "p_value": 0.499656379643342,
+      "p_value_bonferroni": 1.0,
+      "significant": false
+    },
+    "v11_final": {
+      "n_pairs": 461,
+      "mean_diff_vs_v9": -0.0010724511930585677,
+      "p_value": 0.7897165079739374,
       "p_value_bonferroni": 1.0,
       "significant": false
     },

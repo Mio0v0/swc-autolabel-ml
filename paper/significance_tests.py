@@ -61,6 +61,10 @@ PER_FILE_CSVS: dict[str, tuple[str, str, str]] = {
     "no_soft_handoff": ("eval_no_soft_handoff_per_file.csv",             "path", "neurite_macro_f1"),
     # v10 dedup'd dataset (current paper-relevant rows)
     "v10_final":             ("eval_v10_final_per_file.csv",             "path", "neurite_macro_f1_stage23"),
+    # v11_final = v10_final with the 4 trunk features physically removed from
+    # branch_features.py. Headline model going forward (functionally
+    # equivalent to v10_no_trunk, with the cleaner 57-feature schema).
+    "v11_final":             ("eval_v11_final_per_file.csv",             "path", "neurite_macro_f1_stage23"),
     "v10_no_pca":            ("eval_v10_no_pca_per_file.csv",            "path", "neurite_macro_f1_stage23"),
     "v10_no_trunk":          ("eval_v10_no_trunk_per_file.csv",          "path", "neurite_macro_f1_stage23"),
     "v10_no_soft_handoff":   ("eval_v10_no_soft_handoff_per_file.csv",   "path", "neurite_macro_f1_stage23"),

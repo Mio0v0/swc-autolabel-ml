@@ -94,7 +94,7 @@ BRANCH_FEATURE_NAMES: list[str] = [
     "polar_angle_from_up",               # angle (radians) between soma→branch-mid and +z. Apical ≈ 0, basal ≈ π/2
     "vertical_horizontal_span_ratio",    # primary-subtree z_span / max(xy_span, eps). Apical tall/thin → high
     "soma_z_offset_norm",                # (mean_z - soma_z) / cell_z_range. Apical ≈ +1, basal ≈ 0, descending axon < 0
-    "is_trunk_primary",                  # 1.0 if this branch's primary subtree is the top apical-trunk candidate
+    # is_trunk_primary REMOVED 2026-05-09 — v10 ablation showed zero contribution (p_bonf=1.00)
     "primary_subtree_polar_spread",      # std of polar angles within the primary subtree. Apical tight → low
 
     # --- Cell-intrinsic principal-axis features (added 2026-04-25) ---
@@ -116,15 +116,15 @@ BRANCH_FEATURE_NAMES: list[str] = [
     "mean_internode_distance",           # mean Euclidean distance between consecutive nodes in this branch
     "subtree_bifurcations_per_micron",   # subtree total bifurcations / subtree total path length (axon: low)
 
-    # --- Trunk-detection features (added 2026-04-29) ---
+    # --- Trunk-detection features (added 2026-04-29, partially pruned 2026-05-09) ---
     # Directly encode "apical = one dominant trunk before bifurcating; basal =
     # bushy from the start." A "trunk" here is the longest root-to-leaf path
     # within a primary subtree. Apical subtrees have a long, dominant trunk;
     # basal subtrees branch early and have no clear trunk.
+    # subtree_trunk_length_norm, subtree_trunk_fraction, on_longest_path REMOVED
+    # 2026-05-09 — v10 ablation (eval_v10_no_trunk) showed they contributed
+    # zero measurable F1 on the held-out test split (p_bonf = 1.00 vs v10_final).
     "path_to_first_bifurcation_norm",    # primary-root to first bifurcation distance / max cell path. Apical: large, basal: small
-    "subtree_trunk_length_norm",         # subtree longest root-to-leaf path length / max cell path
-    "subtree_trunk_fraction",            # trunk_length / total subtree path length. Apical: ~0.3-0.6, basal: ~0.05-0.2
-    "on_longest_path",                   # 1.0 if this branch is on its subtree's longest path (= trunk)
 ]
 
 # Ablation hooks: paper/run_ablations.py sets SWCAL_NO_PCA=1 and
@@ -975,11 +975,10 @@ def extract_branches(
             prox_persist,
             dist_persist,
 
-            # Apical-vs-basal discrimination
+            # Apical-vs-basal discrimination (is_trunk REMOVED 2026-05-09; v10 ablation showed zero contribution)
             polar_angle_up,
             vh_ratio,
             soma_z_offset_norm,
-            is_trunk,
             polar_spread,
 
             # Cell-intrinsic principal axis (PC1)
@@ -995,10 +994,9 @@ def extract_branches(
             sub_bif_density,
 
             # Trunk-detection (apical-vs-basal discriminator)
+            # sub_trunk_length_norm, sub_trunk_fraction, on_longest_path REMOVED
+            # 2026-05-09 — v10_no_trunk ablation showed zero contribution
             path_to_first_bif_norm,
-            sub_trunk_length_norm,
-            sub_trunk_fraction,
-            on_longest_path,
         ], dtype=np.float64)
 
         branches.append(BranchData(
