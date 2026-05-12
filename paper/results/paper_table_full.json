@@ -323,6 +323,20 @@
       "n_files": 461
     },
     {
+      "method": "v11_final_oracle_celltype",
+      "source": "ablation",
+      "accuracy": 0.9935,
+      "macro_f1": 0.9759,
+      "neurite_macro_f1": 0.9678,
+      "soma_f1": 1.0,
+      "axon_f1": 0.9988,
+      "basal_f1": 0.9597,
+      "apical_f1": 0.9449,
+      "per_file_mean": 0.9596,
+      "per_file_p10": 0.9012,
+      "n_files": 461
+    },
+    {
       "method": "loso_in_house",
       "source": "LOSO",
       "accuracy": 0.9521,
@@ -370,28 +384,28 @@
       "n_pairs": 461,
       "mean_diff_vs_v9": -0.02618937093275488,
       "p_value": 0.00011302335008075882,
-      "p_value_bonferroni": 0.023734903516959352,
+      "p_value_bonferroni": 0.026108393868655287,
       "significant": true
     },
     "loso_allen": {
       "n_pairs": 58,
       "mean_diff_vs_v9": -0.13885862068965515,
       "p_value": 8.75128034540769e-07,
-      "p_value_bonferroni": 0.00018377688725356147,
+      "p_value_bonferroni": 0.00020215457597891763,
       "significant": true
     },
     "loso_in_house": {
       "n_pairs": 228,
       "mean_diff_vs_v9": -0.3679368421052632,
       "p_value": 7.733323095568273e-31,
-      "p_value_bonferroni": 1.6239978500693374e-28,
+      "p_value_bonferroni": 1.786397635076271e-28,
       "significant": true
     },
     "loso_neuromorpho": {
       "n_pairs": 175,
       "mean_diff_vs_v9": -0.24328971428571428,
       "p_value": 3.613713636793365e-18,
-      "p_value_bonferroni": 7.588798637266067e-16,
+      "p_value_bonferroni": 8.347678500992673e-16,
       "significant": true
     },
     "multi_seed_123": {
@@ -412,7 +426,7 @@
       "n_pairs": 461,
       "mean_diff_vs_v9": -0.09723058568329719,
       "p_value": 1.1550942918353525e-42,
-      "p_value_bonferroni": 2.42569801285424e-40,
+      "p_value_bonferroni": 2.668267814139664e-40,
       "significant": true
     },
     "no_pca": {
@@ -447,14 +461,14 @@
       "n_pairs": 461,
       "mean_diff_vs_v9": -0.0633290672451193,
       "p_value": 4.339100829862434e-11,
-      "p_value_bonferroni": 9.112111742711112e-09,
+      "p_value_bonferroni": 1.0023322916982223e-08,
       "significant": true
     },
     "sholl_rf": {
       "n_pairs": 461,
       "mean_diff_vs_v9": -0.03989631236442517,
       "p_value": 8.045018576611629e-07,
-      "p_value_bonferroni": 0.00016894539010884422,
+      "p_value_bonferroni": 0.00018583992911972864,
       "significant": true
     },
     "v10_final": {
@@ -489,6 +503,13 @@
       "n_pairs": 461,
       "mean_diff_vs_v9": -0.0010724511930585677,
       "p_value": 0.7897165079739374,
+      "p_value_bonferroni": 1.0,
+      "significant": false
+    },
+    "v11_oracle_celltype": {
+      "n_pairs": 461,
+      "mean_diff_vs_v9": -5.2060737527115016e-05,
+      "p_value": 0.8733537674341689,
       "p_value_bonferroni": 1.0,
       "significant": false
     },

@@ -100,6 +100,10 @@ def _ablation_rows() -> list[dict]:
         "v10_no_pca",
         "v10_no_trunk",
         "v10_no_soft_handoff",
+        # Fairness ablation: v11_final with oracle (ground-truth) cell type,
+        # bypassing Stage 1. Matches the information available to external
+        # baselines (which receive cell type as a one-hot input feature).
+        "v11_final_oracle_celltype",
     ]
     out: list[dict] = []
     for tag in candidates:
