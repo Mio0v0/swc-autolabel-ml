@@ -88,14 +88,15 @@ def _collect_dataset(data_dir: Path) -> tuple[np.ndarray, np.ndarray, list[str],
 
 def build_pipeline():
     """Build the Stage 1 sklearn pipeline."""
-    from sklearn.ensemble import (
-        ExtraTreesClassifier,
-        HistGradientBoostingClassifier,
-        RandomForestClassifier,
-        VotingClassifier,
-    )
+    from sklearn.ensemble import VotingClassifier
     from sklearn.pipeline import Pipeline
     from sklearn.preprocessing import StandardScaler
+    # GPU drop-ins. Same constructor signatures as sklearn originals.
+    from hybrid._xgb_classifiers import (
+        XGBRandomForestClassifier as RandomForestClassifier,
+        XGBExtraTreesClassifier as ExtraTreesClassifier,
+        XGBHistGradientBoostingClassifier as HistGradientBoostingClassifier,
+    )
 
     rf = RandomForestClassifier(
         n_estimators=300,

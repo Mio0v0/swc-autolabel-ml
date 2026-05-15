@@ -223,9 +223,14 @@ def _branch_feature_with_owner(
 
 
 def _build_subtree_pipeline(seed: int):
-    from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier, VotingClassifier
+    from sklearn.ensemble import VotingClassifier
     from sklearn.pipeline import Pipeline
     from sklearn.preprocessing import StandardScaler
+    # GPU drop-ins. Same constructor signatures as sklearn originals.
+    from hybrid._xgb_classifiers import (
+        XGBRandomForestClassifier as RandomForestClassifier,
+        XGBGradientBoostingClassifier as GradientBoostingClassifier,
+    )
 
     rf = RandomForestClassifier(
         n_estimators=250,
@@ -485,13 +490,14 @@ def _build_pipeline(seed: int):
     weights via sample_weight at fit time (see _node_balanced_weights).
     Setting class_weight would double-count the balancing.
     """
-    from sklearn.ensemble import (
-        GradientBoostingClassifier,
-        RandomForestClassifier,
-        VotingClassifier,
-    )
+    from sklearn.ensemble import VotingClassifier
     from sklearn.preprocessing import StandardScaler
     from sklearn.pipeline import Pipeline
+    # GPU drop-ins. Same constructor signatures as sklearn originals.
+    from hybrid._xgb_classifiers import (
+        XGBRandomForestClassifier as RandomForestClassifier,
+        XGBGradientBoostingClassifier as GradientBoostingClassifier,
+    )
 
     rf = RandomForestClassifier(
         n_estimators=300,

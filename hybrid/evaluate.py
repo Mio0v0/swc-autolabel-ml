@@ -112,9 +112,15 @@ def _file_level_split(
 
 def _train_stage1(train_files: dict[str, list[Path]], model_path: Path) -> None:
     """Train Stage 1 on train split only."""
-    from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier, VotingClassifier
+    from sklearn.ensemble import VotingClassifier
     from sklearn.preprocessing import StandardScaler
     from sklearn.pipeline import Pipeline
+    # GPU drop-ins for RF + GB. Same constructor signatures as the sklearn
+    # originals, so the call below is unchanged.
+    from hybrid._xgb_classifiers import (
+        XGBRandomForestClassifier as RandomForestClassifier,
+        XGBGradientBoostingClassifier as GradientBoostingClassifier,
+    )
 
     X_list, y_list = [], []
     class_names = sorted(train_files.keys())
