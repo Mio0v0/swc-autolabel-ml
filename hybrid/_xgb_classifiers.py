@@ -70,6 +70,23 @@ def _label_encode(y):
     return enc, classes
 
 
+def _switch_inference_to_cpu(model: xgb.XGBClassifier) -> None:
+    """Flip the booster's runtime device to CPU after training on GPU.
+
+    GPU launch overhead (~1-5 ms per call) dominates for the small per-cell
+    predict batches the pipeline issues (~2000 branches at a time). Training
+    keeps the GPU win on the big batched fit; inference switches to CPU
+    where small predicts are essentially free. Same weights, same
+    predictions, just faster.
+    """
+    try:
+        model.get_booster().set_param({"device": "cpu"})
+    except Exception:
+        # If anything goes wrong, leave the model as-is; predictions will
+        # still be correct, just slower.
+        pass
+
+
 # ---------------------------------------------------------------------------
 # Random Forest (XGBoost "random forest mode")
 # ---------------------------------------------------------------------------
@@ -121,6 +138,7 @@ class XGBRandomForestClassifier(BaseEstimator, ClassifierMixin):
             sample_weight = compute_sample_weight(class_weight="balanced", y=np.asarray(y))
         self._model_ = self._make_xgb()
         self._model_.fit(X, y_enc, sample_weight=sample_weight)
+        _switch_inference_to_cpu(self._model_)
         self.classes_ = classes
         return self
 
@@ -192,6 +210,7 @@ class XGBGradientBoostingClassifier(BaseEstimator, ClassifierMixin):
             verbosity=0,
         )
         self._model_.fit(X, y_enc, sample_weight=sample_weight)
+        _switch_inference_to_cpu(self._model_)
         self.classes_ = classes
         return self
 
@@ -241,6 +260,7 @@ class XGBHistGradientBoostingClassifier(BaseEstimator, ClassifierMixin):
             verbosity=0,
         )
         self._model_.fit(X, y_enc, sample_weight=sample_weight)
+        _switch_inference_to_cpu(self._model_)
         self.classes_ = classes
         return self
 
