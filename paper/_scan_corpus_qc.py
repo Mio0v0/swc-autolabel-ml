@@ -35,13 +35,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from hybrid.features import parse_swc, SWCNode    # noqa: E402
+from hybrid.features import parse_swc, SWCNode                                # noqa: E402
+from hybrid.swc_normalize import count_custom_types, normalize_custom_types   # noqa: E402
 
 CORPUS = ROOT / "data" / "v12_uncurated"
 OUT_CSV = ROOT / "paper" / "results" / "corpus_qc_v12_uncurated.csv"
 OUT_JSON = OUT_CSV.with_suffix(".json")
 
-VALID_TYPES = {0, 1, 2, 3, 4, 5, 6, 7}      # SWC standard
+# Custom (non-standard) types are NO LONGER a rejection reason; parse_swc
+# rewrites them to the branch's dominant standard type. We still surface
+# the raw on-disk type values for transparency.
 MIN_NODES = 10
 MAX_NODES = 200_000
 
@@ -65,11 +68,10 @@ def qc_one_file(path: Path) -> dict:
         "single_root": False,
         "no_orphan": False,
         "has_neurites": False,
-        "label_set_ok": False,
         "radius_positive": False,
         "coords_finite": False,
         "reasonable_size": False,
-        # derived counts
+        # derived counts (AFTER normalization)
         "n_nodes": 0,
         "n_soma": 0,
         "n_axon": 0,
@@ -78,16 +80,32 @@ def qc_one_file(path: Path) -> dict:
         "n_other": 0,
         "n_roots": 0,
         "n_orphan": 0,
+        # informational: raw on-disk custom types (NOT a rejection reason)
+        "n_custom_type_nodes_raw": 0,
+        "custom_type_values_raw": "",
         # PASS flag
         "qc_pass": False,
         "qc_reason": "",
     }
 
-    # Parse
+    # Parse RAW, then normalize ourselves so we can report raw custom-type
+    # stats and the post-normalization view in a single pass.
     try:
-        nodes = parse_swc(path)
+        raw_nodes = parse_swc(path, normalize_types=False)
     except Exception as exc:
         row["qc_reason"] = f"parse_error: {exc}"
+        return row
+    raw_custom = count_custom_types(raw_nodes)
+    row["n_custom_type_nodes_raw"] = int(sum(raw_custom.values()))
+    if raw_custom:
+        row["custom_type_values_raw"] = ",".join(
+            f"{t}:{c}" for t, c in sorted(raw_custom.items())
+        )
+
+    try:
+        nodes, _ = normalize_custom_types(raw_nodes)
+    except Exception as exc:
+        row["qc_reason"] = f"normalize_error: {exc}"
         return row
     row["parseable"] = True
 
@@ -99,7 +117,7 @@ def qc_one_file(path: Path) -> dict:
     row["non_empty"] = len(nodes) >= MIN_NODES
     row["reasonable_size"] = MIN_NODES <= len(nodes) <= MAX_NODES
 
-    # Per-type counts
+    # Per-type counts (after normalization, types are in {0,1,2,3,4})
     type_counts = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0}
     for n in nodes:
         if n.type in type_counts:
@@ -111,7 +129,6 @@ def qc_one_file(path: Path) -> dict:
     row["n_other"] = sum(1 for n in nodes if n.type not in (1, 2, 3, 4))
     row["has_soma"] = row["n_soma"] >= 1
     row["has_neurites"] = (row["n_axon"] + row["n_basal"] + row["n_apical"]) >= 1
-    row["label_set_ok"] = all(n.type in VALID_TYPES for n in nodes)
 
     # Roots / orphans
     by_id = {n.id: n for n in nodes}
@@ -128,11 +145,12 @@ def qc_one_file(path: Path) -> dict:
         _is_finite(n.x) and _is_finite(n.y) and _is_finite(n.z) for n in nodes
     )
 
-    # PASS = every structural check is True
+    # PASS = every structural check is True. label_set_ok is intentionally
+    # NOT in this list — non-standard types are now absorbed by
+    # normalize_custom_types instead of being a rejection reason.
     checks = [
         "parseable", "non_empty", "has_soma", "single_root", "no_orphan",
-        "has_neurites", "label_set_ok", "radius_positive", "coords_finite",
-        "reasonable_size",
+        "has_neurites", "radius_positive", "coords_finite", "reasonable_size",
     ]
     failed = [c for c in checks if not row[c]]
     if not failed:

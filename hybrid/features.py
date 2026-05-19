@@ -30,8 +30,19 @@ class SWCNode:
     parent: int
 
 
-def parse_swc(path: str | Path) -> list[SWCNode]:
-    """Parse an SWC file into a list of SWCNode."""
+def parse_swc(path: str | Path, *, normalize_types: bool = True) -> list[SWCNode]:
+    """Parse an SWC file into a list of SWCNode.
+
+    If ``normalize_types`` is True (the default), nodes carrying a
+    non-standard SWC type value (anything outside {1, 2, 3, 4}) are
+    rewritten to the dominant standard type of the branch they belong to.
+    This absorbs custom sub-cellular annotations (axon hillock, spines,
+    boutons, etc.) into their host neurite so downstream training and
+    evaluation see only the four canonical neurite classes. Topology is
+    never altered.
+
+    Pass ``normalize_types=False`` if you need the raw on-disk types.
+    """
     nodes: list[SWCNode] = []
     with open(path, "r", encoding="utf-8", errors="ignore") as fh:
         for line in fh:
@@ -53,6 +64,11 @@ def parse_swc(path: str | Path) -> list[SWCNode]:
                 ))
             except (ValueError, IndexError):
                 continue
+
+    if normalize_types and nodes:
+        # Local import to avoid a circular dependency at module-load time
+        from .swc_normalize import normalize_custom_types
+        nodes, _ = normalize_custom_types(nodes)
     return nodes
 
 
