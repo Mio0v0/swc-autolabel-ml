@@ -58,7 +58,7 @@ from sklearn.model_selection import KFold
 from torch import nn
 from torch_geometric.data import Batch, Data
 from torch_geometric.loader import DataLoader
-from torch_geometric.nn import SAGEConv
+from torch_geometric.nn import SAGEConv, GATConv, GINConv
 
 from paper.gnn_dataset import (
     CLASS_APICAL,
@@ -93,13 +93,29 @@ class ApicalBasalSAGE(nn.Module):
         dropout: float = 0.2,
         n_classes: int = 2,
         n_layers: int = 2,
+        gnn_type: str = "sage",
     ) -> None:
         super().__init__()
         if n_layers < 2:
             raise ValueError(f"n_layers must be >= 2 (got {n_layers})")
+        gnn_type = (gnn_type or "sage").lower()
         dims = [in_dim] + [hidden] * n_layers
+
+        def _make_layer(in_d: int, out_d: int):
+            if gnn_type == "sage":
+                return SAGEConv(in_d, out_d, aggr="mean")
+            if gnn_type == "gat":
+                # Use 4 attention heads, concat=False so output dim stays = out_d.
+                return GATConv(in_d, out_d, heads=4, concat=False, dropout=dropout)
+            if gnn_type == "gin":
+                mlp = nn.Sequential(
+                    nn.Linear(in_d, out_d), nn.ReLU(), nn.Linear(out_d, out_d),
+                )
+                return GINConv(mlp, train_eps=True)
+            raise ValueError(f"unknown gnn_type: {gnn_type!r}")
+
         self.convs = nn.ModuleList(
-            [SAGEConv(dims[i], dims[i + 1], aggr="mean") for i in range(n_layers)]
+            [_make_layer(dims[i], dims[i + 1]) for i in range(n_layers)]
         )
         self.head = nn.Linear(hidden, n_classes)
         self.dropout = dropout
@@ -107,6 +123,7 @@ class ApicalBasalSAGE(nn.Module):
         self.hidden = hidden
         self.n_classes = n_classes
         self.n_layers = n_layers
+        self.gnn_type = gnn_type
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
         h = x
@@ -234,6 +251,7 @@ class TrainConfig:
     patience: int = 25
     batch_size: int = 16
     seed: int = 42
+    gnn_type: str = "sage"  # "sage" | "gat" | "gin"
 
 
 @dataclass
@@ -252,6 +270,43 @@ class FoldResult:
 
 def _make_loader(graphs: Sequence[Data], batch_size: int, shuffle: bool) -> DataLoader:
     return DataLoader(list(graphs), batch_size=batch_size, shuffle=shuffle)
+
+
+def _compute_class_weights(
+    train_graphs: Sequence[Data], device: torch.device,
+) -> torch.Tensor | None:
+    """Compute per-class weights for cross_entropy based on training-set
+    class frequencies. Enabled via env var SWCAL_GNN_CLASS_WEIGHT:
+
+        "off"          -> return None (default; no weighting, behavior
+                          identical to the original training)
+        "inverse"      -> w_c = N / (n_classes * count_c)
+                          (equalizes class contribution)
+        "inverse_sqrt" -> w_c = sqrt(N / (n_classes * count_c))
+                          (gentler; halfway to no weighting)
+
+    The returned tensor is [w_basal, w_apical] on the given device.
+    """
+    import os as _os
+    mode = (_os.environ.get("SWCAL_GNN_CLASS_WEIGHT", "off") or "off").lower()
+    if mode == "off":
+        return None
+    counts = {CLASS_BASAL: 0, CLASS_APICAL: 0}
+    for g in train_graphs:
+        y = g.y.cpu().numpy() if hasattr(g.y, "cpu") else np.asarray(g.y)
+        counts[CLASS_BASAL]  += int((y == CLASS_BASAL).sum())
+        counts[CLASS_APICAL] += int((y == CLASS_APICAL).sum())
+    total = counts[CLASS_BASAL] + counts[CLASS_APICAL]
+    if total == 0:
+        return None
+    n_classes = 2
+    raw = [total / (n_classes * max(1, counts[c])) for c in (CLASS_BASAL, CLASS_APICAL)]
+    if mode == "inverse_sqrt":
+        raw = [float(np.sqrt(w)) for w in raw]
+    elif mode != "inverse":
+        # Unknown mode; bail out conservatively
+        return None
+    return torch.tensor(raw, dtype=torch.float32, device=device)
 
 
 def _eval_predictions(
@@ -326,8 +381,16 @@ def train_one_fold(
 
     model = ApicalBasalSAGE(
         in_dim=in_dim, hidden=cfg.hidden, dropout=cfg.dropout, n_layers=cfg.n_layers,
+        gnn_type=cfg.gnn_type,
     ).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
+
+    # Optional: inverse-frequency class weighting for cross-entropy. Enabled
+    # via env var SWCAL_GNN_CLASS_WEIGHT in {"inverse","inverse_sqrt"};
+    # default "off" preserves the original uniform-weighting behavior.
+    class_weight = _compute_class_weights(train_z, device)
+    if class_weight is not None:
+        print(f"    GNN class weight enabled: {class_weight.tolist()}")
 
     best_macro_f1 = -1.0
     best_epoch = -1
@@ -348,7 +411,9 @@ def train_one_fold(
             batch = batch.to(device)
             opt.zero_grad()
             logits = model(batch.x, batch.edge_index)
-            loss = F.cross_entropy(logits, batch.y, ignore_index=CLASS_IGNORE)
+            loss = F.cross_entropy(
+                logits, batch.y, weight=class_weight, ignore_index=CLASS_IGNORE,
+            )
             loss.backward()
             opt.step()
             total_loss += float(loss.item())
@@ -461,9 +526,13 @@ def fit_final(
     test_z = scaler.transform(test_graphs)
     model = ApicalBasalSAGE(
         in_dim=in_dim, hidden=cfg.hidden, dropout=cfg.dropout, n_layers=cfg.n_layers,
+        gnn_type=cfg.gnn_type,
     ).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
     loader = _make_loader(train_z, batch_size=cfg.batch_size, shuffle=True)
+    class_weight = _compute_class_weights(train_z, device)
+    if class_weight is not None:
+        print(f"    GNN class weight enabled: {class_weight.tolist()}")
     for epoch in range(n_epochs):
         model.train()
         total_loss = 0.0
@@ -472,7 +541,9 @@ def fit_final(
             batch = batch.to(device)
             opt.zero_grad()
             logits = model(batch.x, batch.edge_index)
-            loss = F.cross_entropy(logits, batch.y, ignore_index=CLASS_IGNORE)
+            loss = F.cross_entropy(
+                logits, batch.y, weight=class_weight, ignore_index=CLASS_IGNORE,
+            )
             loss.backward()
             opt.step()
             total_loss += float(loss.item())
@@ -522,6 +593,7 @@ def save_checkpoint(
             "n_classes": model.n_classes,
             "dropout": model.dropout,
             "n_layers": model.n_layers,
+            "gnn_type": getattr(model, "gnn_type", "sage"),
         },
         "scaler": scaler.to_state(),
         "feature_names": list(feature_names),
@@ -555,6 +627,7 @@ def load_checkpoint(path: Path, device: torch.device) -> tuple[ApicalBasalSAGE, 
         n_classes=cfg["n_classes"],
         dropout=cfg["dropout"],
         n_layers=cfg.get("n_layers", 2),
+        gnn_type=cfg.get("gnn_type", "sage"),
     ).to(device)
     model.load_state_dict(payload["model_state"])
     scaler = FeatureScaler.from_state(payload["scaler"])
@@ -586,6 +659,8 @@ def _build_argparser() -> argparse.ArgumentParser:
     ap.add_argument("--skip-final", action="store_true",
                     help="Skip the final retrain on all train data")
     ap.add_argument("--no-cuda", action="store_true")
+    ap.add_argument("--gnn-type", choices=("sage", "gat", "gin"), default="sage",
+                    help="GNN convolution operator (default: sage)")
     return ap
 
 
@@ -598,6 +673,7 @@ def main() -> int:
         epochs=30 if args.quick else args.epochs,
         patience=10 if args.quick else args.patience,
         batch_size=args.batch_size, seed=args.seed,
+        gnn_type=args.gnn_type,
     )
     n_folds = 1 if args.quick else args.n_folds
 
@@ -624,6 +700,7 @@ def main() -> int:
     # Build a model just to print param count.
     probe = ApicalBasalSAGE(
         in_dim=in_dim, hidden=cfg.hidden, dropout=cfg.dropout, n_layers=cfg.n_layers,
+        gnn_type=cfg.gnn_type,
     )
     print(
         f"Model: {cfg.n_layers}-layer GraphSAGE, hidden={cfg.hidden}, "

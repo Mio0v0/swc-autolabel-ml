@@ -362,18 +362,28 @@ def _predict_subtree_owner_map_by_cell_type(
     return _predict_subtree_owner_map(file_path, cell_type, model)
 
 
-def _node_balanced_weights(y: np.ndarray, w: np.ndarray) -> np.ndarray:
+def _node_balanced_weights(
+    y: np.ndarray, w: np.ndarray, power: float | None = None,
+) -> np.ndarray:
     """Combine node-count weights with node-level class balancing.
 
     effective_w = node_count × class_balance_factor
 
-    class_balance_factor ensures each class contributes equal total
-    weight, computed from node-weighted totals (not branch counts, not
-    row counts). This fixes the axon-dominance bias in a single cell
-    type: if 80% of nodes are axon, axon rows get down-weighted 0.625×
-    and dendrite rows up-weighted 2.5× so both classes contribute
-    equal aggregate weight to the loss.
+    With ``power=1.0`` (default, backward compatible) the class factor
+    equalizes total per-class weight: each class contributes the same
+    aggregate mass to the loss.
+
+    With ``power > 1`` the inverse-frequency weighting is amplified,
+    over-correcting toward minority classes. Useful when the model
+    still over-predicts the majority class even after equal-mass
+    balancing — common with axon-vs-dendrite at Stage 2.
+
+    The ``power`` may also be set via the ``SWCAL_CLASS_BALANCE_POWER``
+    env var (default 1.0). The function argument takes precedence.
     """
+    if power is None:
+        import os as _os
+        power = float(_os.environ.get("SWCAL_CLASS_BALANCE_POWER", "1.0"))
     class_totals: dict[int, float] = {}
     for lbl, weight in zip(y.tolist(), w.tolist()):
         class_totals[lbl] = class_totals.get(lbl, 0.0) + weight
@@ -381,7 +391,10 @@ def _node_balanced_weights(y: np.ndarray, w: np.ndarray) -> np.ndarray:
     total = sum(class_totals.values())
     if n_classes == 0 or total <= 0:
         return w
-    class_factor = {c: total / (n_classes * t) for c, t in class_totals.items()}
+    class_factor = {
+        c: (total / (n_classes * t)) ** power
+        for c, t in class_totals.items()
+    }
     return np.array([weight * class_factor[lbl] for lbl, weight in zip(y.tolist(), w.tolist())])
 
 
