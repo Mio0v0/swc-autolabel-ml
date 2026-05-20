@@ -46,14 +46,9 @@ from hybrid.confidence import (                                             # no
 # Pinned inputs
 # ---------------------------------------------------------------------------
 DATA_DIR    = ROOT / "data" / "v12_uncurated"
-SPLIT_JSON  = ROOT / "paper" / "models" / "v12" / "train_test_split.json"
-S1_MODEL    = ROOT / "paper" / "models" / "v12" / "cell_type_classifier.pkl"
-S2_MODEL    = ROOT / "paper" / "models" / "v12" / "branch_classifier.pkl"
-GNN_DEFAULT = ROOT / "paper" / "models" / "v12" / "gnn_apical_basal.pt"
-GNN_FALLBACK = ROOT / "paper" / "models" / "gnn_apical_basal_v11_final.pt"
-FLAG_CONFIG_OUT = ROOT / "paper" / "models" / "v12" / "flag_config.json"
-CURVES_CSV  = ROOT / "paper" / "results" / "flag_calibration_curves.csv"
-SUMMARY_JSON = ROOT / "paper" / "results" / "flag_calibration_summary.json"
+# Default paths — overridable via CLI args.
+DEFAULT_MODEL_DIR    = ROOT / "paper" / "models" / "v12"
+DEFAULT_GNN_FALLBACK = ROOT / "paper" / "models" / "gnn_apical_basal_v11_final.pt"
 
 
 def _neurite_macro_f1(gt: list[int], pred: list[int]) -> float:
@@ -63,8 +58,8 @@ def _neurite_macro_f1(gt: list[int], pred: list[int]) -> float:
     return float(f1_score(gt, pred, labels=[2, 3, 4], average="macro", zero_division=0))
 
 
-def _load_test_files() -> list[tuple[str, Path]]:
-    split = json.loads(SPLIT_JSON.read_text(encoding="utf-8"))
+def _load_test_files(split_json: Path) -> list[tuple[str, Path]]:
+    split = json.loads(split_json.read_text(encoding="utf-8"))
     out: list[tuple[str, Path]] = []
     for ct in ("pyramidal", "interneuron"):
         for name in split["test"].get(ct, []):
@@ -80,6 +75,8 @@ def _load_test_files() -> list[tuple[str, Path]]:
 def run_inference_on_test(
     test_files: list[tuple[str, Path]],
     gnn_path: Path | None,
+    s1_model: Path,
+    s2_model: Path,
     sample: int | None = None,
 ) -> tuple[list[dict], list[dict]]:
     """Return (per_branch_records, per_cell_records).
@@ -125,7 +122,7 @@ def run_inference_on_test(
                 continue
             pr = run_pipeline_on_nodes(
                 nodes, file_path=str(path),
-                stage1_model=S1_MODEL, stage2_model=S2_MODEL,
+                stage1_model=s1_model, stage2_model=s2_model,
                 gnn_state=gnn_state, use_subtree_stage2=True,
             )
         except Exception as exc:
@@ -311,27 +308,46 @@ def main() -> int:
                     help="Target precision for the flag thresholds (default 0.90).")
     ap.add_argument("--bad-cell-f1-threshold", type=float, default=0.85,
                     help="Cells with neurite-F1 below this are considered 'bad' (default 0.85).")
+    ap.add_argument("--model-dir", type=Path, default=DEFAULT_MODEL_DIR,
+                    help="Dir containing cell_type_classifier.pkl, branch_classifier.pkl, "
+                         "gnn_apical_basal.pt, and train_test_split.json (default: v12 baseline).")
     ap.add_argument("--gnn-model", type=Path, default=None,
-                    help="Path to GNN .pt; default tries v12 then v11_final.")
+                    help="Override path to GNN .pt; default uses <model-dir>/gnn_apical_basal.pt.")
+    ap.add_argument("--tag", type=str, default=None,
+                    help="Suffix tag for output files (default: derived from --model-dir name).")
     ap.add_argument("--sample", type=int, default=None,
                     help="Use only the first N test cells (debug option).")
     args = ap.parse_args()
 
+    # Resolve paths from model dir
+    s1_model    = args.model_dir / "cell_type_classifier.pkl"
+    s2_model    = args.model_dir / "branch_classifier.pkl"
+    gnn_default = args.model_dir / "gnn_apical_basal.pt"
+    split_json  = args.model_dir / "train_test_split.json"
+    tag         = args.tag or args.model_dir.name
+
+    flag_config_out = args.model_dir / "flag_config.json"
+    curves_csv      = ROOT / "paper" / "results" / f"flag_calibration_curves_{tag}.csv"
+    summary_json    = ROOT / "paper" / "results" / f"flag_calibration_summary_{tag}.json"
+
+    print(f"Model dir: {args.model_dir}")
+    print(f"Tag      : {tag}")
+
     # GNN selection
     if args.gnn_model:
         gnn_path = args.gnn_model
-    elif GNN_DEFAULT.is_file():
-        gnn_path = GNN_DEFAULT
-        print(f"Using v12 GNN at {gnn_path}")
-    elif GNN_FALLBACK.is_file():
-        gnn_path = GNN_FALLBACK
-        print(f"v12 GNN not found; falling back to {gnn_path}")
+    elif gnn_default.is_file():
+        gnn_path = gnn_default
+        print(f"Using GNN at {gnn_path}")
+    elif DEFAULT_GNN_FALLBACK.is_file():
+        gnn_path = DEFAULT_GNN_FALLBACK
+        print(f"GNN not found in model dir; falling back to {gnn_path}")
     else:
         gnn_path = None
         print("WARN: no GNN checkpoint found; Stage 3 will be skipped.")
 
     # Load test split
-    test_files = _load_test_files()
+    test_files = _load_test_files(split_json)
     print(f"Test split: {len(test_files)} cells "
           f"({sum(1 for ct,_ in test_files if ct=='pyramidal')} pyramidal, "
           f"{sum(1 for ct,_ in test_files if ct=='interneuron')} interneuron)")
@@ -339,7 +355,9 @@ def main() -> int:
     # Inference
     print()
     print("[1] Inference on test set")
-    branch_rows, cell_rows = run_inference_on_test(test_files, gnn_path, args.sample)
+    branch_rows, cell_rows = run_inference_on_test(
+        test_files, gnn_path, s1_model, s2_model, args.sample,
+    )
     print(f"  collected {len(branch_rows)} branch rows, {len(cell_rows)} cell rows")
 
     # Threshold sweeps
@@ -380,13 +398,15 @@ def main() -> int:
         target_precision=args.target_precision,
         note=f"Calibrated on v12 test split. bad_cell_f1_threshold={args.bad_cell_f1_threshold}.",
     )
-    cfg.save(FLAG_CONFIG_OUT)
-    print(f"\nSaved flag config -> {FLAG_CONFIG_OUT}")
+    cfg.save(flag_config_out)
+    print(f"\nSaved flag config -> {flag_config_out}")
 
     # Save full curves for later inspection
-    SUMMARY_JSON.write_text(json.dumps({
+    summary_json.write_text(json.dumps({
         "target_precision":      args.target_precision,
         "bad_cell_f1_threshold": args.bad_cell_f1_threshold,
+        "model_dir":             str(args.model_dir),
+        "tag":                   tag,
         "gnn_model":             str(gnn_path) if gnn_path else None,
         "n_test_cells":          len(cell_rows),
         "n_test_branches":       len(branch_rows),
@@ -394,16 +414,16 @@ def main() -> int:
         "branch_summary":        branch_summary,
         "cell_summary":          cell_summary,
     }, indent=2), encoding="utf-8")
-    print(f"Summary  -> {SUMMARY_JSON}")
+    print(f"Summary  -> {summary_json}")
 
     # Optional: dump per-branch/per-cell rows for offline analysis
-    CURVES_CSV.parent.mkdir(parents=True, exist_ok=True)
-    with CURVES_CSV.open("w", encoding="utf-8", newline="") as fh:
+    curves_csv.parent.mkdir(parents=True, exist_ok=True)
+    with curves_csv.open("w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(branch_rows[0].keys()) if branch_rows else [])
         w.writeheader()
         for r in branch_rows:
             w.writerow(r)
-    print(f"Per-branch rows -> {CURVES_CSV}")
+    print(f"Per-branch rows -> {curves_csv}")
     return 0
 
 
