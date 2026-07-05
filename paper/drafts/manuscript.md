@@ -1,8 +1,8 @@
 # A staged classifier–GNN–topology pipeline for automatic axon, basal, and apical labeling of neuronal morphology reconstructions
 
-**Status:** v0.3 working draft, 2026-06-24. All numbers traced to artifacts in
-`paper/results/`. `[TODO]` markers flag items that still need a figure, a
-number, or a writing pass. Every reported metric is annotated with its
+**Status:** v0.4 working draft, 2026-07-02. All numbers traced to artifacts in
+`paper/results/`. Remaining `[TODO]` markers flag citation verification and
+the SWC-Studio deployment note. Every reported metric is annotated with its
 evaluation configuration (see §4.6).
 
 ---
@@ -92,39 +92,35 @@ constructions* assembled from standard morphometric feature libraries
 (RandomForest, MLP); we deliberately span the design space of
 plausible approaches a competing group might build (see §4.6).
 
-This paper contributes:
+This paper contributes four things:
 
-1. **A five-step end-to-end SWC labeling pipeline** (QC → cell type →
-   branch classifier + GNN → topology refinement + Branch3 rescue →
-   quality flag) that reaches mean per-class F1 of 0.993 / 0.954 /
-   0.916 for axon / basal / apical when the ground-truth cell type is
-   supplied, and 0.993 / 0.951 / 0.906 in the deployment configuration
-   where Stage 1 predicts the cell type.
-2. **An apples-to-apples comparison** against four constructed
-   published-style baselines on the same splits, with paired sign-flip
-   significance testing and bootstrap confidence intervals on per-file
-   metrics (n = 5,739 unique files).
-3. **A controlled stage ablation** isolating the contribution of each
-   pipeline component, showing that Stage 3 topology refinement is the
-   single largest gain (+0.054 apical F1) and that the GNN contributes
-   only when paired with Stage 3.
-4. **A deployment-config quality-flag model** that identifies the worst
-   10% of predictions with 58% recall (F1 0.50, AP 0.48) using only
-   features available from one inference pass, lifting the kept-set
-   10th-percentile per-cell F1 from 0.66 to 0.96.
-5. **A "train on your own data" capability**: the pipeline is fully
-   re-trainable from a user-supplied SWC corpus and labels via a single
-   driver script, so users with their own well-curated lab corpus can
-   produce a labeler specialized to their tracing conventions. We
-   demonstrate this in §5.5 by training and evaluating on the in-house
-   lab subset alone.
-6. **A curator feedback-loop architecture** (§4.7) in which the flag
-   step routes suspect cells to a human, whose corrections feed back
-   into training so the labeler improves with use. A simulated-curator
-   experiment (§5.7) shows flag-guided review reaches a target accuracy
-   with ~60% fewer curator corrections than reviewing random cells.
-7. **An open, reproducible pipeline** with frozen seeds (42, 123, 789),
-   saved train/test splits, and a complete artifact manifest.
+1. **An end-to-end SWC labeler, benchmarked honestly.** A staged
+   pipeline (QC → cell type → branch classifier + GNN → topology
+   refinement + Branch3 rescue) that reaches mean per-class F1 of
+   0.993 / 0.954 / 0.916 for axon / basal / apical (0.993 / 0.951 /
+   0.906 when Stage 1 predicts the cell type), evaluated against four
+   constructed published-style baselines on the same splits with paired
+   significance testing (n = 5,739 files), and dissected by a controlled
+   stage ablation that identifies topology refinement — not the GNN — as
+   the single largest gain.
+2. **A deployment workflow built around a quality flag.** A flag model
+   identifies the worst 10% of predictions at 58% recall (F1 0.50) from
+   a single inference pass, lifting the kept-set 10th-percentile per-cell
+   F1 from 0.66 to 0.96 — turning an auto-labeler into an
+   auto-label-then-curate pipeline.
+3. **Train-on-your-own-data specialization.** The pipeline retrains from
+   a user-supplied corpus via one driver script; we show (§5.5) that
+   retraining on a single clean lab corpus matches or beats the
+   cross-source model on that lab's data.
+4. **A curator feedback loop that improves both labeler and flag.** The
+   flag step routes suspect cells to a curator whose corrected labels
+   retrain the model (§4.7); a simulated-curator study shows flag-guided
+   review improves the labeler with ~60% fewer corrections than random
+   (§5.7) and raises flag precision +21% as verdicts accumulate (§5.8) —
+   so the deployed system improves with use.
+
+Code, models, frozen seeds (42, 123, 789), splits, and an artifact
+manifest are released for full reproducibility.
 
 ---
 
@@ -323,7 +319,7 @@ features depend on cell-type-conditional priors: apical labels are only
 meaningful for pyramidals, and the per-branch classifier is fed
 cell-type as an input feature. A wrong cell type cascades into the
 branch labeling, so cell-type accuracy is a meaningful component
-metric in its own right (see §5.0).
+metric in its own right (0.974 ± 0.007; §5.2).
 
 (See [hybrid/pipeline.py](hybrid/pipeline.py),
 [hybrid/qc_input.py](hybrid/qc_input.py),
@@ -344,7 +340,7 @@ QC pass rates by source and cell type are reported in §3.
 {pyramidal, interneuron} from whole-cell features (Sholl, branch
 statistics, soma geometry). When the user supplies a known cell type,
 this stage is bypassed and the supplied value is passed to Stage 2 as
-the cell-type feature. Predicted-type accuracy is reported in §5.0.
+the cell-type feature. Predicted-type accuracy (0.974) is reported in §5.2.
 
 **Stage 2 — branch classifier.** For each branch in the SWC tree, an
 XGBoost classifier predicts axon / basal / apical given branch-level
@@ -352,11 +348,17 @@ features (length, tortuosity, radial distance, parent–child geometry,
 PCA-projected trajectory) and the cell-type label (from Stage 1 or
 user) as an input feature.
 
-**Stage 2.5 — apical/basal GNN.** A graph neural network operates on
-the branch graph (nodes = branches, edges = parent–child) to refine the
-apical/basal decision on cells classified as pyramidal. [TODO: GNN
-architecture details — number of layers, hidden dim, message-passing
-variant. Pull from [paper/gnn_apical_basal.py](paper/gnn_apical_basal.py).]
+**Stage 2.5 — apical/basal GNN.** A two-layer GraphSAGE network
+(hidden dim 64, ReLU, dropout 0.2) operates on the branch graph
+(nodes = branches with 51 dendrite-relevant features, undirected
+parent–child edges) to re-decide basal vs. apical for branches Stage 2
+labeled as dendrite, on cells classified as pyramidal. It is trained
+with Adam (lr 1e-3, weight decay 5e-4) up to 200 epochs with early
+stopping (patience 25) under 5-fold cross-validation, using a focal
+loss (γ = 2) with inverse-square-root class weighting to counter the
+apical minority. Axon-vs-dendrite is left to Stage 2 (already at F1
+0.99). Implementation:
+[paper/gnn_apical_basal.py](paper/gnn_apical_basal.py).
 
 **Stage 3 — topology refinement + Branch3 rescue.** A rule-based pass
 enforces tree-level constraints: contiguous apical labels along the
@@ -450,10 +452,10 @@ configurations throughout this paper:
   (stage ablation). Reading: *what does the neurite-labeling problem
   look like, holding cell-type knowledge constant?*
 - **Stage 1 active (deployment)** — the user has not supplied a cell
-  type, Stage 1 predicts it. This is the configuration used in §5.0
-  (Stage 1 accuracy), §5.3 (flag model) and §5.4 (failure modes).
-  Reading: *what does the system actually produce for an end user with
-  no prior knowledge?*
+  type, Stage 1 predicts it (at 0.974 accuracy; §5.2). This is the
+  configuration used in §5.3 (flag model), §5.4 (failure modes), and
+  §5.7–5.8 (feedback loop). Reading: *what does the system actually
+  produce for an end user with no prior knowledge?*
 
 Per-class metrics are computed on individual nodes. Per-cell F1 is the
 neurite macro-F1 for one cell. Aggregate per-cell statistics (mean,
@@ -528,17 +530,6 @@ simulated curator; retraining the flag model on curator-derived labels
 
 ## 5. Results
 
-### 5.0 Stage 1: cell-type prediction accuracy
-
-When run in the deployment configuration, Stage 1 predicts the binary
-cell type (pyramidal vs. interneuron) with mean accuracy
-**0.974 ± 0.007** (n = 3 seeds; from
-[final_ablation_table.json](paper/results/final_ablation_table.json),
-`Full Branch3 (Stage 1 active)` row). The Stage 1 error rate
-(~2.6%) is the *only* source of difference between the GT-cell-type
-and deployment configurations downstream; we quantify the resulting
-cost on neurite labeling in §5.2 and motivate the flag model in §5.3.
-
 ### 5.1 Main result: v12+Branch3 vs constructed baselines (GT cell type)
 
 **Baseline framing.** As noted in §1, §2, and detailed in §4.5, no
@@ -605,14 +596,14 @@ Three observations:
 2. **Stage 3 is the biggest single gain.** Adding Stage 3 lifts
    apical F1 from 0.858 to 0.912 (+0.054) and neurite macro-F1
    from 0.922 to 0.953 (+0.030).
-3. **Stage 1 active costs ~0.004 macro-F1.** Switching from
-   ground-truth cell type to Stage 1-predicted cell type costs −0.004
-   neurite macro-F1, −0.010 apical F1, and −0.005 P10 — small
-   absolute drops, consistent with the 0.974 Stage 1 accuracy in §5.0.
-
-[TODO: feature-level ablation (no-PCA, no-soft-handoff, no-trunk). The
-checklist mentions these existed in earlier v9 ablations but the
-current final tables only cover stage-level ablations.]
+3. **Stage 1 active costs ~0.004 macro-F1.** Stage 1 itself predicts
+   the binary cell type at **0.974 ± 0.007** accuracy (n = 3 seeds),
+   and this ~2.6% error is the *only* source of difference between the
+   GT-cell-type and deployment rows. Switching from ground-truth to
+   Stage 1-predicted cell type costs −0.004 neurite macro-F1, −0.010
+   apical F1, and −0.005 P10 — small absolute drops, consistent with the
+   high Stage 1 accuracy. All deployment-configuration results below
+   (§5.3–5.8) inherit this Stage 1 error.
 
 ### 5.3 Quality-flag model (deployment configuration)
 
@@ -699,7 +690,7 @@ indirectly through downstream confidence drop.
 
 ![Qualitative examples](paper/results/figures/final_figure_qualitative.png)
 
-**Figure 4.** Rendered SWC morphologies (2D projection, colored by
+**Figure 2.** Rendered SWC morphologies (2D projection, colored by
 structure type), ground truth vs. predicted. *Top:* a correctly-labeled
 layer-5 pyramidal cell — predicted labels are identical to ground truth
 (per-cell F1 = 1.00). *Bottom:* a mislabeled cell (per-cell F1 = 0.11)
@@ -745,22 +736,13 @@ test cells pooled), GT cell type configuration. Source:
 | per-cell accuracy mean | — | .9840 ± .0035 | — |
 | per-cell accuracy P10 | — | .9767 ± .0015 | — |
 
-Three observations:
-
-1. **Node-level accuracy on lab cells is essentially saturated** at
-   99.2%, and per-cell mean accuracy 98.4% (10th percentile 97.7%).
-   The lab pipeline produces a per-node label that agrees with the
-   curator >98% of the time on almost every cell.
-2. **Per-cell F1 mean and P10 are clearly better on lab**: P10 lifts
-   from 0.74 (cross-source) to 0.79 (lab subset). The model is
-   noticeably more robust on the cleaner data slice.
-3. **Neurite macro-F1 is essentially tied** (0.951 vs 0.950) despite
-   the higher accuracy. The difference is concentrated in basal F1
-   (0.952 → 0.928, Δ −0.024): on these large CA1 pyramidal cells,
-   axon nodes dominate node counts by ~20×, so even a small fraction
-   of basal nodes misclassified as axon pulls the basal macro-F1
-   noticeably down. Axon F1 itself reaches 0.998 — essentially
-   ceiling.
+On lab cells, node accuracy is essentially saturated (99.2%; per-cell
+mean 98.4%, P10 97.7%), and per-cell F1 mean and P10 are clearly better
+than on the full corpus (P10 0.74 → 0.79). Neurite macro-F1 is
+essentially tied (0.951 vs 0.950): the higher accuracy is offset by a
+−0.024 drop in basal F1 — an artifact of macro-averaging on these large
+CA1 cells, where axon nodes outnumber basal ~20×, so a few basal→axon
+errors weigh heavily on the basal class. Axon F1 reaches 0.998.
 
 We note in passing that the simple morphometric baselines of §5.1 close
 most of the gap on this clean single-lab slice (their neurite macro-F1
@@ -799,30 +781,16 @@ focal gamma 2.0). Source:
 | per-cell accuracy mean | .9840 ± .0035 | **.9885 ± .0001** | +.0045 |
 | per-cell accuracy P10 | .9767 ± .0015 | **.9789 ± .0028** | +.0022 |
 
-Three observations:
-
-1. **Lab-only training wins on every metric, with the largest gains
-   on apical F1 (+.006) and per-cell P10 (+.013).** Despite training
-   on ~10× less data (1,064 vs ~9,500 train cells), specializing on
-   in-distribution lab cells more than compensates. The seed-to-seed
-   variance is also tighter on (b) for apical (.0015 vs .0059), per-cell
-   F1 mean (.0024 vs .0045), and per-cell accuracy mean (.0001 vs .0035),
-   suggesting the lab-only model is also more stable.
-2. **The architecture scales down successfully.** Stage 2 + GNN +
-   Branch3 trains end-to-end on 1k cells and matches or beats the
-   model trained on 10× more diverse data, evaluated on the same
-   held-out lab cells. This is the empirical case for the "train on
-   your own data" deployment story: a user with a well-curated
-   single-lab corpus does not need to wait for or rely on a generic
-   cross-source model.
-3. **Headline for lab users: 99.3% node accuracy, 98.9% per-cell mean
-   accuracy, 97.9% P10 per-cell accuracy.** For a typical lab user the
-   model effectively reproduces their manual labels.
-
-The comparison frames the practical recommendation: a user starting
-out with no labeled data uses the released cross-source model (a); a
-user with a large clean in-house corpus retrains (b) for a small but
-consistent gain — especially on the worst-decile tail.
+Lab-only training wins on every metric — most on apical F1 (+.006) and
+per-cell P10 (+.013) — despite ~10× less training data (1,064 vs ~9,500
+cells), and with tighter seed-to-seed variance. The architecture scales
+down: Stage 2 + GNN + Branch3 trains end-to-end on ~1k cells and matches
+or beats the cross-source model on the same held-out lab cells. For a
+lab user the headline is 99.3% node accuracy and 98.9% per-cell mean
+accuracy — the model effectively reproduces their manual labels. The
+practical recommendation: start with the released cross-source model
+(a); if you have a large clean in-house corpus, retrain (b) for a small
+but consistent gain, especially on the worst-decile tail.
 
 ### 5.6 Runtime
 
@@ -919,6 +887,11 @@ per seed. Test set fixed and never queried. Source:
 | 1600 | **.771 ± .014** | .763 ± .015 | +.008 | **.842 ± .021** | .828 ± .024 | +.014 |
 
 ![Active-learning curve](paper/results/figures/final_figure_active_learning.png)
+
+**Figure 3.** Simulated-curator active learning (mean ± SD over 3 seeds).
+Neurite macro-F1 (left) and apical F1 (right) vs. number of curator
+corrections, for flag-guided vs. random selection. Both arms improve
+(the loop works); flag-guided sits above random from the second round on.
 
 Two findings, both robust across seeds:
 
@@ -1029,6 +1002,12 @@ over 3 splits.
 | 1200 | **.391 ± .029** | .357 ± .045 | .328 |
 
 ![Flag feedback curve](paper/results/figures/final_figure_flag_feedback.png)
+
+**Figure 4.** Retraining the flag model on curator-derived verdicts
+(mean ± SD over 3 splits). *Left:* flag precision @10% rejection vs.
+number of verdicts, for feedback (review flagged) vs. random review vs.
+the never-updated factory model. *Right:* recall and average precision
+for the feedback arm.
 
 The answer is **yes — curator feedback measurably improves the flag
 model**, and reviewing *flagged* cells is markedly better than reviewing
@@ -1246,16 +1225,17 @@ released.
 
 ---
 
-## TODO list (carrying forward from readiness audit)
+## Remaining before submission
 
-- [ ] Pipeline architecture schematic (Figure 1).
-- [ ] Qualitative SWC renderings: correct case, caught-bad case, missed-bad case (Figure 5).
-- [ ] Runtime / compute benchmark vs baselines (§7 limitation).
-- [ ] Leave-one-lab-out cross-dataset evaluation (§7 limitation).
-- [ ] Consolidated hyperparameter table (Methods appendix).
+Done: pipeline schematic (Fig 1), qualitative renderings (Fig 2), runtime
+benchmark (§5.6), GNN architecture details (§4.3), Related Work pass (§2),
+figure numbering + captions (Figs 1–4), 4-pillar contribution focus.
+
+Still open:
+- [ ] Verify Related Work citations (authors/venues/years) against the
+      cited URLs; confirm the Emissah/Tecuatl/Ascoli reference (§2).
+- [ ] SWC-Studio deployment framing confirmation (§6).
+- [ ] Consolidated hyperparameter appendix table (optional).
 - [ ] Refresh `paper/README.md` to match the current v12 pipeline.
-- [ ] Full literature pass for Related Work (§2).
-- [ ] GNN architecture details from `paper/gnn_apical_basal.py` (§4.3).
-- [ ] Feature-level ablation if budget allows (no-PCA, no-soft-handoff, no-trunk) (§5.2).
-- [ ] SWC-Studio framing confirmation (§6).
-- [ ] Final figure placements + captions.
+- [ ] Optional: leave-one-lab-out cross-dataset eval (§7); iterative
+      full-pipeline / diversity-aware acquisition (§8).
