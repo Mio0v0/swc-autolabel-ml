@@ -1,0 +1,12 @@
+Full-pipeline active learning (Stage2+GNN+Stage3, GT cell type)
+==================================================================
+
+seed=123  seed_train=614 +K=1000 corrections  test=818
+
+     model   macroF1   apical    basal     axon  pcF1mean  pcF1p10
+      seed    0.9146   0.8637   0.8944   0.9859    0.8768   0.4614
+    random    0.9536   0.9092   0.9560   0.9956    0.9154   0.6479
+      flag    0.9443   0.8882   0.9491   0.9956    0.8962   0.5365
+
+flag vs seed:   macroF1 +0.0297   apical +0.0245
+flag vs random: macroF1 -0.0093   apical -0.0210

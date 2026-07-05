@@ -1,0 +1,212 @@
+{
+  "split_seeds": [
+    42,
+    123,
+    789
+  ],
+  "rounds": 8,
+  "k": 150,
+  "reject_rate": 0.1,
+  "bad_f1_threshold": 0.6,
+  "n_features": 59,
+  "n_test": 1399,
+  "n_base": 1039,
+  "n_pool": 4585,
+  "factory": [
+    {
+      "round": 0,
+      "n_verdicts": 0,
+      "precision": 0.3284,
+      "precision_sd": 0.026,
+      "recall": 0.4842,
+      "recall_sd": 0.0607,
+      "ap": 0.3611,
+      "ap_sd": 0.005
+    }
+  ],
+  "feedback": [
+    {
+      "round": 0,
+      "n_verdicts": 0,
+      "precision": 0.3284,
+      "precision_sd": 0.026,
+      "recall": 0.4842,
+      "recall_sd": 0.0607,
+      "ap": 0.3611,
+      "ap_sd": 0.005
+    },
+    {
+      "round": 1,
+      "n_verdicts": 150,
+      "precision": 0.3475,
+      "precision_sd": 0.0231,
+      "recall": 0.5122,
+      "recall_sd": 0.0582,
+      "ap": 0.3954,
+      "ap_sd": 0.0515
+    },
+    {
+      "round": 2,
+      "n_verdicts": 300,
+      "precision": 0.3667,
+      "precision_sd": 0.0338,
+      "recall": 0.5387,
+      "recall_sd": 0.0464,
+      "ap": 0.4116,
+      "ap_sd": 0.0542
+    },
+    {
+      "round": 3,
+      "n_verdicts": 450,
+      "precision": 0.381,
+      "precision_sd": 0.0336,
+      "recall": 0.5604,
+      "recall_sd": 0.0549,
+      "ap": 0.4432,
+      "ap_sd": 0.0411
+    },
+    {
+      "round": 4,
+      "n_verdicts": 600,
+      "precision": 0.3834,
+      "precision_sd": 0.0365,
+      "recall": 0.5631,
+      "recall_sd": 0.0479,
+      "ap": 0.4547,
+      "ap_sd": 0.0366
+    },
+    {
+      "round": 5,
+      "n_verdicts": 750,
+      "precision": 0.3977,
+      "precision_sd": 0.0485,
+      "recall": 0.5821,
+      "recall_sd": 0.0314,
+      "ap": 0.4578,
+      "ap_sd": 0.0386
+    },
+    {
+      "round": 6,
+      "n_verdicts": 900,
+      "precision": 0.3932,
+      "precision_sd": 0.0308,
+      "recall": 0.5804,
+      "recall_sd": 0.0812,
+      "ap": 0.4583,
+      "ap_sd": 0.0219
+    },
+    {
+      "round": 7,
+      "n_verdicts": 1050,
+      "precision": 0.3978,
+      "precision_sd": 0.0293,
+      "recall": 0.5859,
+      "recall_sd": 0.0625,
+      "ap": 0.4696,
+      "ap_sd": 0.0293
+    },
+    {
+      "round": 8,
+      "n_verdicts": 1200,
+      "precision": 0.3907,
+      "precision_sd": 0.0294,
+      "recall": 0.5751,
+      "recall_sd": 0.0603,
+      "ap": 0.4718,
+      "ap_sd": 0.0202
+    }
+  ],
+  "random": [
+    {
+      "round": 0,
+      "n_verdicts": 0,
+      "precision": 0.3284,
+      "precision_sd": 0.026,
+      "recall": 0.4842,
+      "recall_sd": 0.0607,
+      "ap": 0.3611,
+      "ap_sd": 0.005
+    },
+    {
+      "round": 1,
+      "n_verdicts": 150,
+      "precision": 0.3427,
+      "precision_sd": 0.0288,
+      "recall": 0.505,
+      "recall_sd": 0.0607,
+      "ap": 0.352,
+      "ap_sd": 0.0269
+    },
+    {
+      "round": 2,
+      "n_verdicts": 300,
+      "precision": 0.3452,
+      "precision_sd": 0.022,
+      "recall": 0.5092,
+      "recall_sd": 0.0638,
+      "ap": 0.3512,
+      "ap_sd": 0.0332
+    },
+    {
+      "round": 3,
+      "n_verdicts": 450,
+      "precision": 0.3381,
+      "precision_sd": 0.023,
+      "recall": 0.5013,
+      "recall_sd": 0.0879,
+      "ap": 0.3693,
+      "ap_sd": 0.0142
+    },
+    {
+      "round": 4,
+      "n_verdicts": 600,
+      "precision": 0.3451,
+      "precision_sd": 0.0273,
+      "recall": 0.508,
+      "recall_sd": 0.0526,
+      "ap": 0.376,
+      "ap_sd": 0.0348
+    },
+    {
+      "round": 5,
+      "n_verdicts": 750,
+      "precision": 0.3499,
+      "precision_sd": 0.0259,
+      "recall": 0.5156,
+      "recall_sd": 0.0587,
+      "ap": 0.3956,
+      "ap_sd": 0.029
+    },
+    {
+      "round": 6,
+      "n_verdicts": 900,
+      "precision": 0.3451,
+      "precision_sd": 0.0291,
+      "recall": 0.5077,
+      "recall_sd": 0.0504,
+      "ap": 0.3913,
+      "ap_sd": 0.0296
+    },
+    {
+      "round": 7,
+      "n_verdicts": 1050,
+      "precision": 0.3524,
+      "precision_sd": 0.0207,
+      "recall": 0.5198,
+      "recall_sd": 0.0637,
+      "ap": 0.4088,
+      "ap_sd": 0.0357
+    },
+    {
+      "round": 8,
+      "n_verdicts": 1200,
+      "precision": 0.3571,
+      "precision_sd": 0.0447,
+      "recall": 0.5242,
+      "recall_sd": 0.0565,
+      "ap": 0.424,
+      "ap_sd": 0.0278
+    }
+  ],
+  "note": "Flag model retrained on curator-derived bad/good verdicts of REVIEWED cells; precision/recall on disjoint held-out test."
+}

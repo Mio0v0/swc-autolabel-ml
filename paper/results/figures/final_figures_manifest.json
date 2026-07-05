@@ -1,0 +1,16 @@
+{
+  "confusion_matrix": {
+    "matrix_csv": "paper\\results\\figures\\final_figure_confusion_matrix.csv"
+  },
+  "f1_distribution": {
+    "n_rows": 7023,
+    "n_flagged": 702,
+    "all_p10": 0.662,
+    "kept_p10": 0.9664,
+    "flagged_bad_rate": 0.43447293447293445
+  },
+  "flag_pr_curve": {
+    "average_precision": 0.4764656087610594,
+    "curve_csv": "paper\\results\\figures\\final_figure_flag_pr_curve.csv"
+  }
+}

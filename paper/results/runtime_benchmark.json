@@ -1,0 +1,82 @@
+{
+  "seed": 123,
+  "n_cells": 100,
+  "node_count_mean": 8976.2,
+  "node_count_median": 1016.5,
+  "model_dir": "paper\\models\\v12_gentle_seed123",
+  "baselines_cache_dir": "paper\\models\\baselines",
+  "platform_note": "single Windows workstation; v12 Stage 2 on GPU (XGBoost), GNN/Branch3 on CPU, baselines on CPU.",
+  "exclusions": "SWC parse and one-time model load excluded from per-cell timing; warmup on 3 cells discarded.",
+  "summary_by_method": [
+    {
+      "method": "v12",
+      "n_cells": 100,
+      "total_nodes": 897617,
+      "total_wall_s": 35.383,
+      "per_cell_mean_ms": 353.83,
+      "per_cell_median_ms": 227.72,
+      "per_cell_p10_ms": 185.57,
+      "per_cell_p90_ms": 592.08,
+      "per_cell_min_ms": 155.05,
+      "per_cell_max_ms": 1779.68,
+      "throughput_nodes_per_s": 25369.0,
+      "throughput_cells_per_s": 2.83
+    },
+    {
+      "method": "neurom_rf",
+      "n_cells": 100,
+      "total_nodes": 897617,
+      "total_wall_s": 11.272,
+      "per_cell_mean_ms": 112.72,
+      "per_cell_median_ms": 34.57,
+      "per_cell_p10_ms": 30.91,
+      "per_cell_p90_ms": 217.5,
+      "per_cell_min_ms": 25.63,
+      "per_cell_max_ms": 1072.49,
+      "throughput_nodes_per_s": 79631.0,
+      "throughput_cells_per_s": 8.87
+    },
+    {
+      "method": "sholl_rf",
+      "n_cells": 100,
+      "total_nodes": 897617,
+      "total_wall_s": 8.785,
+      "per_cell_mean_ms": 87.85,
+      "per_cell_median_ms": 45.15,
+      "per_cell_p10_ms": 30.87,
+      "per_cell_p90_ms": 171.45,
+      "per_cell_min_ms": 26.76,
+      "per_cell_max_ms": 578.03,
+      "throughput_nodes_per_s": 102171.0,
+      "throughput_cells_per_s": 11.38
+    },
+    {
+      "method": "sholl_mlp",
+      "n_cells": 100,
+      "total_nodes": 897617,
+      "total_wall_s": 5.253,
+      "per_cell_mean_ms": 52.53,
+      "per_cell_median_ms": 5.61,
+      "per_cell_p10_ms": 1.4,
+      "per_cell_p90_ms": 147.37,
+      "per_cell_min_ms": 0.5,
+      "per_cell_max_ms": 522.71,
+      "throughput_nodes_per_s": 170880.0,
+      "throughput_cells_per_s": 19.04
+    },
+    {
+      "method": "lmeasure_rf",
+      "n_cells": 100,
+      "total_nodes": 897617,
+      "total_wall_s": 35.468,
+      "per_cell_mean_ms": 354.68,
+      "per_cell_median_ms": 42.17,
+      "per_cell_p10_ms": 31.11,
+      "per_cell_p90_ms": 632.09,
+      "per_cell_min_ms": 26.78,
+      "per_cell_max_ms": 5590.42,
+      "throughput_nodes_per_s": 25308.0,
+      "throughput_cells_per_s": 2.82
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+Runtime benchmark
+================================================================
+
+n_cells=100  (seed=123; sampled from v12_gentle_seed123 test split)
+per-cell node count: mean=8976  median=1016
+Excludes SWC parse + model load. Warmup discarded.
+
+method           cells/s    nodes/s    mean ms  median ms      p10      p90     min     max
+v12                 2.83      25369      353.8      227.7   185.57   592.08   155.1  1779.7
+neurom_rf           8.87      79631      112.7       34.6    30.91    217.5    25.6  1072.5
+sholl_rf           11.38     102171       87.8       45.1    30.87   171.45    26.8   578.0
+sholl_mlp          19.04     170880       52.5        5.6      1.4   147.37     0.5   522.7
+lmeasure_rf         2.82      25308      354.7       42.2    31.11   632.09    26.8  5590.4

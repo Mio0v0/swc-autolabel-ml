@@ -1,0 +1,17 @@
+Multi-seed v12+Branch3 (GT cell type) -- LAB-ONLY RETRAIN
+================================================================
+
+Mean +/- SD over n=3 seeds ([42, 123, 789]).
+Pipeline trained on hpf_ca1 cells only (1,064 train per seed),
+evaluated on the matching lab-only held-out test split.
+
+  accuracy                       0.9929 +/- 0.0014  [0.9915, 0.9942]
+  neurite_macro_f1               0.9528 +/- 0.0059  [0.9462, 0.9575]
+  axon_f1                        0.9986 +/- 0.0007  [0.9979, 0.9993]
+  basal_f1                       0.9314 +/- 0.0164  [0.9134, 0.9456]
+  apical_f1                      0.9283 +/- 0.0015  [0.9272, 0.9301]
+  per_cell_f1_mean               0.9552 +/- 0.0024  [0.9538, 0.9580]
+  per_cell_f1_p10                0.8011 +/- 0.0491  [0.7560, 0.8533]
+  per_cell_f1_p25                1.0000 +/- 0.0000  [1.0000, 1.0000]
+  per_cell_accuracy_mean         0.9885 +/- 0.0001  [0.9884, 0.9886]
+  per_cell_accuracy_p10          0.9789 +/- 0.0028  [0.9759, 0.9814]

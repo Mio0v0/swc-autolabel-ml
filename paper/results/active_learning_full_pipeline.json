@@ -1,0 +1,41 @@
+{
+  "seed": 123,
+  "n_max": 4000,
+  "k": 1000,
+  "n_seed": 614,
+  "n_pool": 2567,
+  "n_test": 818,
+  "note": "Full pipeline (Stage2+GNN+Stage3 topology; Branch3 omitted). GT cell-type config. Endpoints trained on seed / seed+flagK / seed+randomK.",
+  "endpoints": {
+    "seed": {
+      "node_accuracy": 0.9657,
+      "neurite_macro_f1": 0.9146,
+      "axon_f1": 0.9859,
+      "basal_f1": 0.8944,
+      "apical_f1": 0.8637,
+      "per_cell_f1_mean": 0.8768,
+      "per_cell_f1_p10": 0.4614,
+      "n_test": 818
+    },
+    "flag": {
+      "node_accuracy": 0.9834,
+      "neurite_macro_f1": 0.9443,
+      "axon_f1": 0.9956,
+      "basal_f1": 0.9491,
+      "apical_f1": 0.8882,
+      "per_cell_f1_mean": 0.8962,
+      "per_cell_f1_p10": 0.5365,
+      "n_test": 818
+    },
+    "random": {
+      "node_accuracy": 0.9855,
+      "neurite_macro_f1": 0.9536,
+      "axon_f1": 0.9956,
+      "basal_f1": 0.956,
+      "apical_f1": 0.9092,
+      "per_cell_f1_mean": 0.9154,
+      "per_cell_f1_p10": 0.6479,
+      "n_test": 818
+    }
+  }
+}
