@@ -1,0 +1,147 @@
+{
+  "criteria": {
+    "min_failure_rate": 0.4,
+    "min_holdout_sample": 3,
+    "bottom_pct_for_failure_def": 10.0
+  },
+  "n_labs_dropped": 21,
+  "n_cells_dropped": 533,
+  "dropped_by_celltype": {
+    "pyramidal": 505,
+    "interneuron": 28
+  },
+  "dropped_by_lab": {
+    "73014V1-": 31,
+    "A550": 3,
+    "A9": 27,
+    "B8": 25,
+    "D1": 25,
+    "DCX": 29,
+    "F7": 21,
+    "H1": 19,
+    "ICR": 28,
+    "KO": 36,
+    "KO3": 11,
+    "Soriano": 10,
+    "T50": 3,
+    "WT1": 27,
+    "X041": 24,
+    "inv": 45,
+    "m2s": 10,
+    "neu": 55,
+    "ofc": 73,
+    "roc": 19,
+    "ttL": 12
+  },
+  "bad_labs_with_rates": {
+    "KO3": {
+      "holdout_n": 3,
+      "holdout_bad": 3,
+      "failure_rate": 1.0
+    },
+    "WT1": {
+      "holdout_n": 9,
+      "holdout_bad": 5,
+      "failure_rate": 0.5556
+    },
+    "A550": {
+      "holdout_n": 3,
+      "holdout_bad": 3,
+      "failure_rate": 1.0
+    },
+    "inv": {
+      "holdout_n": 10,
+      "holdout_bad": 8,
+      "failure_rate": 0.8
+    },
+    "KO": {
+      "holdout_n": 15,
+      "holdout_bad": 6,
+      "failure_rate": 0.4
+    },
+    "Soriano": {
+      "holdout_n": 5,
+      "holdout_bad": 4,
+      "failure_rate": 0.8
+    },
+    "DCX": {
+      "holdout_n": 10,
+      "holdout_bad": 9,
+      "failure_rate": 0.9
+    },
+    "X041": {
+      "holdout_n": 5,
+      "holdout_bad": 2,
+      "failure_rate": 0.4
+    },
+    "ICR": {
+      "holdout_n": 9,
+      "holdout_bad": 4,
+      "failure_rate": 0.4444
+    },
+    "B8": {
+      "holdout_n": 10,
+      "holdout_bad": 5,
+      "failure_rate": 0.5
+    },
+    "m2s": {
+      "holdout_n": 5,
+      "holdout_bad": 3,
+      "failure_rate": 0.6
+    },
+    "neu": {
+      "holdout_n": 19,
+      "holdout_bad": 9,
+      "failure_rate": 0.4737
+    },
+    "ofc": {
+      "holdout_n": 27,
+      "holdout_bad": 15,
+      "failure_rate": 0.5556
+    },
+    "73014V1-": {
+      "holdout_n": 10,
+      "holdout_bad": 5,
+      "failure_rate": 0.5
+    },
+    "D1": {
+      "holdout_n": 7,
+      "holdout_bad": 3,
+      "failure_rate": 0.4286
+    },
+    "T50": {
+      "holdout_n": 3,
+      "holdout_bad": 2,
+      "failure_rate": 0.6667
+    },
+    "ttL": {
+      "holdout_n": 4,
+      "holdout_bad": 2,
+      "failure_rate": 0.5
+    },
+    "H1": {
+      "holdout_n": 8,
+      "holdout_bad": 4,
+      "failure_rate": 0.5
+    },
+    "roc": {
+      "holdout_n": 6,
+      "holdout_bad": 6,
+      "failure_rate": 1.0
+    },
+    "F7": {
+      "holdout_n": 8,
+      "holdout_bad": 5,
+      "failure_rate": 0.625
+    },
+    "A9": {
+      "holdout_n": 6,
+      "holdout_bad": 3,
+      "failure_rate": 0.5
+    }
+  },
+  "rows_in_total_before": 21587,
+  "rows_in_qcpass_before": 12395,
+  "rows_in_total_after": 21054,
+  "rows_in_qcpass_after": 11862
+}

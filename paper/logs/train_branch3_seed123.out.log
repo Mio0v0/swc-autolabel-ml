@@ -1,0 +1,155 @@
+Device: cuda
+  GPU: NVIDIA GeForce RTX 4080
+Model dir: paper\models\v12_gentle_seed123
+Branch3 focal gamma: 2.0
+Branch3 class weight: inverse_sqrt
+Split: train=6743 test=1745
+Loaded old apical/basal GNN: paper\models\v12_gentle_seed123\gnn_apical_basal.pt
+
+Building Branch3 train graphs...
+  processed 200/6743 files, kept 200, branches=41067, labeled=41067 (2.6 min)
+  processed 400/6743 files, kept 400, branches=100350, labeled=100350 (6.1 min)
+  processed 600/6743 files, kept 600, branches=137801, labeled=137801 (9.0 min)
+  processed 800/6743 files, kept 800, branches=188832, labeled=188832 (12.4 min)
+  processed 1000/6743 files, kept 1000, branches=237794, labeled=237794 (15.3 min)
+  processed 1200/6743 files, kept 1200, branches=282083, labeled=282083 (17.6 min)
+  processed 1400/6743 files, kept 1400, branches=296106, labeled=296106 (18.2 min)
+  processed 1600/6743 files, kept 1600, branches=306197, labeled=306197 (18.6 min)
+  processed 1800/6743 files, kept 1800, branches=318321, labeled=318321 (19.3 min)
+  processed 2000/6743 files, kept 2000, branches=332816, labeled=332816 (20.0 min)
+  processed 2200/6743 files, kept 2200, branches=344587, labeled=344587 (20.5 min)
+  processed 2400/6743 files, kept 2400, branches=356075, labeled=356075 (20.9 min)
+  processed 2600/6743 files, kept 2600, branches=378318, labeled=378318 (22.1 min)
+  processed 2800/6743 files, kept 2800, branches=394279, labeled=394279 (22.9 min)
+  processed 3000/6743 files, kept 3000, branches=405716, labeled=405716 (23.3 min)
+  processed 3200/6743 files, kept 3200, branches=427888, labeled=427888 (24.3 min)
+  processed 3400/6743 files, kept 3400, branches=452042, labeled=452042 (25.3 min)
+  processed 3600/6743 files, kept 3600, branches=466779, labeled=466779 (25.9 min)
+  processed 3800/6743 files, kept 3800, branches=479847, labeled=479847 (26.4 min)
+  processed 4000/6743 files, kept 4000, branches=493512, labeled=493512 (26.9 min)
+  processed 4200/6743 files, kept 4200, branches=508386, labeled=508386 (27.4 min)
+  processed 4400/6743 files, kept 4400, branches=513037, labeled=513037 (27.7 min)
+  processed 4600/6743 files, kept 4600, branches=523830, labeled=523830 (28.1 min)
+  processed 4800/6743 files, kept 4800, branches=534513, labeled=534513 (28.6 min)
+  processed 5000/6743 files, kept 5000, branches=551339, labeled=551339 (29.3 min)
+  processed 5200/6743 files, kept 5200, branches=559402, labeled=559402 (29.7 min)
+  processed 5400/6743 files, kept 5400, branches=571898, labeled=571898 (30.3 min)
+  processed 5600/6743 files, kept 5600, branches=582551, labeled=582551 (30.7 min)
+  processed 5800/6743 files, kept 5800, branches=592213, labeled=592213 (31.1 min)
+  processed 6000/6743 files, kept 6000, branches=597912, labeled=597912 (31.4 min)
+  processed 6200/6743 files, kept 6200, branches=607274, labeled=607274 (31.8 min)
+  processed 6400/6743 files, kept 6400, branches=612237, labeled=612237 (31.9 min)
+  processed 6600/6743 files, kept 6600, branches=627705, labeled=627705 (32.6 min)
+  saved cache D:\Desktop\swc-autolabel-ml\paper\models\v12_gentle_seed123\branch3_cache\train_full_with_old_gnn.pt (6743 graphs)
+
+Building Branch3 held-out graphs...
+  processed 200/1745 files, kept 200, branches=51148, labeled=51148 (3.4 min)
+  processed 400/1745 files, kept 400, branches=82719, labeled=82719 (5.3 min)
+  processed 600/1745 files, kept 600, branches=94642, labeled=94642 (5.9 min)
+  processed 800/1745 files, kept 800, branches=111041, labeled=111041 (6.7 min)
+  processed 1000/1745 files, kept 1000, branches=127491, labeled=127491 (7.3 min)
+  processed 1200/1745 files, kept 1200, branches=136814, labeled=136814 (7.8 min)
+  processed 1400/1745 files, kept 1400, branches=147849, labeled=147849 (8.3 min)
+  processed 1600/1745 files, kept 1600, branches=155307, labeled=155307 (8.6 min)
+  saved cache D:\Desktop\swc-autolabel-ml\paper\models\v12_gentle_seed123\branch3_cache\test_full_with_old_gnn.pt (1745 graphs)
+
+Graphs: train=6743 test=1745 in_dim=76 train_labeled=632712 test_labeled=164928
+
+=== Branch3 fold 1/5: train=5394 val=1349 ===
+    Branch3 class weight: [0.951768696308136, 0.908660352230072, 1.2083021402359009]
+  fold0 ep000 loss=0.0248 val macro=0.9931 ax=0.9972 ba=0.9934 ap=0.9887 cell=0.9840 best=0.9931
+  fold0 ep004 loss=0.0024 val macro=0.9956 ax=0.9982 ba=0.9958 ap=0.9927 cell=0.9923 best=0.9960
+  fold0 ep009 loss=0.0026 val macro=0.9966 ax=0.9989 ba=0.9968 ap=0.9940 cell=0.9920 best=0.9966
+  fold0 ep014 loss=0.0026 val macro=0.9968 ax=0.9993 ba=0.9970 ap=0.9941 cell=0.9948 best=0.9968
+  fold0 ep019 loss=0.0020 val macro=0.9976 ax=0.9990 ba=0.9978 ap=0.9961 cell=0.9959 best=0.9976
+  fold0 ep024 loss=0.0025 val macro=0.9967 ax=0.9981 ba=0.9969 ap=0.9952 cell=0.9943 best=0.9976
+  fold0 ep029 loss=0.0022 val macro=0.9969 ax=0.9985 ba=0.9971 ap=0.9953 cell=0.9939 best=0.9980
+  fold0 ep034 loss=0.0019 val macro=0.9978 ax=0.9992 ba=0.9979 ap=0.9963 cell=0.9941 best=0.9980
+  fold0 ep039 loss=0.0023 val macro=0.9971 ax=0.9984 ba=0.9971 ap=0.9956 cell=0.9958 best=0.9980
+  fold0 ep044 loss=0.0020 val macro=0.9972 ax=0.9984 ba=0.9972 ap=0.9959 cell=0.9934 best=0.9980
+  fold0 ep049 loss=0.0020 val macro=0.9971 ax=0.9985 ba=0.9972 ap=0.9957 cell=0.9944 best=0.9980
+  fold0 early stop at ep51
+  fold0 best ep=26 macro=0.9980 apical=0.9970
+
+=== Branch3 fold 2/5: train=5394 val=1349 ===
+    Branch3 class weight: [0.9504252076148987, 0.9087780714035034, 1.2107880115509033]
+  fold1 ep000 loss=0.0219 val macro=0.9924 ax=0.9970 ba=0.9926 ap=0.9877 cell=0.9670 best=0.9924
+  fold1 ep004 loss=0.0021 val macro=0.9962 ax=0.9996 ba=0.9964 ap=0.9927 cell=0.9898 best=0.9962
+  fold1 ep009 loss=0.0021 val macro=0.9944 ax=0.9997 ba=0.9946 ap=0.9889 cell=0.9927 best=0.9972
+  fold1 ep014 loss=0.0018 val macro=0.9940 ax=0.9995 ba=0.9943 ap=0.9882 cell=0.9909 best=0.9972
+  fold1 ep019 loss=0.0018 val macro=0.9961 ax=0.9997 ba=0.9963 ap=0.9923 cell=0.9934 best=0.9972
+  fold1 ep024 loss=0.0022 val macro=0.9970 ax=0.9997 ba=0.9972 ap=0.9942 cell=0.9933 best=0.9972
+  fold1 ep029 loss=0.0021 val macro=0.9962 ax=0.9989 ba=0.9963 ap=0.9934 cell=0.9923 best=0.9972
+  fold1 early stop at ep33
+  fold1 best ep=8 macro=0.9972 apical=0.9946
+
+=== Branch3 fold 3/5: train=5394 val=1349 ===
+    Branch3 class weight: [0.94867342710495, 0.9075376391410828, 1.2174135446548462]
+  fold2 ep000 loss=0.0210 val macro=0.9946 ax=0.9981 ba=0.9944 ap=0.9912 cell=0.9801 best=0.9946
+  fold2 ep004 loss=0.0026 val macro=0.9935 ax=0.9993 ba=0.9933 ap=0.9878 cell=0.9898 best=0.9959
+  fold2 ep009 loss=0.0023 val macro=0.9972 ax=0.9996 ba=0.9972 ap=0.9948 cell=0.9926 best=0.9974
+  fold2 ep014 loss=0.0045 val macro=0.9954 ax=0.9989 ba=0.9953 ap=0.9920 cell=0.9899 best=0.9980
+  fold2 ep019 loss=0.0026 val macro=0.9975 ax=0.9993 ba=0.9975 ap=0.9959 cell=0.9929 best=0.9980
+  fold2 ep024 loss=0.0021 val macro=0.9975 ax=0.9995 ba=0.9975 ap=0.9955 cell=0.9935 best=0.9980
+  fold2 ep029 loss=0.0024 val macro=0.9975 ax=0.9995 ba=0.9975 ap=0.9957 cell=0.9920 best=0.9980
+  fold2 ep034 loss=0.0022 val macro=0.9977 ax=0.9995 ba=0.9976 ap=0.9959 cell=0.9943 best=0.9980
+  fold2 ep039 loss=0.0020 val macro=0.9978 ax=0.9995 ba=0.9978 ap=0.9962 cell=0.9938 best=0.9980
+  fold2 ep044 loss=0.0020 val macro=0.9977 ax=0.9993 ba=0.9977 ap=0.9962 cell=0.9951 best=0.9980
+  fold2 early stop at ep48
+  fold2 best ep=23 macro=0.9980 apical=0.9964
+
+=== Branch3 fold 4/5: train=5395 val=1348 ===
+    Branch3 class weight: [0.9426525831222534, 0.9126740097999573, 1.2179656028747559]
+  fold3 ep000 loss=0.0219 val macro=0.9919 ax=0.9988 ba=0.9924 ap=0.9846 cell=0.9784 best=0.9919
+  fold3 ep004 loss=0.0023 val macro=0.9920 ax=0.9998 ba=0.9926 ap=0.9837 cell=0.9910 best=0.9970
+  fold3 ep009 loss=0.0021 val macro=0.9969 ax=0.9997 ba=0.9971 ap=0.9939 cell=0.9907 best=0.9971
+  fold3 ep014 loss=0.0020 val macro=0.9966 ax=0.9998 ba=0.9969 ap=0.9932 cell=0.9949 best=0.9971
+  fold3 ep019 loss=0.0023 val macro=0.9980 ax=0.9999 ba=0.9981 ap=0.9959 cell=0.9956 best=0.9980
+  fold3 ep024 loss=0.0024 val macro=0.9978 ax=0.9996 ba=0.9980 ap=0.9959 cell=0.9922 best=0.9980
+  fold3 ep029 loss=0.0019 val macro=0.9969 ax=0.9998 ba=0.9972 ap=0.9939 cell=0.9945 best=0.9980
+  fold3 ep034 loss=0.0017 val macro=0.9951 ax=0.9998 ba=0.9955 ap=0.9901 cell=0.9936 best=0.9980
+  fold3 ep039 loss=0.0019 val macro=0.9960 ax=0.9998 ba=0.9962 ap=0.9918 cell=0.9936 best=0.9980
+  fold3 ep044 loss=0.0031 val macro=0.9960 ax=0.9998 ba=0.9963 ap=0.9920 cell=0.9951 best=0.9980
+  fold3 early stop at ep45
+  fold3 best ep=20 macro=0.9980 apical=0.9961
+
+=== Branch3 fold 5/5: train=5395 val=1348 ===
+    Branch3 class weight: [0.9599815011024475, 0.9062061905860901, 1.1976494789123535]
+  fold4 ep000 loss=0.0204 val macro=0.9942 ax=0.9988 ba=0.9947 ap=0.9891 cell=0.9817 best=0.9942
+  fold4 ep004 loss=0.0022 val macro=0.9962 ax=0.9992 ba=0.9965 ap=0.9928 cell=0.9874 best=0.9962
+  fold4 ep009 loss=0.0023 val macro=0.9968 ax=0.9996 ba=0.9971 ap=0.9938 cell=0.9941 best=0.9968
+  fold4 ep014 loss=0.0019 val macro=0.9951 ax=0.9997 ba=0.9957 ap=0.9900 cell=0.9891 best=0.9969
+  fold4 ep019 loss=0.0022 val macro=0.9966 ax=0.9997 ba=0.9970 ap=0.9931 cell=0.9922 best=0.9970
+  fold4 ep024 loss=0.0020 val macro=0.9963 ax=0.9996 ba=0.9966 ap=0.9925 cell=0.9919 best=0.9970
+  fold4 ep029 loss=0.0015 val macro=0.9969 ax=0.9997 ba=0.9972 ap=0.9937 cell=0.9946 best=0.9970
+  fold4 ep034 loss=0.0028 val macro=0.9962 ax=0.9998 ba=0.9966 ap=0.9921 cell=0.9924 best=0.9970
+  fold4 ep039 loss=0.0020 val macro=0.9965 ax=0.9998 ba=0.9969 ap=0.9927 cell=0.9940 best=0.9970
+  fold4 ep044 loss=0.0024 val macro=0.9960 ax=0.9995 ba=0.9964 ap=0.9921 cell=0.9906 best=0.9970
+  fold4 ep049 loss=0.0019 val macro=0.9961 ax=0.9997 ba=0.9965 ap=0.9921 cell=0.9908 best=0.9970
+  fold4 ep054 loss=0.0020 val macro=0.9968 ax=0.9997 ba=0.9971 ap=0.9935 cell=0.9915 best=0.9970
+  fold4 ep059 loss=0.0019 val macro=0.9953 ax=0.9997 ba=0.9958 ap=0.9905 cell=0.9926 best=0.9970
+  fold4 ep064 loss=0.0022 val macro=0.9956 ax=0.9994 ba=0.9960 ap=0.9913 cell=0.9913 best=0.9970
+  fold4 ep069 loss=0.0019 val macro=0.9961 ax=0.9997 ba=0.9966 ap=0.9921 cell=0.9928 best=0.9970
+  fold4 ep074 loss=0.0019 val macro=0.9960 ax=0.9998 ba=0.9964 ap=0.9917 cell=0.9924 best=0.9970
+  fold4 ep079 loss=0.0025 val macro=0.9959 ax=0.9997 ba=0.9963 ap=0.9916 cell=0.9883 best=0.9971
+  fold4 ep084 loss=0.0017 val macro=0.9966 ax=0.9996 ba=0.9969 ap=0.9932 cell=0.9931 best=0.9971
+  fold4 ep089 loss=0.0019 val macro=0.9959 ax=0.9998 ba=0.9964 ap=0.9916 cell=0.9927 best=0.9971
+  fold4 ep094 loss=0.0018 val macro=0.9966 ax=0.9997 ba=0.9969 ap=0.9932 cell=0.9927 best=0.9971
+  fold4 ep099 loss=0.0021 val macro=0.9967 ax=0.9996 ba=0.9970 ap=0.9934 cell=0.9937 best=0.9971
+  fold4 ep104 loss=0.0016 val macro=0.9968 ax=0.9998 ba=0.9971 ap=0.9934 cell=0.9943 best=0.9974
+  fold4 ep109 loss=0.0020 val macro=0.9969 ax=0.9996 ba=0.9973 ap=0.9939 cell=0.9927 best=0.9974
+  fold4 ep114 loss=0.0017 val macro=0.9960 ax=0.9997 ba=0.9964 ap=0.9919 cell=0.9915 best=0.9974
+  fold4 ep119 loss=0.0017 val macro=0.9970 ax=0.9997 ba=0.9973 ap=0.9939 cell=0.9953 best=0.9974
+  fold4 ep124 loss=0.0020 val macro=0.9950 ax=0.9994 ba=0.9955 ap=0.9902 cell=0.9897 best=0.9974
+  fold4 early stop at ep126
+  fold4 best ep=101 macro=0.9974 apical=0.9947
+
+=== Branch3 final retrain on 6743 files for 24 epochs ===
+    Branch3 class weight: [0.950645387172699, 0.9087631702423096, 1.2103683948516846]
+  ep000 train_loss=0.0200
+  ep009 train_loss=0.0024
+  ep019 train_loss=0.0025
+
+Branch3 held-out branch metrics: macro=0.9586 axon=0.9797 basal=0.9649 apical=0.9312 cell=0.9338
+
+Saved Branch3 checkpoint to D:\Desktop\swc-autolabel-ml\paper\models\v12_gentle_seed123\gnn_branch3_rescue.pt (79.1 KB)

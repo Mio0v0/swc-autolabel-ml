@@ -1,0 +1,35 @@
+Baseline summary (v11 metric convention, seed=42 split)
+{
+  "neurom_rf": {
+    "accuracy": 0.9348,
+    "neurite_macro_f1": 0.8281,
+    "apical_f1": 0.6874,
+    "per_cell_F1_mean": 0.8503567010309279,
+    "per_cell_F1_p10": 0.5428700000000001,
+    "per_cell_F1_p25": 0.774475
+  },
+  "lmeasure_rf": {
+    "accuracy": 0.9777,
+    "neurite_macro_f1": 0.9439,
+    "apical_f1": 0.91,
+    "per_cell_F1_mean": 0.9128562285223368,
+    "per_cell_F1_p10": 0.58918,
+    "per_cell_F1_p25": 1.0
+  },
+  "sholl_rf": {
+    "accuracy": 0.9769,
+    "neurite_macro_f1": 0.939,
+    "apical_f1": 0.8976,
+    "per_cell_F1_mean": 0.8988474656357389,
+    "per_cell_F1_p10": 0.49500000000000005,
+    "per_cell_F1_p25": 1.0
+  },
+  "sholl_mlp": {
+    "accuracy": 0.9695,
+    "neurite_macro_f1": 0.9239,
+    "apical_f1": 0.8757,
+    "per_cell_F1_mean": 0.8757317869415808,
+    "per_cell_F1_p10": 0.4660500000000001,
+    "per_cell_F1_p25": 0.955725
+  }
+}

@@ -1,0 +1,7 @@
+label,scope,target_recall_setting,precision,recall,flagged_total,actually_bad_flagged_tp,false_flags_fp,missed_bad_fn,bad_total_in_test,model,experiment,saved_bundle
+Original confidence/geometry,pyramidal,0.8,0.3880597014925373,0.7428571428571429,67,26,41,9,35,rf:full,single_cell_f060/cell_f060,
++ morphology baseline disagreement,pyramidal,0.8,0.5283018868,0.8,53,28,25,7,35,rf:full,single_cell_f060/cell_f060,
+"+ sanity/failure heads, best 70% target",pyramidal,0.7,0.5434782608695652,0.7142857142857143,46,25,21,10,35,gb:full,single_cell_f060/cell_f060,
+"+ sanity/failure heads, high recall",pyramidal,0.8,0.3368421052631579,0.9142857142857144,95,32,63,3,35,rf:numeric_only,single_failure_head_ranked_against_cell_f060/basal_f060,
+"+ multi-v12 disagreement, recommended",pyramidal,0.8,0.7894736842105263,0.8571428571428571,38,30,8,5,35,hgb:full,single_cell_f060/cell_f060,paper/models/flag_improvement_sweep_seed123_branch3_v12ens/pyramidal_xmodel_cell_f060_r080.joblib
+"+ multi-v12 disagreement, high recall",pyramidal,0.9,0.3902439024390244,0.9142857142857144,82,32,50,3,35,extra_trees:numeric_only,single_failure_head_ranked_against_cell_f060/basal_f060,

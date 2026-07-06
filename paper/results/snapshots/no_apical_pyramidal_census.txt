@@ -1,8 +1,0 @@
-Pyramidal-with-no-apical census (v9 held-out test split)
-────────────────────────────────────────────────────────────
-Population:  36 pyramidal cells whose GT has no node of type 4
-False-apical: 0 cells where the engine predicted apical anyway
-Rate:        0.00%
-
-Data dir:    D:\Desktop\SWC-Studio\data\v9_merged_dataset
-Eval split:  D:\Desktop\swc-autolabel-ml\paper\results\snapshots\v9_eval_split.json

@@ -1,0 +1,49 @@
+Bad-cell characteristic scan for seed123 Branch3 heldout
+================================================================
+Target: held_out_F1 < 0.60
+Primary subset: GT pyramidal heldout cells
+Rows: 1745; bad: 177; bad rate: 10.1%
+
+Strong shared traits among bad GT-pyramidal cells
+-------------------------------------------------
+1. Cross-model disagreement is the strongest deployment-safe signal.
+   - Best single feature: xmodel_neurom_rf_pyr_v12_l1_frac_delta
+   - Univariate AUC: ~0.83
+   - Bad median: 0.5778; good median: 0.0401
+   - Rule xmodel_neurom_rf_pyr_v12_l1_frac_delta >= 0.5:
+     precision 41.1%, recall 55.9%, flagged 241, TP 99, FP 142, FN 78
+
+2. Forced-pyramidal baseline disagreement matters more than ordinary confidence.
+   - xmodel_pyr_l1_mean univariate AUC: ~0.82
+   - Bad median: 0.5106; good median: 0.0153
+   - xmodel_pyr_apical_presence_disagreement > 0:
+     bad 60.5%, good 27.1%, lift 2.23x
+
+3. Stage1 disagreement is rare but high precision.
+   - stage1_pred != GT cell_type:
+     bad 16.9%, good 1.7%, lift 10.2x
+   - As a rule: precision 53.6%, recall 16.9%
+   - This is important because a claimed pyramidal cell routed as interneuron is often suspicious.
+
+4. Low confidence helps but does not solve the problem alone.
+   - stage1_conf median: bad 0.9638, good 0.9900
+   - conf_p10 median: bad 0.6416, good 0.9821
+   - conf_p10 < 0.7:
+     bad 56.5%, good 36.9%, lift 1.53x
+
+5. Bad cells are often smaller/less complete in this heldout.
+   - n_nodes median: bad 733, good 922.5
+   - But size is weaker than cross-model disagreement.
+
+Conclusion
+----------
+The useful phenotype is: v12 gives a plausible-looking label with sometimes high confidence, but simple morphology baselines disagree strongly about axon/basal/apical fractions, especially apical presence/fraction. That is why adding xmodel features improves the flag model.
+
+Current best honest xmodel operating points on the heldout test split
+---------------------------------------------------------------------
+- Best balanced high-recall bundle: r080, rf/full
+  test precision 52.8%, recall 80.0%, flagged 53, false flags 25, missed bad 7, kept-cell P10 F1 0.9793
+- Very high recall bundle: r095, hgb/no_lab
+  test precision 23.7%, recall 91.4%, flagged 135, false flags 103, missed bad 3, kept-cell P10 F1 1.0000
+
+90% recall and 90% precision is not supported by these features/labels yet. The score ranking improved a lot with xmodel features, but the bad/good distributions still overlap heavily.

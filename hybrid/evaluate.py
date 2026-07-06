@@ -138,19 +138,77 @@ def _train_stage1(train_files: dict[str, list[Path]], model_path: Path) -> None:
     X = np.stack(X_list)
     y = np.array(y_list)
 
-    pipeline = Pipeline([
-        ("scaler", StandardScaler()),
-        ("clf", VotingClassifier(
-            estimators=[
-                ("rf", RandomForestClassifier(n_estimators=200, min_samples_leaf=2,
-                                               class_weight="balanced", random_state=42, n_jobs=-1)),
-                ("gb", GradientBoostingClassifier(n_estimators=150, max_depth=5,
-                                                   learning_rate=0.1, min_samples_leaf=3, random_state=42)),
-            ],
-            voting="soft",
-        )),
-    ])
-    pipeline.fit(X, y)
+    # ITER-B: explicit oversampling of interneurons + stronger model
+    # class_names sorted alphabetically → 0=interneuron, 1=pyramidal.
+    # Class weight alone (iter-A) lifted pyramidal recall but interneurons
+    # got slightly worse — the bigger model just learned pyramidal patterns
+    # more. Here we OVERSAMPLE the minority class with replacement, then
+    # let the model train on balanced data without class_weight tricks.
+    import os as _os
+    rf_n  = int(_os.environ.get("SWCAL_STAGE1_RF_N",   "500"))
+    gb_n  = int(_os.environ.get("SWCAL_STAGE1_GB_N",   "300"))
+    oversample = _os.environ.get("SWCAL_STAGE1_OVERSAMPLE", "1") == "1"
+    if oversample:
+        # Match the majority class count by bootstrap-sampling the minority
+        rng = np.random.default_rng(42)
+        unique, counts = np.unique(y, return_counts=True)
+        n_max = int(counts.max())
+        new_X_parts = [X]; new_y_parts = [y]
+        for cls, cnt in zip(unique.tolist(), counts.tolist()):
+            need = n_max - cnt
+            if need <= 0: continue
+            class_idx = np.flatnonzero(y == cls)
+            pick = rng.choice(class_idx, size=need, replace=True)
+            new_X_parts.append(X[pick])
+            new_y_parts.append(y[pick])
+        X = np.concatenate(new_X_parts, axis=0)
+        y = np.concatenate(new_y_parts, axis=0)
+        print(f"  Oversampled training to balanced: {len(y)} samples "
+              f"({(y == 0).sum()} interneuron + {(y == 1).sum()} pyramidal)")
+    print(f"  Stage 1 config: RF n={rf_n}, GB n={gb_n}, oversample={oversample}")
+
+    # ITER-C: pure XGBoost (gradient boosting, GPU) with deep trees + early
+    # stopping. VotingClassifier in earlier iters averaged out signal; a
+    # single strong gradient booster often wins on tabular data.
+    use_pure_xgb = _os.environ.get("SWCAL_STAGE1_PURE_XGB", "1") == "1"
+    if use_pure_xgb:
+        import xgboost as xgb
+        from sklearn.model_selection import train_test_split
+        # Held-out 10% for early stopping (stratified)
+        X_tr, X_val, y_tr, y_val = train_test_split(
+            X, y, test_size=0.10, stratify=y, random_state=42,
+        )
+        scaler = StandardScaler().fit(X_tr)
+        X_tr_s, X_val_s = scaler.transform(X_tr), scaler.transform(X_val)
+        clf = xgb.XGBClassifier(
+            n_estimators=2000, max_depth=8, learning_rate=0.03,
+            subsample=0.85, colsample_bytree=0.85,
+            min_child_weight=2, reg_lambda=1.0,
+            objective="binary:logistic", eval_metric="error",
+            tree_method="hist", device="cuda",
+            random_state=42, n_jobs=4,
+            early_stopping_rounds=50,
+        )
+        clf.fit(X_tr_s, y_tr, eval_set=[(X_val_s, y_val)], verbose=False)
+        print(f"  XGB stopped at iteration {clf.best_iteration} of 2000 "
+              f"(best val error={clf.best_score:.4f})")
+        clf.get_booster().set_param({"device": "cpu"})  # CPU inference
+        pipeline = Pipeline([("scaler", scaler), ("clf", clf)])
+    else:
+        pipeline = Pipeline([
+            ("scaler", StandardScaler()),
+            ("clf", VotingClassifier(
+                estimators=[
+                    ("rf", RandomForestClassifier(n_estimators=rf_n, min_samples_leaf=1,
+                                                   random_state=42, n_jobs=-1)),
+                    ("gb", GradientBoostingClassifier(n_estimators=gb_n, max_depth=6,
+                                                       learning_rate=0.05, min_samples_leaf=2,
+                                                       random_state=42)),
+                ],
+                voting="soft",
+            )),
+        ])
+        pipeline.fit(X, y)
 
     full_classes = list(class_names)
     for ct in CELL_TYPES:
@@ -164,14 +222,26 @@ def _train_stage1(train_files: dict[str, list[Path]], model_path: Path) -> None:
     classifier.save(model_path)
 
 
+# The default pipeline runs Stage 2 in subtree mode
+# (``use_subtree_stage2=True``): each primary subtree is typed by the
+# subtree-owner model and that label is propagated to its branches. The
+# legacy per-branch (Tier B) classifier below is therefore never consulted
+# at inference — the paper and SWC-Studio both run subtree mode — and a
+# head-to-head confirmed subtree mode is both more accurate (higher neurite
+# macro-F1, basal F1, and worst-decile per-cell F1) and ~1.7x faster. We no
+# longer train it. The branch *features* are still extracted and used, by the
+# apical/basal GNN and the Branch3 rescue head. Set this flag True only to
+# restore the old branch-mode classifier for experiments.
+_TRAIN_LEGACY_BRANCH_CLASSIFIER = False
+
+
 def _train_stage2(train_files: dict[str, list[Path]], model_path: Path) -> None:
     """Train Stage 2 per-cell-type on train split only.
 
-    Mirrors the production design in train_stage2.py:
-      - One model per cell type (pyramidal, interneuron)
-      - Per-node training: one row per (branch, label) weighted by node count
-      - Node-level class balancing via sample_weight (equal per-class mass)
-      - Purkinje falls back to a default label if only one class in data
+    Trains the subtree-owner model used by the default (subtree-mode)
+    pipeline. The legacy per-branch classifier is trained only if
+    ``_TRAIN_LEGACY_BRANCH_CLASSIFIER`` is set (off by default), since the
+    subtree-mode pipeline does not use it.
     """
     models_by_cell_type: dict[str, object] = {}
     default_labels_by_cell_type: dict[str, int] = {}
@@ -208,51 +278,56 @@ def _train_stage2(train_files: dict[str, list[Path]], model_path: Path) -> None:
         if m is not None:
             subtree_owner_models_by_cell_type[ct] = m
 
-    # Owner probability maps per file, keyed by filepath for reuse in branch
-    # feature augmentation. Computed once for both pyramidal and interneuron
-    # (whichever have a subtree owner model trained).
-    owner_maps_by_file: dict[str, dict[int, dict[str, float | int]]] = {}
-    for ct, owner_model in subtree_owner_models_by_cell_type.items():
-        for f in train_files.get(ct, []):
-            owner_maps_by_file[str(f)] = _predict_subtree_owner_map(
-                str(f), ct, owner_model
-            )
+    # Legacy per-branch (Tier B) classifier — disabled by default (see the
+    # note above _train_stage2). When off, models_by_cell_type stays empty;
+    # the subtree-mode pipeline ignores it, and _select_stage2_model falls
+    # back gracefully. The branch features remain available to the GNN and
+    # Branch3, which extract them independently.
+    if _TRAIN_LEGACY_BRANCH_CLASSIFIER:
+        # Owner probability maps per file, keyed by filepath for reuse in
+        # branch feature augmentation.
+        owner_maps_by_file: dict[str, dict[int, dict[str, float | int]]] = {}
+        for ct, owner_model in subtree_owner_models_by_cell_type.items():
+            for f in train_files.get(ct, []):
+                owner_maps_by_file[str(f)] = _predict_subtree_owner_map(
+                    str(f), ct, owner_model
+                )
 
-    for ct in ["pyramidal", "interneuron"]:
-        if ct not in train_files or not train_files[ct]:
-            continue
-        valid_neurite = NEURITE_LABELS.get(ct, {2, 3})
-        use_owner = ct in subtree_owner_models_by_cell_type
+        for ct in ["pyramidal", "interneuron"]:
+            if ct not in train_files or not train_files[ct]:
+                continue
+            valid_neurite = NEURITE_LABELS.get(ct, {2, 3})
+            use_owner = ct in subtree_owner_models_by_cell_type
 
-        # Build (features, label, node_count_weight) rows
-        X_list, y_list, w_list = [], [], []
-        for morph in train_morphs_by_ct.get(ct, []):
-            owner_map = owner_maps_by_file.get(morph.file_path, {}) if use_owner else {}
-            for br in morph.branches:
-                feat = _branch_feature_with_owner(br, owner_map)
-                for lbl, count in br.gt_label_counts.items():
-                    if lbl in valid_neurite and count > 0:
-                        X_list.append(feat)
-                        y_list.append(lbl)
-                        w_list.append(float(count))
+            # Build (features, label, node_count_weight) rows
+            X_list, y_list, w_list = [], [], []
+            for morph in train_morphs_by_ct.get(ct, []):
+                owner_map = owner_maps_by_file.get(morph.file_path, {}) if use_owner else {}
+                for br in morph.branches:
+                    feat = _branch_feature_with_owner(br, owner_map)
+                    for lbl, count in br.gt_label_counts.items():
+                        if lbl in valid_neurite and count > 0:
+                            X_list.append(feat)
+                            y_list.append(lbl)
+                            w_list.append(float(count))
 
-        if not X_list:
-            continue
-        y_arr = np.array(y_list)
-        w_arr = np.array(w_list)
-        X_arr = np.stack(X_list)
+            if not X_list:
+                continue
+            y_arr = np.array(y_list)
+            w_arr = np.array(w_list)
+            X_arr = np.stack(X_list)
 
-        if len(set(y_arr.tolist())) < 2:
-            # Only one class → register as default label
-            default_labels_by_cell_type[ct] = int(y_arr[0])
-            continue
+            if len(set(y_arr.tolist())) < 2:
+                # Only one class → register as default label
+                default_labels_by_cell_type[ct] = int(y_arr[0])
+                continue
 
-        sw = _node_balanced_weights(y_arr, w_arr)
+            sw = _node_balanced_weights(y_arr, w_arr)
 
-        # Isotonic-calibrated fit (item 3). Falls back to uncalibrated if
-        # the split is infeasible (too few samples / classes).
-        pipeline = _fit_calibrated_pipeline(X_arr, y_arr, sw, seed=42)
-        models_by_cell_type[ct] = pipeline
+            # Isotonic-calibrated fit. Falls back to uncalibrated if the
+            # split is infeasible (too few samples / classes).
+            pipeline = _fit_calibrated_pipeline(X_arr, y_arr, sw, seed=42)
+            models_by_cell_type[ct] = pipeline
 
     # Back-compat alias for old pipeline.py readers.
     pyramidal_subtree_owner_model = subtree_owner_models_by_cell_type.get("pyramidal")
@@ -474,6 +549,56 @@ def _compute_metrics(
         "per_label": per_label,
         "confusion": confusion,
     }
+
+
+def per_cell_per_class_f1(
+    gt: list[int],
+    pred: list[int],
+    cell_type: str,
+) -> dict[str, float | None]:
+    """Per-class F1 for this single cell — v11/v9 convention.
+
+    Returns a dict like {'soma': 1.0, 'axon': 0.97, 'basal/dendrite': 0.92,
+    'apical': None}. The value is **None** when that class is NOT present
+    in this cell's ground truth — callers should EXCLUDE Nones from any
+    cross-cell distribution (so the apical-F1 distribution is over only
+    cells that actually have apical traced).
+
+    The class set is the cell-type's valid label set:
+        pyramidal:   soma, axon, basal/dendrite, apical
+        interneuron: soma, axon, basal/dendrite  (no apical by definition)
+    """
+    from hybrid.cell_type_detector import CELL_TYPE_LABEL_SETS
+    valid = set(CELL_TYPE_LABEL_SETS.get(cell_type, {1, 2, 3}))
+    m = _compute_metrics(gt, pred, valid)
+    out: dict[str, float | None] = {}
+    for name, info in m.get("per_label", {}).items():
+        out[name] = float(info["f1"]) if info["support"] > 0 else None
+    return out
+
+
+def per_cell_neurite_f1(
+    gt: list[int],
+    pred: list[int],
+    cell_type: str,
+) -> float:
+    """Per-cell neurite-macro-F1 — the v11/v9-paper convention.
+
+    Macro F1 averaged over the neurite classes (soma=1 excluded) that
+    are PRESENT in this cell's ground truth. Missing classes are
+    DROPPED from the average rather than counted as F1=0, because
+    "did the model find apical?" is undefined when no apical was traced.
+
+    Use this everywhere we report per-cell F1. It's the only correct
+    per-cell F1 in the codebase — earlier `labels=[2,3,4]` /
+    `labels=[2,3]` variants were dropped because they forced missing
+    classes to 0 and depressed the numbers ~30-40 pp on cells lacking
+    a neurite class.
+    """
+    from hybrid.cell_type_detector import CELL_TYPE_LABEL_SETS
+    valid = set(CELL_TYPE_LABEL_SETS.get(cell_type, {1, 2, 3}))
+    m = _compute_metrics(gt, pred, valid)
+    return float(m.get("neurite_macro_f1", 0.0))
 
 
 def _print_metrics(title: str, metrics: dict) -> None:
@@ -907,14 +1032,14 @@ def main() -> int:
         help="Override path for the binary B1 bundle.",
     )
     parser.add_argument(
-        "--use-subtree-stage2", action="store_true",
-        help="Stage 2 = Tier A's per-subtree predictions (whole subtree gets one "
-             "label), bypassing the per-branch Tier B classifier. Targets the "
-             "apical-as-axon failure where individual thin trunk branches look "
-             "axon-like but the whole subtree has clear apical signatures. "
-             "Combine with --use-gnn so the GNN refines basal-vs-apical at "
-             "branch level inside dendrite subtrees.",
+        "--no-subtree-stage2", dest="use_subtree_stage2", action="store_false",
+        help="Disable the default subtree-mode Stage 2 and use the legacy "
+             "per-branch classifier instead (requires a model trained with "
+             "_TRAIN_LEGACY_BRANCH_CLASSIFIER=True). Subtree mode — one label "
+             "per primary subtree, refined at branch level by the GNN — is the "
+             "default and the more accurate path.",
     )
+    parser.set_defaults(use_subtree_stage2=True)
     args = parser.parse_args()
 
     if not args.data_dir.exists():

@@ -1,0 +1,141 @@
+{
+  "source": "paper\\results\\corpus_qc_v12_uncurated.csv",
+  "rows": [
+    {
+      "group": "overall",
+      "label": "all",
+      "total_cells": 21054,
+      "qc_pass_cells": 11862,
+      "qc_fail_cells": 9192,
+      "qc_pass_rate": 0.5634083784554004,
+      "median_nodes_qc_pass": 1352.5,
+      "mean_nodes_qc_pass": 7880.296408700051
+    },
+    {
+      "group": "cell_type",
+      "label": "interneuron",
+      "total_cells": 10144,
+      "qc_pass_cells": 3374,
+      "qc_fail_cells": 6770,
+      "qc_pass_rate": 0.3326104100946372,
+      "median_nodes_qc_pass": 3612.5,
+      "mean_nodes_qc_pass": 8502.963544754
+    },
+    {
+      "group": "cell_type",
+      "label": "pyramidal",
+      "total_cells": 10910,
+      "qc_pass_cells": 8488,
+      "qc_fail_cells": 2422,
+      "qc_pass_rate": 0.7780018331805683,
+      "median_nodes_qc_pass": 917.5,
+      "mean_nodes_qc_pass": 7632.784754948162
+    },
+    {
+      "group": "source",
+      "label": "allen",
+      "total_cells": 299,
+      "qc_pass_cells": 203,
+      "qc_fail_cells": 96,
+      "qc_pass_rate": 0.6789297658862876,
+      "median_nodes_qc_pass": 11792.0,
+      "mean_nodes_qc_pass": 13074.980295566502
+    },
+    {
+      "group": "source",
+      "label": "hpf_ca1",
+      "total_cells": 1377,
+      "qc_pass_cells": 1358,
+      "qc_fail_cells": 19,
+      "qc_pass_rate": 0.9862018881626725,
+      "median_nodes_qc_pass": 31055.5,
+      "mean_nodes_qc_pass": 36283.29970544919
+    },
+    {
+      "group": "source",
+      "label": "neuromorpho",
+      "total_cells": 19378,
+      "qc_pass_cells": 10301,
+      "qc_fail_cells": 9077,
+      "qc_pass_rate": 0.5315822066260708,
+      "median_nodes_qc_pass": 1009.0,
+      "mean_nodes_qc_pass": 4033.5049024366567
+    },
+    {
+      "group": "source_cell_type",
+      "label": "allen:interneuron",
+      "total_cells": 197,
+      "qc_pass_cells": 126,
+      "qc_fail_cells": 71,
+      "qc_pass_rate": 0.6395939086294417,
+      "median_nodes_qc_pass": 11976.5,
+      "mean_nodes_qc_pass": 12641.619047619048
+    },
+    {
+      "group": "source_cell_type",
+      "label": "allen:pyramidal",
+      "total_cells": 102,
+      "qc_pass_cells": 77,
+      "qc_fail_cells": 25,
+      "qc_pass_rate": 0.7549019607843137,
+      "median_nodes_qc_pass": 11405.0,
+      "mean_nodes_qc_pass": 13784.116883116883
+    },
+    {
+      "group": "source_cell_type",
+      "label": "hpf_ca1:pyramidal",
+      "total_cells": 1377,
+      "qc_pass_cells": 1358,
+      "qc_fail_cells": 19,
+      "qc_pass_rate": 0.9862018881626725,
+      "median_nodes_qc_pass": 31055.5,
+      "mean_nodes_qc_pass": 36283.29970544919
+    },
+    {
+      "group": "source_cell_type",
+      "label": "neuromorpho:interneuron",
+      "total_cells": 9947,
+      "qc_pass_cells": 3248,
+      "qc_fail_cells": 6699,
+      "qc_pass_rate": 0.32653061224489793,
+      "median_nodes_qc_pass": 3439.5,
+      "mean_nodes_qc_pass": 8342.412253694582
+    },
+    {
+      "group": "source_cell_type",
+      "label": "neuromorpho:pyramidal",
+      "total_cells": 9431,
+      "qc_pass_cells": 7053,
+      "qc_fail_cells": 2378,
+      "qc_pass_rate": 0.7478528257872972,
+      "median_nodes_qc_pass": 684.0,
+      "mean_nodes_qc_pass": 2049.195944987948
+    }
+  ],
+  "fail_reasons": [
+    {
+      "qc_reason": "fail: has_soma",
+      "count": 5624
+    },
+    {
+      "qc_reason": "fail: has_soma,has_neurites",
+      "count": 2246
+    },
+    {
+      "qc_reason": "fail: non_empty,has_neurites,reasonable_size",
+      "count": 1194
+    },
+    {
+      "qc_reason": "fail: single_root",
+      "count": 121
+    },
+    {
+      "qc_reason": "fail: radius_positive",
+      "count": 6
+    },
+    {
+      "qc_reason": "fail: non_empty,has_soma,reasonable_size",
+      "count": 1
+    }
+  ]
+}

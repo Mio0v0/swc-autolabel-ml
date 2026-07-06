@@ -1,0 +1,21 @@
+{
+  "seed": 123,
+  "test_size": 0.2,
+  "swcal_class_balance_power": "1.25",
+  "swcal_gnn_class_weight": "inverse_sqrt",
+  "n_train": {
+    "pyramidal": 6743,
+    "interneuron": 2717
+  },
+  "n_test": {
+    "pyramidal": 1745,
+    "interneuron": 657
+  },
+  "stage1_train_min": 0.0,
+  "stage2_train_min": 0.0,
+  "gnn_train_min": 41.855833284999974,
+  "ood_n_train": 9460,
+  "ood_threshold": 1029.4284975188011,
+  "ood_quantile": 0.99,
+  "total_min": 48.319565990000164
+}

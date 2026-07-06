@@ -66,9 +66,14 @@ def parse_swc(path: str | Path, *, normalize_types: bool = True) -> list[SWCNode
                 continue
 
     if normalize_types and nodes:
-        # Local import to avoid a circular dependency at module-load time
-        from .swc_normalize import normalize_custom_types
-        nodes, _ = normalize_custom_types(nodes)
+        # Local import to avoid a circular dependency at module-load time.
+        # normalize_swc applies BOTH passes in canonical order:
+        #   (1) rewrite non-standard SWC types into {1,2,3,4}
+        #   (2) consolidate connected multi-point soma components into a
+        #       single anchor node (centroid + mega-radius) so the metric
+        #       reflects one soma per cell.
+        from .swc_normalize import normalize_swc
+        nodes, _ = normalize_swc(nodes)
     return nodes
 
 
@@ -170,6 +175,14 @@ FEATURE_NAMES: list[str] = [
     "pc1_radial_max",              # max |projection on PC1| (cell radius along PC1)
     "subtree_pc1_concentration",   # fraction of total |PC1 mass| in top-aligned primary subtree
     "subtree_pc1_top_alignment",   # mean signed PC1 projection of top subtree, normalized to pc1_radial_max
+
+    # ITER-E: extra discriminative features targeting the 5% Stage 1 ceiling
+    "soma_radius",                 # radius of the soma anchor node (mega-radius after consolidation)
+    "max_neurite_to_soma_ratio",   # max neurite radius / soma radius (interneurons have higher)
+    "branching_density",           # n_branch_points / max_path_length (per micron)
+    "terminal_density",            # n_terminals / max_path_length (per micron)
+    "bif_angle_mean",              # mean bifurcation angle (degrees)
+    "bif_angle_std",               # std of bifurcation angles
 ]
 
 # Ablation hook: paper/run_ablations.py sets SWCAL_NO_PCA=1 to retrain
@@ -451,6 +464,55 @@ def extract_global_features(nodes: list[SWCNode]) -> dict[str, float]:
         "subtree_pc1_concentration": float(subtree_pc1_concentration),
         "subtree_pc1_top_alignment": float(subtree_pc1_top_alignment),
     }
+
+    # =========================================================================
+    # ITER-E: extra discriminative features (added 2026-05; targets the
+    # ~5% Stage 1 ceiling left after extensive classifier tuning).
+    # =========================================================================
+    # Soma radius — the proxy_root's radius. After multi-point-soma
+    # consolidation this is the "mega-radius" of the whole soma cluster.
+    soma_radius_val = float(proxy_root.radius)
+    feats["soma_radius"] = soma_radius_val
+
+    # Max non-soma neurite radius / soma_radius. Interneurons tend to have
+    # neurites whose thickest segment is a larger fraction of their soma
+    # than pyramidals (whose soma is comparatively large).
+    non_proxy_radii = [nd.radius for nd in nodes if nd.id != proxy_root_id]
+    if non_proxy_radii and soma_radius_val > 1e-6:
+        feats["max_neurite_to_soma_ratio"] = float(max(non_proxy_radii)) / soma_radius_val
+    else:
+        feats["max_neurite_to_soma_ratio"] = 0.0
+
+    # Branching / terminal density — number of branch-points or terminals
+    # per micron of longest path. Interneurons are denser.
+    max_pl = float(max(path_vals)) if path_vals else 0.0
+    feats["branching_density"]  = (n_branch_points / max_pl) if max_pl > 1e-6 else 0.0
+    feats["terminal_density"]   = (n_terminals     / max_pl) if max_pl > 1e-6 else 0.0
+
+    # Bifurcation angles. For each branch point with >= 2 children,
+    # compute the angle between the unit vectors to the first two children
+    # (in 3D). Pyramidals' apical bifurcations tend to be wider (~180°);
+    # interneurons' branching is more variable.
+    bif_angles_deg: list[float] = []
+    for bp_id in branch_points:
+        bp_nd = by_id[bp_id]
+        kid_ids = list(children[bp_id])[:2]   # take the first two children
+        if len(kid_ids) < 2:
+            continue
+        v1 = np.array([by_id[kid_ids[0]].x - bp_nd.x,
+                        by_id[kid_ids[0]].y - bp_nd.y,
+                        by_id[kid_ids[0]].z - bp_nd.z], dtype=np.float64)
+        v2 = np.array([by_id[kid_ids[1]].x - bp_nd.x,
+                        by_id[kid_ids[1]].y - bp_nd.y,
+                        by_id[kid_ids[1]].z - bp_nd.z], dtype=np.float64)
+        n1, n2 = np.linalg.norm(v1), np.linalg.norm(v2)
+        if n1 < 1e-9 or n2 < 1e-9:
+            continue
+        cos_theta = float(np.clip(np.dot(v1, v2) / (n1 * n2), -1.0, 1.0))
+        bif_angles_deg.append(math.degrees(math.acos(cos_theta)))
+    feats["bif_angle_mean"] = float(np.mean(bif_angles_deg)) if bif_angles_deg else 0.0
+    feats["bif_angle_std"]  = float(np.std(bif_angles_deg))  if len(bif_angles_deg) > 1 else 0.0
+
     return feats
 
 

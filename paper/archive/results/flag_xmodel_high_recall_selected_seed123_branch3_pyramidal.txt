@@ -1,0 +1,9 @@
+XMODEL validation-selected high-recall flag candidates for F1 < 0.60
+========================================================================================
+ target_R  selected_model/features       val_P  val_R  val_flagged | test_P test_R test_flagged false_flags missed_bad accuracy kept_P10
+   50.0%  hgb:full                     62.1%  50.0%          29 |   50.0%  51.4%           36          18         17    90.0%   0.7448
+   70.0%  gb:full                      50.0%  72.2%          52 |   47.8%  62.9%           46          24         13    89.4%   0.8353
+   80.0%  rf:full                      47.5%  80.6%          61 |   52.8%  80.0%           53          25          7    90.8%   0.9793
+   90.0%  gb:full                      38.8%  91.7%          85 |   37.8%  80.0%           74          46          7    84.8%   0.9898
+   95.0%  hgb:no_lab                   25.9%  97.2%         135 |   23.7%  91.4%          135         103          3    69.6%   1.0000
+  100.0%  hgb:no_lab                   25.9% 100.0%         139 |   23.2%  91.4%          138         106          3    68.8%   1.0000

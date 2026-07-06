@@ -102,9 +102,15 @@ def _aggregate_per_file(
 ) -> tuple[list[dict], list[int], list[int], dict[str, list[int]], dict[str, list[int]]]:
     """Apply predict_fn(nodes, cell_type) → list[int] to every test file.
 
-    Returns (file_rows, all_gt, all_pred, gt_by_ct, pred_by_ct).
+    Returns (cell_records, all_gt, all_pred, gt_by_ct, pred_by_ct).
+
+    cell_records is the shape expected by
+    ``hybrid.comprehensive_metrics.build_full_report``:
+    each entry has {cell_type, n_nodes, gt, pred, path}. The downstream
+    `_build_result` calls into the shared metric builder so baselines
+    emit the IDENTICAL report layout as the v12 per-seed eval.
     """
-    file_rows: list[dict] = []
+    cell_records: list[dict] = []
     all_gt: list[int] = []
     all_pred: list[int] = []
     gt_by_ct: dict[str, list[int]] = defaultdict(list)
@@ -119,20 +125,16 @@ def _aggregate_per_file(
             pred = predict_fn(nodes, ct)
             assert len(pred) == len(gt), f"{f.name}: pred {len(pred)} != gt {len(gt)}"
 
-            valid = set(CELL_TYPE_LABEL_SETS.get(ct, {1, 2, 3}))
-            metrics = _compute_metrics(gt, pred, valid)
             try:
                 rel_path = str(f.relative_to(ROOT))
             except ValueError:
-                # Symlinks/abs paths from non-canonical data dirs (e.g. v9 merged
-                # dataset) may not be under ROOT — use the full path as-is.
                 rel_path = str(f)
-            file_rows.append({
-                "path": rel_path,
+            cell_records.append({
+                "path":      rel_path,
                 "cell_type": ct,
-                "n_nodes": len(nodes),
-                "neurite_macro_f1": float(metrics.get("neurite_macro_f1", 0.0)),
-                "macro_f1": float(metrics.get("macro_f1", 0.0)),
+                "n_nodes":   len(nodes),
+                "gt":        gt,
+                "pred":      pred,
             })
 
             all_gt.extend(gt)
@@ -140,7 +142,7 @@ def _aggregate_per_file(
             gt_by_ct[ct].extend(gt)
             pred_by_ct[ct].extend(pred)
 
-    return file_rows, all_gt, all_pred, gt_by_ct, pred_by_ct
+    return cell_records, all_gt, all_pred, gt_by_ct, pred_by_ct
 
 
 def _build_result(
@@ -151,42 +153,23 @@ def _build_result(
     gt_by_ct: dict[str, list[int]],
     pred_by_ct: dict[str, list[int]],
 ) -> dict:
-    overall_valid = {1, 2, 3, 4}
-    overall = _compute_metrics(all_gt, all_pred, overall_valid)
-    per_ct = {}
-    for ct in gt_by_ct:
-        valid = set(CELL_TYPE_LABEL_SETS.get(ct, {1, 2, 3}))
-        per_ct[ct] = _compute_metrics(gt_by_ct[ct], pred_by_ct[ct], valid)
+    """Build the canonical comprehensive metric report for one method.
 
-    file_summary = _summarize_file_scores(file_rows)
+    Delegates to ``hybrid.comprehensive_metrics.build_full_report`` so the
+    output dict layout is IDENTICAL to the v12 per-seed eval, making
+    apples-to-apples baseline-vs-v12 comparison trivial.
 
-    # Pull per-class F1 from overall metrics (numbers reviewers cite)
-    per_class = {
-        name: overall["per_label"].get(name, {}).get("f1", None)
-        for name in ("soma", "axon", "basal/dendrite", "apical")
-    }
-
-    return {
-        "method": method_name,
-        "accuracy": overall["accuracy"],
-        "macro_f1": overall["macro_f1"],
-        "neurite_macro_f1": overall["neurite_macro_f1"],
-        "per_class_f1": per_class,
-        "per_cell_type": {
-            ct: {
-                "accuracy": m["accuracy"],
-                "neurite_macro_f1": m["neurite_macro_f1"],
-            }
-            for ct, m in per_ct.items()
-        },
-        "per_file": {
-            "mean": file_summary.get("mean", 0.0),
-            "median": file_summary.get("median", 0.0),
-            "p10": file_summary.get("p10", 0.0),
-            "n_files": file_summary.get("n_files", 0),
-        },
-        "confusion": overall["confusion"],
-    }
+    The first argument (formerly ``file_rows``) is now ``cell_records``
+    in the shape required by `build_full_report`.
+    """
+    from hybrid.comprehensive_metrics import build_full_report
+    return build_full_report(
+        method=method_name,
+        gt_pool=all_gt,
+        pred_pool=all_pred,
+        cell_records=file_rows,
+        inference_min=None,  # baselines include training time; tracked at caller
+    )
 
 
 # =============================================================================

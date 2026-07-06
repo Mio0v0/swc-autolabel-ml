@@ -1,0 +1,10 @@
+D:\Desktop\SWC-Studio\.venv\Lib\site-packages\numpy\_core\_methods.py:190: RuntimeWarning: overflow encountered in square
+  x = um.square(x, out=x)
+D:\Desktop\SWC-Studio\.venv\Lib\site-packages\numpy\_core\_methods.py:190: RuntimeWarning: overflow encountered in square
+  x = um.square(x, out=x)
+D:\Desktop\SWC-Studio\.venv\Lib\site-packages\numpy\_core\_methods.py:190: RuntimeWarning: overflow encountered in square
+  x = um.square(x, out=x)
+D:\Desktop\SWC-Studio\.venv\Lib\site-packages\numpy\_core\_methods.py:190: RuntimeWarning: overflow encountered in square
+  x = um.square(x, out=x)
+D:\Desktop\SWC-Studio\.venv\Lib\site-packages\numpy\_core\_methods.py:190: RuntimeWarning: overflow encountered in square
+  x = um.square(x, out=x)

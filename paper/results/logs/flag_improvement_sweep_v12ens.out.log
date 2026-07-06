@@ -1,0 +1,60 @@
+
+=== xmodel / all: cell_f060 ===
+=== xmodel / all: axon_f050 head ===
+=== xmodel / all: basal_f060 head ===
+=== xmodel / all: apical_f050 head ===
+
+=== xmodel / pyramidal: cell_f060 ===
+=== xmodel / pyramidal: axon_f050 head ===
+=== xmodel / pyramidal: basal_f060 head ===
+=== xmodel / pyramidal: apical_f050 head ===
+
+=== xmodel / interneuron: cell_f060 ===
+=== xmodel / interneuron: axon_f050 head ===
+=== xmodel / interneuron: basal_f060 head ===
+
+=== xmodel_sanity / all: cell_f060 ===
+=== xmodel_sanity / all: axon_f050 head ===
+=== xmodel_sanity / all: basal_f060 head ===
+=== xmodel_sanity / all: apical_f050 head ===
+
+=== xmodel_sanity / pyramidal: cell_f060 ===
+=== xmodel_sanity / pyramidal: axon_f050 head ===
+=== xmodel_sanity / pyramidal: basal_f060 head ===
+=== xmodel_sanity / pyramidal: apical_f050 head ===
+
+=== xmodel_sanity / interneuron: cell_f060 ===
+=== xmodel_sanity / interneuron: axon_f050 head ===
+=== xmodel_sanity / interneuron: basal_f060 head ===
+Flag improvement sweep, seed123 Branch3 heldout
+================================================================================================
+Rows are honest test metrics. Target is bad cell: held_out_F1 < 0.60.
+
+Best rows for subset=pyramidal
+------------------------------------------------------------------------------------------------
+target_R  50% | test_P  79.2% test_R  54.3% flagged   24 fp    5 fn  16 acc  94.0% keptP10 0.7439 | single_failure_head_ranked_against_cell_f060 / xmodel / basal_f060 / gb:full
+target_R  70% | test_P  78.4% test_R  82.9% flagged   37 fp    8 fn   6 acc  96.0% keptP10 0.9538 | single_cell_f060 / xmodel_sanity / cell_f060 / hgb:full
+target_R  80% | test_P  78.9% test_R  85.7% flagged   38 fp    8 fn   5 acc  96.3% keptP10 0.9738 | single_cell_f060 / xmodel / cell_f060 / hgb:full
+target_R  90% | test_P  39.0% test_R  91.4% flagged   82 fp   50 fn   3 acc  84.8% keptP10 0.9961 | single_failure_head_ranked_against_cell_f060 / xmodel_sanity / basal_f060 / extra_trees:numeric_only
+target_R  95% | test_P  38.4% test_R  94.3% flagged   86 fp   53 fn   2 acc  84.2% keptP10 0.9973 | single_failure_head_ranked_against_cell_f060 / xmodel_sanity / basal_f060 / extra_trees:no_lab
+
+Best rows for subset=interneuron
+------------------------------------------------------------------------------------------------
+target_R  50% | test_P 100.0% test_R  57.1% flagged    4 fp    0 fn   3 acc  97.7% keptP10 1.0000 | two_stage_max_failure_heads / xmodel / cell_f060+axon_f050+basal_f060 / two_stage:max_validation_percentile
+target_R  70% | test_P 100.0% test_R  57.1% flagged    4 fp    0 fn   3 acc  97.7% keptP10 1.0000 | two_stage_max_failure_heads / xmodel / cell_f060+axon_f050+basal_f060 / two_stage:max_validation_percentile
+target_R  80% | test_P  25.0% test_R  71.4% flagged   20 fp   15 fn   2 acc  87.1% keptP10 1.0000 | single_failure_head_ranked_against_cell_f060 / xmodel / basal_f060 / gb:no_lab
+target_R  90% | test_P  60.0% test_R  85.7% flagged   10 fp    4 fn   1 acc  96.2% keptP10 1.0000 | single_failure_head_ranked_against_cell_f060 / xmodel / axon_f050 / rf:full
+target_R  95% | test_P  60.0% test_R  85.7% flagged   10 fp    4 fn   1 acc  96.2% keptP10 1.0000 | single_failure_head_ranked_against_cell_f060 / xmodel / axon_f050 / rf:full
+
+Best rows for subset=all
+------------------------------------------------------------------------------------------------
+target_R  50% | test_P  50.0% test_R  50.0% flagged   42 fp   21 fn  21 acc  91.3% keptP10 0.9016 | single_failure_head_ranked_against_cell_f060 / xmodel / apical_f050 / rf:full
+target_R  70% | test_P  64.4% test_R  69.0% flagged   45 fp   16 fn  13 acc  94.0% keptP10 0.9750 | single_cell_f060 / xmodel_sanity / cell_f060 / extra_trees:numeric_only
+target_R  80% | test_P  53.8% test_R  83.3% flagged   65 fp   30 fn   7 acc  92.3% keptP10 0.9932 | two_stage_max_failure_heads / xmodel_sanity / cell_f060+axon_f050+basal_f060+apical_f050 / two_stage:max_validation_percentile
+target_R  90% | test_P  24.1% test_R  95.2% flagged  166 fp  126 fn   2 acc  73.4% keptP10 1.0000 | single_failure_head_ranked_against_cell_f060 / xmodel / apical_f050 / rf:full
+target_R  95% | test_P  17.4% test_R  97.6% flagged  236 fp  195 fn   1 acc  59.3% keptP10 1.0000 | single_failure_head_ranked_against_cell_f060 / xmodel / axon_f050 / hgb:numeric_only
+
+CSV: paper/results/flag_improvement_sweep_seed123_branch3_v12ens.csv
+JSON: paper/results/flag_improvement_sweep_seed123_branch3_v12ens.json
+Wrote paper/results/flag_improvement_sweep_seed123_branch3_v12ens.csv
+Wrote paper/results/flag_improvement_sweep_seed123_branch3_v12ens.txt

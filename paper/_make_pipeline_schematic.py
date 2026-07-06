@@ -48,9 +48,9 @@ def main() -> int:
     b_in  = box(ax, xs, y, 1.15, h, "Raw\nSWC", C_INPUT, bold=True); xs += 1.15 + gap
     b_qc  = box(ax, xs, y, 1.35, h, "Stage 0\nQC gate", C_RULE); xs += 1.35 + gap
     b_ct  = box(ax, xs, y, 1.7, h, "Stage 1\nCell type\n(user or predict)", C_MODEL); xs += 1.7 + gap
-    b_s2  = box(ax, xs, y, 1.6, h, "Stage 2\nbranch\nclassifier", C_MODEL); xs += 1.6 + gap
-    b_gnn = box(ax, xs, y, 1.35, h, "GNN\napical/\nbasal", C_MODEL); xs += 1.35 + gap
-    b_s3  = box(ax, xs, y, 1.7, h, "Stage 3\ntopology +\nBranch3", C_RULE); xs += 1.7 + gap
+    b_s2  = box(ax, xs, y, 1.6, h, "Stage 2\nsubtree\nclassifier", C_MODEL); xs += 1.6 + gap
+    b_gnn = box(ax, xs, y, 1.7, h, "Stage 2.5\napical/basal\nGNN + Branch3", C_MODEL); xs += 1.7 + gap
+    b_s3  = box(ax, xs, y, 1.5, h, "Stage 3\ntopology\nrefinement", C_RULE); xs += 1.5 + gap
 
     for a, b in ((b_in, b_qc), (b_qc, b_ct), (b_ct, b_s2), (b_s2, b_gnn), (b_gnn, b_s3)):
         arrow(ax, a[0]+a[2], a[1]+a[3]/2, b[0], b[1]+b[3]/2)

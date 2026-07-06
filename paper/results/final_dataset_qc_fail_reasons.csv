@@ -1,0 +1,7 @@
+qc_reason,count
+fail: has_soma,5624
+"fail: has_soma,has_neurites",2246
+"fail: non_empty,has_neurites,reasonable_size",1194
+fail: single_root,121
+fail: radius_positive,6
+"fail: non_empty,has_soma,reasonable_size",1

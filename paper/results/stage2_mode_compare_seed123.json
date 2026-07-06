@@ -1,0 +1,23 @@
+{
+  "n_subsample": 400,
+  "subtree": {
+    "node_accuracy": 0.9752,
+    "neurite_macro_f1": 0.942,
+    "axon_f1": 0.9907,
+    "basal_f1": 0.9299,
+    "apical_f1": 0.9053,
+    "per_cell_f1_mean": 0.9049,
+    "per_cell_f1_p10": 0.6332,
+    "minutes": 2.4
+  },
+  "branch": {
+    "node_accuracy": 0.9689,
+    "neurite_macro_f1": 0.9347,
+    "axon_f1": 0.986,
+    "basal_f1": 0.9117,
+    "apical_f1": 0.9064,
+    "per_cell_f1_mean": 0.9165,
+    "per_cell_f1_p10": 0.6236,
+    "minutes": 4.1
+  }
+}

@@ -1,0 +1,155 @@
+============================================================================================================================================
+  v12 seed=123 vs rerun baselines
+  Stage 1 is bypassed for v12; baselines receive GT cell type; no flag model involved.
+============================================================================================================================================
+
+== SUMMARY ==
+  method                     n_test      acc  neurite_F1   axon_F1   basal_F1   apical_F1  pc_acc_mean   pc_acc_p10  pc_F1_mean  pc_F1_p10  pc_F1_p25
+  v12_branch3_gt_celltype_seed123     2402   0.9791      0.9443    0.9912     0.9440      0.8979       0.9402       0.7595      0.9296     0.6480     1.0000
+  neurom_rf                    2402   0.9304      0.8205    0.9671     0.8304      0.6642       0.8838       0.6714      0.8427     0.5402     0.7553
+  lmeasure_rf                  2402   0.9795      0.9446    0.9923     0.9401      0.9013       0.9368       0.7299      0.8952     0.4808     1.0000
+  sholl_rf                     2402   0.9793      0.9437    0.9922     0.9399      0.8990       0.9289       0.6778      0.8840     0.4256     1.0000
+  sholl_mlp                    2402   0.9724      0.9251    0.9893     0.9228      0.8631       0.9126       0.6058      0.8572     0.3795     0.7978
+
+== PER-CLASS PER-CELL F1 DISTRIBUTIONS ==
+
+  v12_branch3_gt_celltype_seed123:
+    class             n_cells     mean   median      p10      p25      p90
+    soma                 2402   1.0000   1.0000   1.0000   1.0000   1.0000
+    axon                 1128   0.8930   1.0000   0.0000   1.0000   1.0000
+    basal/dendrite       2341   0.9528   1.0000   0.8355   1.0000   1.0000
+    apical                855   0.8634   1.0000   0.0000   1.0000   1.0000
+
+  neurom_rf:
+    class             n_cells     mean   median      p10      p25      p90
+    soma                 2402   1.0000   1.0000   1.0000   1.0000   1.0000
+    axon                 1128   0.7676   0.9773   0.0000   0.7743   1.0000
+    basal/dendrite       2341   0.8630   0.9181   0.6408   0.7897   1.0000
+    apical                855   0.6858   0.7586   0.2843   0.6013   0.9186
+
+  lmeasure_rf:
+    class             n_cells     mean   median      p10      p25      p90
+    soma                 2402   1.0000   1.0000   1.0000   1.0000   1.0000
+    axon                 1128   0.7966   1.0000   0.0000   1.0000   1.0000
+    basal/dendrite       2341   0.9480   1.0000   0.7961   1.0000   1.0000
+    apical                855   0.7352   1.0000   0.0000   0.0000   1.0000
+
+  sholl_rf:
+    class             n_cells     mean   median      p10      p25      p90
+    soma                 2402   1.0000   1.0000   1.0000   1.0000   1.0000
+    axon                 1128   0.7730   1.0000   0.0000   0.9895   1.0000
+    basal/dendrite       2341   0.9430   1.0000   0.7662   1.0000   1.0000
+    apical                855   0.7055   1.0000   0.0000   0.0000   1.0000
+
+  sholl_mlp:
+    class             n_cells     mean   median      p10      p25      p90
+    soma                 2402   1.0000   1.0000   1.0000   1.0000   1.0000
+    axon                 1128   0.7019   1.0000   0.0000   0.0000   1.0000
+    basal/dendrite       2341   0.9297   1.0000   0.7093   0.9893   1.0000
+    apical                855   0.6497   1.0000   0.0000   0.0000   1.0000
+
+== PER-CELL-TYPE BREAKDOWN ==
+
+  ### v12_branch3_gt_celltype_seed123 ###
+  pyramidal  (n_cells=1745, n_nodes=14195243)
+    corpus  acc=0.9809  neurite_F1=0.9450  axon=0.9935  basal=0.9363  apical=0.9052
+    per-cell  acc mean=0.9313 p10=0.6958  F1 mean=0.9175 p10=0.6114
+    confusion (GT\pred):
+                           soma       axon      basal     apical
+      soma                 1745          0          0          0
+      axon                    0   11521023      33699      17920
+      basal/dendrite          0      52352    1514488      69888
+      apical                  0      47755      50053     886320
+  interneuron  (n_cells=657, n_nodes=5634059)
+    corpus  acc=0.9775  neurite_F1=0.9710  axon=0.9847  basal=0.9574  apical=0.0000
+    per-cell  acc mean=0.9638 p10=0.9710  F1 mean=0.9617 p10=0.9871
+    confusion (GT\pred):
+                           soma       axon      basal     apical
+      soma                  657          0          0          0
+      axon                    0    4068777      19463          0
+      basal/dendrite          0     107183    1422011          0
+      apical                  0          0          0          0
+
+  ### neurom_rf ###
+  pyramidal  (n_cells=1745, n_nodes=14195243)
+    corpus  acc=0.9424  neurite_F1=0.8326  axon=0.9793  basal=0.8492  apical=0.6694
+    per-cell  acc mean=0.8869 p10=0.6846  F1 mean=0.8337 p10=0.5177
+    confusion (GT\pred):
+                           soma       axon      basal     apical
+      soma                 1745          0          0          0
+      axon                    0   11312242      54707     205693
+      basal/dendrite          0      98328    1389500     148900
+      apical                  0     118895     191693     673540
+  interneuron  (n_cells=657, n_nodes=5634059)
+    corpus  acc=0.9028  neurite_F1=0.8724  axon=0.9347  basal=0.8102  apical=0.0000
+    per-cell  acc mean=0.8757 p10=0.6290  F1 mean=0.8668 p10=0.5916
+    confusion (GT\pred):
+                           soma       axon      basal     apical
+      soma                  657          0          0          0
+      axon                    0    3905834     182406          0
+      basal/dendrite          0     363778    1165416          0
+      apical                  0          0          0          0
+
+  ### lmeasure_rf ###
+  pyramidal  (n_cells=1745, n_nodes=14195243)
+    corpus  acc=0.9843  neurite_F1=0.9487  axon=0.9968  basal=0.9405  apical=0.9087
+    per-cell  acc mean=0.9297 p10=0.6863  F1 mean=0.8801 p10=0.4366
+    confusion (GT\pred):
+                           soma       axon      basal     apical
+      soma                 1745          0          0          0
+      axon                    0   11540721      22593       9328
+      basal/dendrite          0      22590    1541708      72430
+      apical                  0      19254      77359     887515
+  interneuron  (n_cells=657, n_nodes=5634059)
+    corpus  acc=0.9702  neurite_F1=0.9621  axon=0.9796  basal=0.9445  apical=0.0000
+    per-cell  acc mean=0.9557 p10=0.8981  F1 mean=0.9355 p10=0.7191
+    confusion (GT\pred):
+                           soma       axon      basal     apical
+      soma                  657          0          0          0
+      axon                    0    4023890      64350          0
+      basal/dendrite          0     103148    1426046          0
+      apical                  0          0          0          0
+
+  ### sholl_rf ###
+  pyramidal  (n_cells=1745, n_nodes=14195243)
+    corpus  acc=0.9840  neurite_F1=0.9478  axon=0.9967  basal=0.9403  apical=0.9064
+    per-cell  acc mean=0.9205 p10=0.6435  F1 mean=0.8663 p10=0.4036
+    confusion (GT\pred):
+                           soma       axon      basal     apical
+      soma                 1745          0          0          0
+      axon                    0   11545277      18034       9331
+      basal/dendrite          0      27437    1541861      67430
+      apical                  0      21981      82916     879231
+  interneuron  (n_cells=657, n_nodes=5634059)
+    corpus  acc=0.9702  neurite_F1=0.9620  axon=0.9796  basal=0.9444  apical=0.0000
+    per-cell  acc mean=0.9510 p10=0.8671  F1 mean=0.9310 p10=0.6915
+    confusion (GT\pred):
+                           soma       axon      basal     apical
+      soma                  657          0          0          0
+      axon                    0    4028545      59695          0
+      basal/dendrite          0     107739    1421455          0
+      apical                  0          0          0          0
+
+  ### sholl_mlp ###
+  pyramidal  (n_cells=1745, n_nodes=14195243)
+    corpus  acc=0.9773  neurite_F1=0.9279  axon=0.9946  basal=0.9189  apical=0.8702
+    per-cell  acc mean=0.9017 p10=0.5738  F1 mean=0.8329 p10=0.3376
+    confusion (GT\pred):
+                           soma       axon      basal     apical
+      soma                 1745          0          0          0
+      axon                    0   11505531      42707      24404
+      basal/dendrite          0      28519    1521093      87116
+      apical                  0      30197     109992     843939
+  interneuron  (n_cells=657, n_nodes=5634059)
+    corpus  acc=0.9629  neurite_F1=0.9531  axon=0.9745  basal=0.9317  apical=0.0000
+    per-cell  acc mean=0.9417 p10=0.7910  F1 mean=0.9215 p10=0.4956
+    confusion (GT\pred):
+                           soma       axon      basal     apical
+      soma                  657          0          0          0
+      axon                    0    3986605     101635          0
+      basal/dendrite          0     106793    1422401          0
+      apical                  0          0          0          0
+
+Inputs:
+  v12:       paper\results\v12_gt_celltype_seed123.json
+  baselines: paper\results\baselines_on_v12_seed123.json

@@ -1,0 +1,18 @@
+High-recall flag policy for F1 < 0.60
+========================================================================
+Scope: honest flag-model test split, 349 pyramidal cells.
+This answers: what if we want to catch every F1<0.6 cell?
+
+Selected scorer: gb / full
+Ranking AP=0.4573, ROC AUC=0.8450
+
+Validation-derived recall thresholds applied to test:
+ target_recall  score_threshold  flagged  precision  recall  flag_accuracy  false_flags  missed_bad
+   80.0%         0.050696       81      32.1%   74.3%         81.7%           55           9
+   90.0%         0.026965      117      23.9%   80.0%         72.5%           89           7
+   95.0%         0.014138      282      11.7%   94.3%         28.1%          249           2
+  100.0%         0.009805      331      10.6%  100.0%         15.2%          296           0
+
+Interpretation: 100% recall is possible on this test split, but only by flagging almost everything.
+For the 100% recall policy: flagged=331, true bad=35, false flags=296, missed bad=0.
+So this is a review-queue policy, not a high-precision automatic rejection policy.

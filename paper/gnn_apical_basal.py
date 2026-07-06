@@ -192,33 +192,56 @@ def load_pyramidal_split(
     feature_names: Sequence[str] = DENDRITE_FEATURE_NAMES,
     progress: bool = True,
 ) -> tuple[list[Data], list[Data]]:
-    """Load pyramidal graphs and split them into (train_graphs, test_graphs)
-    using the SAME held-out test files defined in eval_split.json. This
-    keeps the GNN's test set identical to Stage 1+2's, so its contribution
-    is directly comparable to the pipeline headline numbers.
+    """Load pyramidal graphs and split them into (train_graphs, test_graphs).
+
+    Newer split files include both train_files and test_files. When present,
+    the train whitelist is enforced so cleaned-corpus runs do not silently
+    train on QC-failed or manually dropped files that still exist on disk.
+    Older split files only include test_files and fall back to "all non-test
+    files are train."
     """
     with eval_split_path.open() as f:
         eval_split = json.load(f)
+    train_pyr_files = set(eval_split.get("train_files", {}).get("pyramidal", []))
     test_pyr_files = set(eval_split["test_files"]["pyramidal"])
     # eval_split.json stores names like
     # "data\benchmark_pyramidal_interneuron_v1_qc_diag_pruned\pyramidal\swc\<name>.swc"
     # — keep only the basename for cross-platform matching.
+    train_basenames = {Path(p).name for p in train_pyr_files}
     test_basenames = {Path(p).name for p in test_pyr_files}
+    overlap = train_basenames & test_basenames
+    if overlap:
+        raise ValueError(
+            f"GNN split leakage: {len(overlap)} files in both train and test"
+        )
+    use_train_whitelist = bool(train_basenames)
+    allowed_basenames = train_basenames | test_basenames if use_train_whitelist else None
 
     print(f"Loading pyramidal graphs from {data_dir} ...")
     graphs, stats = build_dataset(
         data_dir,
         feature_names=feature_names,
         include_interneurons=False,
+        file_filter=(
+            (lambda p: Path(p).name in allowed_basenames)
+            if allowed_basenames is not None else None
+        ),
         progress=progress,
     )
     train, test = [], []
     for g in graphs:
         name = Path(g.file_path).name
-        (test if name in test_basenames else train).append(g)
+        if name in test_basenames:
+            test.append(g)
+        elif use_train_whitelist:
+            if name in train_basenames:
+                train.append(g)
+        else:
+            train.append(g)
     print(
         f"  total={len(graphs)}  train={len(train)}  test={len(test)}  "
-        f"(expected: 763 / 169 from eval_split.json)"
+        f"(expected train/test from eval_split.json: "
+        f"{len(train_basenames) if use_train_whitelist else 'all non-test'} / {len(test_basenames)})"
     )
     print(
         f"  train apical/basal labeled branches: "
@@ -228,6 +251,10 @@ def load_pyramidal_split(
         f"  test  apical/basal labeled branches: "
         f"{sum(g.n_apical_basal for g in test)}"
     )
+    if use_train_whitelist and len(train) != len(train_basenames):
+        missing = train_basenames - {Path(g.file_path).name for g in train}
+        if missing:
+            print(f"  WARN: {len(missing)} train files not found: e.g. {next(iter(missing))}")
     if len(test) != len(test_basenames):
         missing = test_basenames - {Path(g.file_path).name for g in test}
         if missing:
@@ -270,6 +297,39 @@ class FoldResult:
 
 def _make_loader(graphs: Sequence[Data], batch_size: int, shuffle: bool) -> DataLoader:
     return DataLoader(list(graphs), batch_size=batch_size, shuffle=shuffle)
+
+
+def _gnn_loss(logits, target, weight, ignore_index):
+    """Loss function for GNN training. Defaults to weighted cross-entropy.
+
+    Set env var SWCAL_GNN_FOCAL_GAMMA=<g> (e.g. 2.0) to switch to focal loss,
+    which down-weights well-classified examples and concentrates gradient
+    on hard ones — targets the per-cell F1 tail."""
+    import os as _os
+    gamma_str = _os.environ.get("SWCAL_GNN_FOCAL_GAMMA")
+    if gamma_str is None:
+        return F.cross_entropy(logits, target, weight=weight, ignore_index=ignore_index)
+    try:
+        gamma = float(gamma_str)
+    except ValueError:
+        gamma = 0.0
+    if gamma <= 0.0:
+        return F.cross_entropy(logits, target, weight=weight, ignore_index=ignore_index)
+    # Focal loss: -(1 - p_t)^gamma * log(p_t) * class_weight[target]
+    log_probs = F.log_softmax(logits, dim=-1)               # (N, C)
+    valid = target != ignore_index
+    if not valid.any():
+        return logits.sum() * 0.0
+    log_p_t  = log_probs.gather(1, target.clamp_min(0).unsqueeze(1)).squeeze(1)  # (N,)
+    p_t      = log_p_t.exp()
+    focal_w  = (1.0 - p_t).pow(gamma)
+    loss     = -focal_w * log_p_t
+    if weight is not None:
+        # Per-sample class weight: weight[target]
+        per_sample_w = weight[target.clamp_min(0)]
+        loss = loss * per_sample_w
+    loss = loss * valid.float()
+    return loss.sum() / valid.float().sum().clamp_min(1.0)
 
 
 def _compute_class_weights(
@@ -344,12 +404,24 @@ def _eval_predictions(
 
 
 def _macro_f1(y_true: np.ndarray, y_pred: np.ndarray) -> tuple[float, float, float]:
-    """Return (macro_f1, apical_f1, basal_f1)."""
+    """Return (macro_f1, apical_f1, basal_f1).
+
+    Macro F1 follows the v11/v9-paper convention: averages only over
+    classes PRESENT in y_true. If a fold/cell only has basal (no apical
+    subtrees), the macro is basal_F1 alone — NOT mean(basal_F1, 0).
+    Per-class F1s are still returned for logging."""
     if y_true.size == 0:
         return 0.0, 0.0, 0.0
-    f1s = f1_score(y_true, y_pred, labels=[CLASS_BASAL, CLASS_APICAL], average=None, zero_division=0)
+    f1s = f1_score(y_true, y_pred, labels=[CLASS_BASAL, CLASS_APICAL],
+                    average=None, zero_division=0)
     basal_f1, apical_f1 = float(f1s[0]), float(f1s[1])
-    return (basal_f1 + apical_f1) / 2.0, apical_f1, basal_f1
+    has_basal  = bool(np.any(y_true == CLASS_BASAL))
+    has_apical = bool(np.any(y_true == CLASS_APICAL))
+    present_f1s = []
+    if has_basal:  present_f1s.append(basal_f1)
+    if has_apical: present_f1s.append(apical_f1)
+    macro = (sum(present_f1s) / len(present_f1s)) if present_f1s else 0.0
+    return macro, apical_f1, basal_f1
 
 
 def _per_cell_macro_f1(per_graph: list[tuple[np.ndarray, np.ndarray]]) -> float:
@@ -411,9 +483,7 @@ def train_one_fold(
             batch = batch.to(device)
             opt.zero_grad()
             logits = model(batch.x, batch.edge_index)
-            loss = F.cross_entropy(
-                logits, batch.y, weight=class_weight, ignore_index=CLASS_IGNORE,
-            )
+            loss = _gnn_loss(logits, batch.y, weight=class_weight, ignore_index=CLASS_IGNORE)
             loss.backward()
             opt.step()
             total_loss += float(loss.item())
@@ -541,9 +611,7 @@ def fit_final(
             batch = batch.to(device)
             opt.zero_grad()
             logits = model(batch.x, batch.edge_index)
-            loss = F.cross_entropy(
-                logits, batch.y, weight=class_weight, ignore_index=CLASS_IGNORE,
-            )
+            loss = _gnn_loss(logits, batch.y, weight=class_weight, ignore_index=CLASS_IGNORE)
             loss.backward()
             opt.step()
             total_loss += float(loss.item())

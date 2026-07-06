@@ -1,0 +1,115 @@
+{
+  "qc_csv": "paper\\results\\corpus_qc_v12_uncurated.csv",
+  "n_qc_pass_files": 11862,
+  "dry_run": false,
+  "n_csvs_with_file_column": 15,
+  "n_csvs_changed": 6,
+  "total_rows_removed": 1879,
+  "files": [
+    {
+      "file": "paper\\results\\apical_owner_prob_scan.csv",
+      "rows_before": 4263,
+      "rows_after": 4263,
+      "rows_removed": 0,
+      "unique_files_removed": 0
+    },
+    {
+      "file": "paper\\results\\baselines_on_v12.csv",
+      "rows_before": 9872,
+      "rows_after": 9312,
+      "rows_removed": 560,
+      "unique_files_removed": 140
+    },
+    {
+      "file": "paper\\results\\flag_confidence_features.csv",
+      "rows_before": 4176,
+      "rows_after": 4176,
+      "rows_removed": 0,
+      "unique_files_removed": 0
+    },
+    {
+      "file": "paper\\results\\flag_model_eval_test_predictions.csv",
+      "rows_before": 872,
+      "rows_after": 835,
+      "rows_removed": 37,
+      "unique_files_removed": 37
+    },
+    {
+      "file": "paper\\results\\gt_failure_modes.csv",
+      "rows_before": 4358,
+      "rows_after": 4176,
+      "rows_removed": 182,
+      "unique_files_removed": 182
+    },
+    {
+      "file": "paper\\results\\heldout_per_cell_f1.csv",
+      "rows_before": 4358,
+      "rows_after": 4176,
+      "rows_removed": 182,
+      "unique_files_removed": 182
+    },
+    {
+      "file": "paper\\results\\lmeasure_pyramidal_only_eval.csv",
+      "rows_before": 4263,
+      "rows_after": 4263,
+      "rows_removed": 0,
+      "unique_files_removed": 0
+    },
+    {
+      "file": "paper\\results\\per_seed_own_test.csv",
+      "rows_before": 4917,
+      "rows_after": 4621,
+      "rows_removed": 296,
+      "unique_files_removed": 242
+    },
+    {
+      "file": "paper\\results\\stage1_disagreement.csv",
+      "rows_before": 12484,
+      "rows_after": 11862,
+      "rows_removed": 622,
+      "unique_files_removed": 622
+    },
+    {
+      "file": "paper\\results\\v12_pyramidal_only_seed2024_balance1_eval.csv",
+      "rows_before": 4263,
+      "rows_after": 4263,
+      "rows_removed": 0,
+      "unique_files_removed": 0
+    },
+    {
+      "file": "paper\\results\\v12_pyramidal_only_seed2024_clean_apowner035_eval.csv",
+      "rows_before": 4263,
+      "rows_after": 4263,
+      "rows_removed": 0,
+      "unique_files_removed": 0
+    },
+    {
+      "file": "paper\\results\\v12_pyramidal_only_seed2024_clean_branch3_eval.csv",
+      "rows_before": 4263,
+      "rows_after": 4263,
+      "rows_removed": 0,
+      "unique_files_removed": 0
+    },
+    {
+      "file": "paper\\results\\v12_pyramidal_only_seed2024_clean_branch3_gate_eval.csv",
+      "rows_before": 4263,
+      "rows_after": 4263,
+      "rows_removed": 0,
+      "unique_files_removed": 0
+    },
+    {
+      "file": "paper\\results\\v12_pyramidal_only_seed2024_clean_branch3_loose_eval.csv",
+      "rows_before": 4263,
+      "rows_after": 4263,
+      "rows_removed": 0,
+      "unique_files_removed": 0
+    },
+    {
+      "file": "paper\\results\\v12_pyramidal_only_seed2024_clean_eval.csv",
+      "rows_before": 4263,
+      "rows_after": 4263,
+      "rows_removed": 0,
+      "unique_files_removed": 0
+    }
+  ]
+}

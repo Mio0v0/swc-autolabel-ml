@@ -1,0 +1,20 @@
+{
+  "source_input": "paper\\results\\heldout_per_cell_f1_seed123_branch3.csv",
+  "confidence_features": "paper\\results\\flag_confidence_features_seed123_branch3.csv",
+  "target_threshold": 0.6,
+  "seed": 2026,
+  "models": [
+    {
+      "path": "paper\\models\\flag_model_seed123_branch3_pyramidal_highrecall\\flag_model_f060_r70.joblib",
+      "selected_model": "rf",
+      "feature_set": "numeric_only",
+      "selection_recall_target": 0.7
+    },
+    {
+      "path": "paper\\models\\flag_model_seed123_branch3_pyramidal_highrecall\\flag_model_f060_r80.joblib",
+      "selected_model": "rf",
+      "feature_set": "full",
+      "selection_recall_target": 0.8
+    }
+  ]
+}

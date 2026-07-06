@@ -1,0 +1,38 @@
+{
+  "corpus": "D:\\Desktop\\swc-autolabel-ml\\data\\v12_uncurated",
+  "n_total": 21676,
+  "n_pass": 12484,
+  "n_fail": 9192,
+  "pass_by_cell_type": {
+    "pyramidal": 9057,
+    "interneuron": 3427
+  },
+  "fail_by_cell_type": {
+    "pyramidal": 2422,
+    "interneuron": 6770
+  },
+  "by_source": {
+    "allen": {
+      "pass": 206,
+      "fail": 96
+    },
+    "hpf_ca1": {
+      "pass": 1358,
+      "fail": 19
+    },
+    "neuromorpho": {
+      "pass": 10920,
+      "fail": 9077
+    }
+  },
+  "fail_reason_counts": {
+    "fail: has_soma": 5624,
+    "fail: has_soma,has_neurites": 2246,
+    "fail: non_empty,has_neurites,reasonable_size": 1194,
+    "fail: single_root": 121,
+    "fail: radius_positive": 6,
+    "fail: non_empty,has_soma,reasonable_size": 1
+  },
+  "elapsed_min": 9.911884160000046,
+  "csv": "D:\\Desktop\\swc-autolabel-ml\\paper\\results\\corpus_qc_v12_uncurated.csv"
+}

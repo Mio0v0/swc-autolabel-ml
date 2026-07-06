@@ -1,0 +1,136 @@
+{
+  "dataset": {
+    "n_rows": 7023,
+    "n_unique_files": 5739,
+    "n_bad_f060": 528,
+    "bad_rate_f060": 0.07518154634771465,
+    "n_bottom": 703,
+    "bottom_threshold": 0.662,
+    "flag_scores_enabled": true,
+    "flag_scope": "all",
+    "flag_feature_mode": "baseline_oof",
+    "flag_reject_rate": 0.1
+  },
+  "category_summary": [
+    {
+      "category": "APICAL_OVERPREDICTED",
+      "description": "Model predicted far more apical nodes than GT and apical F1 is low.",
+      "rows": 15,
+      "bottom_rows": 15,
+      "bad_rows": 15,
+      "unique_bad_files": 13,
+      "bottom_enrichment": 9.9900426742532,
+      "flagged_bad_rows": 0,
+      "flag_recall_bad_rows": 0.0,
+      "false_flag_rows": 0
+    },
+    {
+      "category": "STAGE1_PROPAGATION",
+      "description": "Stage 1 is wrong and per-cell F1 is low.",
+      "rows": 91,
+      "bottom_rows": 89,
+      "bad_rows": 85,
+      "unique_bad_files": 78,
+      "bottom_enrichment": 9.770481296797087,
+      "flagged_bad_rows": 54,
+      "flag_recall_bad_rows": 0.6352941176470588,
+      "false_flag_rows": 1
+    },
+    {
+      "category": "APICAL_UNDERPREDICTED",
+      "description": "Model predicted less than half the GT apical node count and apical F1 is low.",
+      "rows": 311,
+      "bottom_rows": 287,
+      "bad_rows": 265,
+      "unique_bad_files": 234,
+      "bottom_enrichment": 9.219106905178997,
+      "flagged_bad_rows": 185,
+      "flag_recall_bad_rows": 0.6981132075471698,
+      "false_flag_rows": 8
+    },
+    {
+      "category": "APICAL_MISSED",
+      "description": "GT has apical nodes but the model predicted zero apical nodes.",
+      "rows": 304,
+      "bottom_rows": 280,
+      "bad_rows": 261,
+      "unique_bad_files": 232,
+      "bottom_enrichment": 9.201355094706894,
+      "flagged_bad_rows": 185,
+      "flag_recall_bad_rows": 0.7088122605363985,
+      "false_flag_rows": 7
+    },
+    {
+      "category": "BASAL_LOST",
+      "description": "Basal F1 is below 0.5 despite GT basal nodes.",
+      "rows": 146,
+      "bottom_rows": 131,
+      "bad_rows": 123,
+      "unique_bad_files": 103,
+      "bottom_enrichment": 8.96366842689842,
+      "flagged_bad_rows": 63,
+      "flag_recall_bad_rows": 0.5121951219512195,
+      "false_flag_rows": 3
+    },
+    {
+      "category": "AXON_DENDRITE_CONFUSION",
+      "description": "Axon F1 is below 0.95.",
+      "rows": 369,
+      "bottom_rows": 331,
+      "bad_rows": 214,
+      "unique_bad_files": 185,
+      "bottom_enrichment": 8.961257791809782,
+      "flagged_bad_rows": 113,
+      "flag_recall_bad_rows": 0.5280373831775701,
+      "false_flag_rows": 16
+    },
+    {
+      "category": "WHOLE_CELL_MISLABEL",
+      "description": "Stage 1 confidently disagrees with GT cell type.",
+      "rows": 26,
+      "bottom_rows": 12,
+      "bad_rows": 11,
+      "unique_bad_files": 10,
+      "bottom_enrichment": 4.610788926578401,
+      "flagged_bad_rows": 3,
+      "flag_recall_bad_rows": 0.2727272727272727,
+      "false_flag_rows": 6
+    },
+    {
+      "category": "TRUNCATED_APICAL",
+      "description": "GT apical exists but has short z extent.",
+      "rows": 402,
+      "bottom_rows": 118,
+      "bad_rows": 108,
+      "unique_bad_files": 96,
+      "bottom_enrichment": 2.93240058597482,
+      "flagged_bad_rows": 67,
+      "flag_recall_bad_rows": 0.6203703703703703,
+      "false_flag_rows": 21
+    },
+    {
+      "category": "APICAL_INVERTED",
+      "description": "GT apical nodes are on average below the soma.",
+      "rows": 1362,
+      "bottom_rows": 218,
+      "bad_rows": 158,
+      "unique_bad_files": 138,
+      "bottom_enrichment": 1.5989936145280454,
+      "flagged_bad_rows": 95,
+      "flag_recall_bad_rows": 0.6012658227848101,
+      "false_flag_rows": 34
+    },
+    {
+      "category": "DISCONNECTED",
+      "description": "Reconstruction has more than one connected component.",
+      "rows": 0,
+      "bottom_rows": 0,
+      "bad_rows": 0,
+      "unique_bad_files": 0,
+      "bottom_enrichment": 0.0,
+      "flagged_bad_rows": 0,
+      "flag_recall_bad_rows": 0.0,
+      "false_flag_rows": 0
+    }
+  ]
+}

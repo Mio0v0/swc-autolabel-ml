@@ -1,0 +1,30 @@
+{
+  "model_dir": "paper\\models\\v12_gentle_seed123",
+  "split": "test",
+  "branch3_enabled": true,
+  "branch3_path": "paper\\models\\v12_gentle_seed123\\gnn_branch3_rescue.pt",
+  "out_labels": "paper\\results\\final_flag_seed123_labels.csv",
+  "out_features": "paper\\results\\final_flag_seed123_features.csv",
+  "n_scored": 2402,
+  "n_failed": 0,
+  "elapsed_min": 53.13546305000006,
+  "f1_mean": 0.9260884263114071,
+  "f1_p10": 0.6341800000000001,
+  "f1_p25": 1.0,
+  "bad_rate_f050": 0.05620316402997502,
+  "bad_rate_f060": 0.08784346378018318,
+  "by_cell_type": {
+    "pyramidal": {
+      "n": 1745,
+      "f1_mean": 0.9137579369627506,
+      "f1_p10": 0.59544,
+      "bad_rate_f060": 0.101432664756447
+    },
+    "interneuron": {
+      "n": 657,
+      "f1_mean": 0.9588383561643835,
+      "f1_p10": 0.9840000000000001,
+      "bad_rate_f060": 0.0517503805175038
+    }
+  }
+}

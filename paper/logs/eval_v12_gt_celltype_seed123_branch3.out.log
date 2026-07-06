@@ -1,0 +1,61 @@
+=== v12 seed=123 eval with GT cell-type override ===
+  test cells: 2402
+  loading models from v12_gentle_seed123/...
+  branch3: paper\models\v12_gentle_seed123\gnn_branch3_rescue.pt
+    ... 200/2402 (4.9 min)
+    ... 400/2402 (7.9 min)
+    ... 600/2402 (9.1 min)
+    ... 800/2402 (10.6 min)
+    ... 1000/2402 (11.9 min)
+    ... 1200/2402 (13.0 min)
+    ... 1400/2402 (14.1 min)
+    ... 1600/2402 (15.0 min)
+    ... 1800/2402 (16.5 min)
+    ... 2000/2402 (18.6 min)
+    ... 2200/2402 (21.2 min)
+    ... 2400/2402 (23.7 min)
+  inference: 23.7 min
+
+========================================================================================================================
+  V12 seed=123 with GT cell-type override
+========================================================================================================================
+  method                     n_test      acc  neurite_F1   axon_F1   basal_F1   apical_F1  pc_acc_mean   pc_acc_p10  pc_F1_mean  pc_F1_p10  pc_F1_p25
+  v12_branch3_gt_celltype_seed123     2402   0.9791      0.9443    0.9912     0.9440      0.8979       0.9402       0.7595      0.9296     0.6480     1.0000
+
+========================================================================================================================
+  PER-CLASS PER-CELL F1 DISTRIBUTIONS
+========================================================================================================================
+
+  v12_branch3_gt_celltype_seed123:
+    class             n_cells     mean   median      p10      p25      p90
+    soma                 2402   1.0000   1.0000   1.0000   1.0000   1.0000
+    axon                 1128   0.8930   1.0000   0.0000   1.0000   1.0000
+    basal/dendrite       2341   0.9528   1.0000   0.8355   1.0000   1.0000
+    apical                855   0.8634   1.0000   0.0000   1.0000   1.0000
+
+========================================================================================================================
+  PER-CELL-TYPE BREAKDOWN
+========================================================================================================================
+
+  ### v12_branch3_gt_celltype_seed123 ###
+  pyramidal  (n_cells=1745, n_nodes=14195243)
+    corpus  acc=0.9809  neurite_F1=0.9450  axon=0.9935  basal=0.9363  apical=0.9052
+    per-cell  acc mean=0.9313 p10=0.6958  F1 mean=0.9175 p10=0.6114
+    confusion (GT\pred):
+                           soma       axon      basal     apical
+      soma                 1745          0          0          0
+      axon                    0   11521023      33699      17920
+      basal/dendrite          0      52352    1514488      69888
+      apical                  0      47755      50053     886320
+  interneuron  (n_cells=657, n_nodes=5634059)
+    corpus  acc=0.9775  neurite_F1=0.9710  axon=0.9847  basal=0.9574  apical=0.0000
+    per-cell  acc mean=0.9638 p10=0.9710  F1 mean=0.9617 p10=0.9871
+    confusion (GT\pred):
+                           soma       axon      basal     apical
+      soma                  657          0          0          0
+      axon                    0    4068777      19463          0
+      basal/dendrite          0     107183    1422011          0
+      apical                  0          0          0          0
+
+  JSON -> D:\Desktop\swc-autolabel-ml\paper\results\v12_gt_celltype_seed123.json
+  CSV  -> D:\Desktop\swc-autolabel-ml\paper\results\v12_gt_celltype_seed123.csv

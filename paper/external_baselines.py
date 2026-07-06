@@ -76,8 +76,9 @@ from paper.baselines import _aggregate_per_file, _build_result               # n
 DEFAULT_DATA_DIR = ROOT / "data" / "v9_merged_dataset"
 RESULTS_DIR = ROOT / "paper" / "results"
 SNAPSHOT_DIR = RESULTS_DIR / "snapshots"
-RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
+# NOTE: output dirs are created INSIDE main() when this module is run as a
+# CLI, not at import time. Creating dirs at import time leaks empty
+# directories whenever any caller does `from paper.external_baselines import ...`.
 
 
 # =============================================================================
@@ -293,18 +294,25 @@ def _extract_branch_dataset(
     return np.vstack(X) if X else np.zeros((0, 17)), np.array(y, dtype=np.int64)
 
 
-def predict_neurom_rf(train_files: dict[str, list[Path]], seed: int = 42):
-    """Train a RandomForest on per-branch NeuroM-style features. Returns a
-    `predict_fn(nodes, cell_type) -> list[int]` predictor for nodes."""
+def _train_neurom_clf(train_files: dict[str, list[Path]], seed: int = 42):
+    """Train and return just the RF classifier — no closure."""
     from sklearn.ensemble import RandomForestClassifier  # noqa: PLC0415
     Xtr, ytr = _extract_branch_dataset(train_files, "train")
+    Xtr = _sanitize_features(Xtr)
     print(f"  fitting RandomForest on {Xtr.shape[0]} branches, {Xtr.shape[1]} features...")
+    # n_jobs=4 (not -1) to bound memory: each parallel worker holds its own
+    # copy of the 2M-row training matrix; -1 spawns one per core and OOMs
+    # on the v12 corpus. Also cap depth so trees don't blow up.
     clf = RandomForestClassifier(
-        n_estimators=400, max_depth=None, n_jobs=-1, random_state=seed,
+        n_estimators=400, max_depth=30, n_jobs=4, random_state=seed,
         class_weight="balanced",
     )
     clf.fit(Xtr, ytr)
+    return clf
 
+
+def _make_neurom_predictor(clf):
+    """Wrap a fitted NeuroM-RF classifier into a `(nodes, cell_type) -> labels` fn."""
     def fn(nodes, cell_type):
         if not nodes:
             return []
@@ -317,15 +325,13 @@ def predict_neurom_rf(train_files: dict[str, list[Path]], seed: int = 42):
         out[proxy] = 1
         valid = set(CELL_TYPE_LABEL_SETS.get(cell_type, {1, 2, 3}))
 
-        # Batch all branch features into one matrix → one predict() call.
-        # Per-branch predict() calls are 100-1000x slower because of the
-        # Python ↔ sklearn boundary overhead per call.
         segs = [s for s in _branch_segments(topo, proxy) if s]
         if not segs:
             return out
         X = np.vstack([
             _branch_neurom_features(topo, proxy, seg, cell_type) for seg in segs
         ])
+        X = _sanitize_features(X)
         preds = clf.predict(X).astype(int).tolist()
         fallback = 3 if 3 in valid else next(iter(valid - {1}), 3)
         for seg, pred in zip(segs, preds):
@@ -336,8 +342,13 @@ def predict_neurom_rf(train_files: dict[str, list[Path]], seed: int = 42):
                     continue
                 out[i] = pred
         return out
-
     return fn
+
+
+def predict_neurom_rf(train_files: dict[str, list[Path]], seed: int = 42):
+    """Backward-compat: train + wrap in one call. Use `_train_neurom_clf` +
+    `_make_neurom_predictor` separately if you need to cache the clf."""
+    return _make_neurom_predictor(_train_neurom_clf(train_files, seed))
 
 
 # =============================================================================
@@ -662,16 +673,33 @@ def _extract_lmeasure_dataset(files_by_ct: dict[str, list[Path]], label: str):
     return X_arr, np.array(y, dtype=np.int64)
 
 
-def predict_lmeasure_rf(train_files: dict[str, list[Path]], seed: int = 42):
+def _sanitize_features(X: np.ndarray) -> np.ndarray:
+    """Replace inf/nan with finite values + clip to float32 range.
+    Some v12 corpus cells produce overflowing features (very large
+    morphologies). sklearn rejects non-finite inputs; clip to keep
+    the row but bound its influence."""
+    X = np.asarray(X, dtype=np.float64)
+    # Replace nan with 0, +/- inf with large finite values
+    X = np.nan_to_num(X, nan=0.0, posinf=1e30, neginf=-1e30)
+    # Clip to a safe range (well inside float32 max ~3.4e38)
+    return np.clip(X, -1e30, 1e30).astype(np.float32)
+
+
+def _train_lmeasure_clf(train_files: dict[str, list[Path]], seed: int = 42):
     from sklearn.ensemble import RandomForestClassifier  # noqa: PLC0415
     Xtr, ytr = _extract_lmeasure_dataset(train_files, "train")
+    Xtr = _sanitize_features(Xtr)
     print(f"  fitting RandomForest on {Xtr.shape[0]} subtrees, {Xtr.shape[1]} features...")
     clf = RandomForestClassifier(
         n_estimators=400, max_depth=None, n_jobs=-1, random_state=seed,
         class_weight="balanced",
     )
     clf.fit(Xtr, ytr)
-    return _make_lmeasure_predictor(clf)
+    return clf
+
+
+def predict_lmeasure_rf(train_files: dict[str, list[Path]], seed: int = 42):
+    return _make_lmeasure_predictor(_train_lmeasure_clf(train_files, seed))
 
 
 def _make_lmeasure_predictor(clf):
@@ -695,6 +723,7 @@ def _make_lmeasure_predictor(clf):
             _lmeasure_subtree_features(topo, proxy, sub_root, cell_type)
             for sub_root in sub_roots
         ])
+        X = _sanitize_features(X)
         preds = clf.predict(X).astype(int).tolist()
         fallback = 3 if 3 in valid else next(iter(valid - {1}), 3)
         for sub_root, pred in zip(sub_roots, preds):
@@ -730,6 +759,7 @@ def _make_sholl_predictor(clf):
             _sholl_subtree_features(topo, proxy, sub_root, cell_type)
             for sub_root in sub_roots
         ])
+        X = _sanitize_features(X)
         preds = clf.predict(X).astype(int).tolist()
         fallback = 3 if 3 in valid else next(iter(valid - {1}), 3)
         for sub_root, pred in zip(sub_roots, preds):
@@ -743,28 +773,30 @@ def _make_sholl_predictor(clf):
     return fn
 
 
-def predict_sholl_rf(train_files: dict[str, list[Path]], seed: int = 42):
+def _train_sholl_rf_clf(train_files: dict[str, list[Path]], seed: int = 42):
     from sklearn.ensemble import RandomForestClassifier  # noqa: PLC0415
     Xtr, ytr = _extract_subtree_dataset(train_files, "train")
+    Xtr = _sanitize_features(Xtr)
     print(f"  fitting RandomForest on {Xtr.shape[0]} subtrees, {Xtr.shape[1]} features...")
     clf = RandomForestClassifier(
         n_estimators=400, max_depth=None, n_jobs=-1, random_state=seed,
         class_weight="balanced",
     )
     clf.fit(Xtr, ytr)
-    return _make_sholl_predictor(clf)
+    return clf
 
 
-def predict_sholl_mlp(train_files: dict[str, list[Path]], seed: int = 42):
-    """Sholl features → small MLP (mirrors the Emissah/Ascoli 2026 architecture
-    style more directly than RF). Uses sklearn MLPClassifier so we don't pull
-    in torch for this one — Emissah et al. report their MLP is "compact" and
-    the feature dim is small enough that sklearn's MLP suffices."""
+def predict_sholl_rf(train_files: dict[str, list[Path]], seed: int = 42):
+    return _make_sholl_predictor(_train_sholl_rf_clf(train_files, seed))
+
+
+def _train_sholl_mlp_pipe(train_files: dict[str, list[Path]], seed: int = 42):
     from sklearn.neural_network import MLPClassifier  # noqa: PLC0415
     from sklearn.preprocessing import StandardScaler  # noqa: PLC0415
     from sklearn.pipeline import Pipeline  # noqa: PLC0415
 
     Xtr, ytr = _extract_subtree_dataset(train_files, "train")
+    Xtr = _sanitize_features(Xtr)
     print(f"  fitting MLP on {Xtr.shape[0]} subtrees, {Xtr.shape[1]} features...")
     pipe = Pipeline([
         ("scaler", StandardScaler()),
@@ -774,7 +806,54 @@ def predict_sholl_mlp(train_files: dict[str, list[Path]], seed: int = 42):
         )),
     ])
     pipe.fit(Xtr, ytr)
-    return _make_sholl_predictor(pipe)
+    return pipe
+
+
+def predict_sholl_mlp(train_files: dict[str, list[Path]], seed: int = 42):
+    """Sholl features → small MLP (mirrors the Emissah/Ascoli 2026 architecture
+    style more directly than RF). Uses sklearn MLPClassifier so we don't pull
+    in torch for this one — Emissah et al. report their MLP is "compact" and
+    the feature dim is small enough that sklearn's MLP suffices."""
+    return _make_sholl_predictor(_train_sholl_mlp_pipe(train_files, seed))
+
+
+# =============================================================================
+# CACHED training: save sklearn classifiers once, load thereafter
+# =============================================================================
+
+# (method_name) -> (trainer, wrapper)
+_CACHE_REGISTRY: dict[str, tuple[callable, callable]] = {
+    "neurom_rf":   (_train_neurom_clf,    _make_neurom_predictor),
+    "lmeasure_rf": (_train_lmeasure_clf,  _make_lmeasure_predictor),
+    "sholl_rf":    (_train_sholl_rf_clf,  _make_sholl_predictor),
+    "sholl_mlp":   (_train_sholl_mlp_pipe, _make_sholl_predictor),
+}
+
+
+def predict_with_cache(
+    method_name: str,
+    train_files: dict[str, list[Path]],
+    seed: int = 42,
+    cache_path: Path | None = None,
+    force_retrain: bool = False,
+):
+    """Train method (or load from cache), return its (nodes, cell_type) -> labels fn.
+
+    cache_path: where to pickle/load the fitted classifier. None disables caching.
+    force_retrain: ignore the cache and re-train.
+    """
+    import joblib
+    trainer, wrapper = _CACHE_REGISTRY[method_name]
+    if cache_path and cache_path.is_file() and not force_retrain:
+        print(f"  loading cached {method_name} model from {cache_path.name}...")
+        clf = joblib.load(cache_path)
+        return wrapper(clf)
+    clf = trainer(train_files, seed=seed)
+    if cache_path:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(clf, cache_path)
+        print(f"  cached {method_name} model -> {cache_path.name}")
+    return wrapper(clf)
 
 
 # =============================================================================
@@ -822,6 +901,9 @@ def _run_one(method: str, data_dir: Path, seed: int) -> tuple[dict, list[dict]]:
 
 
 def main():
+    # Create output dirs only when actually running as a CLI.
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "method", nargs="?", default="all",

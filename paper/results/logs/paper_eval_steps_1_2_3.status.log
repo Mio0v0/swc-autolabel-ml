@@ -1,0 +1,36 @@
+[2026-06-08T21:39:52] paper eval steps 1/2/3 start; eval seeds=42,789; ablation seeds=123,42,789
+[2026-06-08T21:39:52] seed 123 baseline snapshot refreshed
+[2026-06-08T21:39:52] seed 42 v12+Branch3 GT-celltype eval start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_seed42_v12_gt_celltype.log
+[2026-06-08T22:06:34] seed 42 v12+Branch3 GT-celltype eval complete
+[2026-06-08T22:06:35] seed 42 baseline retrain/eval start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_seed42_baselines.log
+[2026-06-09T00:11:57] seed 42 baseline retrain/eval complete
+[2026-06-09T00:11:57] seed 42 leakage check start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_seed42_leakage.log
+[2026-06-09T00:14:57] paper eval steps 1/2/3 start; eval seeds=42,789; ablation seeds=123,42,789
+[2026-06-09T00:14:57] seed 123 baseline snapshot refreshed
+[2026-06-09T00:14:57] seed 42 v12+Branch3 GT-celltype eval skipped; existing D:\Desktop\swc-autolabel-ml\paper\results\v12_gt_celltype_seed42.json
+[2026-06-09T00:14:57] seed 42 baseline retrain/eval skipped; existing seed-specific baseline is complete
+[2026-06-09T00:14:57] seed 42 leakage check start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_seed42_leakage.log
+[2026-06-09T00:14:58] seed 42 leakage check complete
+[2026-06-09T00:14:58] seed 42 compare v12 vs baselines start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_seed42_compare.log
+[2026-06-09T00:14:58] seed 42 compare v12 vs baselines complete
+[2026-06-09T00:14:58] seed 789 v12+Branch3 GT-celltype eval start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_seed789_v12_gt_celltype.log
+[2026-06-09T00:40:14] seed 789 v12+Branch3 GT-celltype eval complete
+[2026-06-09T00:40:14] seed 789 baseline retrain/eval start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_seed789_baselines.log
+[2026-06-09T02:35:32] seed 789 baseline retrain/eval complete
+[2026-06-09T02:35:32] seed 789 leakage check start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_seed789_leakage.log
+[2026-06-09T02:35:34] seed 789 leakage check complete
+[2026-06-09T02:35:34] seed 789 compare v12 vs baselines start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_seed789_compare.log
+[2026-06-09T02:35:34] seed 789 compare v12 vs baselines complete
+[2026-06-09T02:35:34] seed 123 v12 GT-celltype Branch3-off ablation start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_seed123_v12_no_branch3.log
+[2026-06-09T02:59:08] seed 123 v12 GT-celltype Branch3-off ablation complete
+[2026-06-09T02:59:08] seed 42 v12 GT-celltype Branch3-off ablation start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_seed42_v12_no_branch3.log
+[2026-06-09T03:22:19] seed 42 v12 GT-celltype Branch3-off ablation complete
+[2026-06-09T03:22:19] seed 789 v12 GT-celltype Branch3-off ablation start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_seed789_v12_no_branch3.log
+[2026-06-09T03:45:22] seed 789 v12 GT-celltype Branch3-off ablation complete
+[2026-06-09T03:45:22] seed 123 leakage check start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_seed123_leakage.log
+[2026-06-09T03:45:24] seed 123 leakage check complete
+[2026-06-09T03:45:24] seed 123 compare v12 vs baselines start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_seed123_compare.log
+[2026-06-09T03:45:24] seed 123 compare v12 vs baselines complete
+[2026-06-09T03:45:24] compile multiseed paper tables start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\paper_eval_compile_multiseed.log
+[2026-06-09T03:45:24] compile multiseed paper tables complete
+[2026-06-09T03:45:24] paper eval steps 1/2/3 complete

@@ -1,0 +1,9 @@
+{
+  "labels": "paper\\results\\heldout_per_cell_f1_seed123_branch3.csv",
+  "base_features": "paper\\results\\flag_confidence_features_seed123_branch3.csv",
+  "out_xmodel": "paper\\results\\flag_cross_model_features_seed123_branch3.csv",
+  "out_features": "paper\\results\\flag_features_seed123_branch3_xmodel.csv",
+  "n_rows": 2402,
+  "n_xmodel_columns": 106,
+  "elapsed_min": 32.99681913333334
+}

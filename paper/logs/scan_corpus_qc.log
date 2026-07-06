@@ -1,0 +1,62 @@
+Found 21676 SWCs total in D:\Desktop\swc-autolabel-ml\data\v12_uncurated
+  ... 500/21676  (elapsed 0.9 min)
+  ... 1000/21676  (elapsed 2.1 min)
+  ... 1500/21676  (elapsed 2.9 min)
+  ... 2000/21676  (elapsed 3.0 min)
+  ... 2500/21676  (elapsed 3.2 min)
+  ... 3000/21676  (elapsed 3.3 min)
+  ... 3500/21676  (elapsed 3.5 min)
+  ... 4000/21676  (elapsed 4.1 min)
+  ... 4500/21676  (elapsed 4.2 min)
+  ... 5000/21676  (elapsed 4.2 min)
+  ... 5500/21676  (elapsed 4.3 min)
+  ... 6000/21676  (elapsed 4.3 min)
+  ... 6500/21676  (elapsed 4.3 min)
+  ... 7000/21676  (elapsed 4.4 min)
+  ... 7500/21676  (elapsed 4.4 min)
+  ... 8000/21676  (elapsed 4.4 min)
+  ... 8500/21676  (elapsed 4.4 min)
+  ... 9000/21676  (elapsed 4.6 min)
+  ... 9500/21676  (elapsed 4.6 min)
+  ... 10000/21676  (elapsed 5.4 min)
+  ... 10500/21676  (elapsed 5.9 min)
+  ... 11000/21676  (elapsed 6.0 min)
+  ... 11500/21676  (elapsed 6.1 min)
+  ... 12000/21676  (elapsed 6.2 min)
+  ... 12500/21676  (elapsed 6.4 min)
+  ... 13000/21676  (elapsed 6.5 min)
+  ... 13500/21676  (elapsed 6.6 min)
+  ... 14000/21676  (elapsed 6.7 min)
+  ... 14500/21676  (elapsed 6.9 min)
+  ... 15000/21676  (elapsed 7.0 min)
+  ... 15500/21676  (elapsed 7.1 min)
+  ... 16000/21676  (elapsed 7.6 min)
+  ... 16500/21676  (elapsed 7.8 min)
+  ... 17000/21676  (elapsed 7.8 min)
+  ... 17500/21676  (elapsed 7.9 min)
+  ... 18000/21676  (elapsed 8.0 min)
+  ... 18500/21676  (elapsed 8.1 min)
+  ... 19000/21676  (elapsed 8.1 min)
+  ... 19500/21676  (elapsed 8.4 min)
+  ... 20000/21676  (elapsed 8.6 min)
+  ... 20500/21676  (elapsed 9.5 min)
+  ... 21000/21676  (elapsed 9.8 min)
+  ... 21500/21676  (elapsed 9.8 min)
+
+=== QC scan complete (9.9 min) ===
+  Total       : 21676
+  Passed      : 12484  (57.6%)
+  Failed      : 9192
+  Pass by cell-type    : {'pyramidal': 9057, 'interneuron': 3427}
+  Fail by cell-type    : {'pyramidal': 2422, 'interneuron': 6770}
+  By source            : {'allen': {'pass': 206, 'fail': 96}, 'hpf_ca1': {'pass': 1358, 'fail': 19}, 'neuromorpho': {'pass': 10920, 'fail': 9077}}
+  Top fail reasons:
+      5624  fail: has_soma
+      2246  fail: has_soma,has_neurites
+      1194  fail: non_empty,has_neurites,reasonable_size
+       121  fail: single_root
+         6  fail: radius_positive
+         1  fail: non_empty,has_soma,reasonable_size
+
+CSV  -> D:\Desktop\swc-autolabel-ml\paper\results\corpus_qc_v12_uncurated.csv
+JSON -> D:\Desktop\swc-autolabel-ml\paper\results\corpus_qc_v12_uncurated.json

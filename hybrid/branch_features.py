@@ -154,6 +154,46 @@ if _NO_PCA or _NO_TRUNK:
     BRANCH_FEATURE_NAMES = [n for n in BRANCH_FEATURE_NAMES if n not in _DROP_KEYS]
 
 
+# --- L-Measure feature addition (gated by SWCAL_USE_LMEASURE_FEATURES) ---
+# Classical morphometric features that capture apical-vs-basal structure
+# better than the v12 features alone. From Scorcioni et al. 2008 (L-Measure).
+# When the env var is set, these are APPENDED to the per-branch feature
+# vector (computed per primary-subtree, broadcast to all branches in the
+# subtree). Existing v12 models trained without this env var keep their
+# original 57-feature dimensionality.
+#
+# Set env var BEFORE training/inference of any new model. Schema becomes
+# 61-feature. Mismatch with a 57-feature pickle will raise at predict.
+_LMEASURE_ALL = [
+    "partition_asymmetry_mean",   # mean across bifurcations in primary subtree
+    "partition_asymmetry_max",    # max across bifurcations
+    "branch_contraction",         # this branch's euclidean(first,last) / path_length (straightness)
+    "subtree_volume_norm",        # subtree compartment volume / total cell volume
+]
+# Two env-var entry points:
+#   SWCAL_USE_LMEASURE_FEATURES=1               -> use ALL 4 (legacy)
+#   SWCAL_USE_LMEASURE_FEATURES_SUBSET=a,b,c    -> use ONLY the named subset
+# The subset wins if both are set.
+SWCAL_USE_LMEASURE = _os.environ.get("SWCAL_USE_LMEASURE_FEATURES") == "1"
+_subset_str = _os.environ.get("SWCAL_USE_LMEASURE_FEATURES_SUBSET", "").strip()
+if _subset_str:
+    _requested = [n.strip() for n in _subset_str.split(",") if n.strip()]
+    _bad = [n for n in _requested if n not in _LMEASURE_ALL]
+    if _bad:
+        raise ValueError(
+            f"SWCAL_USE_LMEASURE_FEATURES_SUBSET contains unknown names {_bad}. "
+            f"Valid: {_LMEASURE_ALL}"
+        )
+    LMEASURE_EXTRA_NAMES = _requested
+    SWCAL_USE_LMEASURE = True
+elif SWCAL_USE_LMEASURE:
+    LMEASURE_EXTRA_NAMES = _LMEASURE_ALL
+else:
+    LMEASURE_EXTRA_NAMES = []
+if SWCAL_USE_LMEASURE:
+    BRANCH_FEATURE_NAMES = BRANCH_FEATURE_NAMES + LMEASURE_EXTRA_NAMES
+
+
 @dataclass
 class BranchData:
     """Per-branch data: features + ground truth label."""
@@ -567,6 +607,63 @@ def extract_branches(
         subtree_bif_density_by_root[pr] = (
             n_bif / total_path if total_path > 1e-9 else 0.0
         )
+
+    # --- L-Measure-style features (gated by SWCAL_USE_LMEASURE_FEATURES) ---
+    # partition_asymmetry: |s_big - s_small| / (s_big + s_small) at each
+    #   bifurcation. Apical subtrees bifurcate asymmetrically (one dominant
+    #   trunk + small side branches -> values near 1). Basal subtrees
+    #   bifurcate near-symmetrically (values near 0).
+    # subtree_volume_norm: compartment volume of the primary subtree /
+    #   total cell compartment volume. Apical subtrees often occupy a
+    #   larger fraction of cell volume; basals are more evenly split.
+    # branch_contraction is computed per-branch later in the branch loop.
+    lm_pa_mean_by_root: dict[int, float] = {}
+    lm_pa_max_by_root: dict[int, float] = {}
+    lm_volume_norm_by_root: dict[int, float] = {}
+    if SWCAL_USE_LMEASURE:
+        # Precompute subtree size below each node (bottom-up DP).
+        sub_size_below = [1] * n
+        for i in reversed(order):
+            for ci in children[i]:
+                sub_size_below[i] += sub_size_below[ci]
+        # Cell total volume (sum of all parent-child compartments).
+        cell_volume = 0.0
+        for i in order:
+            pi = parent_idx[i]
+            if pi is not None:
+                seg_len = _euclidean(nodes[pi], nodes[i])
+                seg_radius = 0.5 * (nodes[pi].radius + nodes[i].radius)
+                cell_volume += math.pi * (seg_radius ** 2) * seg_len
+        cell_volume = max(cell_volume, 1e-6)
+
+        for pr in primary_set:
+            # Walk subtree once -- collect nodes + bif partition asymmetry.
+            stack = [pr]
+            sub_set: set[int] = set()
+            pa_vals: list[float] = []
+            sub_volume = 0.0
+            while stack:
+                idx = stack.pop()
+                if idx in sub_set:
+                    continue
+                sub_set.add(idx)
+                kids = children[idx]
+                if len(kids) >= 2:
+                    sizes = sorted((sub_size_below[k] for k in kids), reverse=True)
+                    a, b = sizes[0], sizes[1]
+                    pa_vals.append(abs(a - b) / max(1, a + b))
+                # Volume contribution: this node's incoming compartment if its
+                # parent is also in the subtree (i.e. not the root itself).
+                pi = parent_idx[idx]
+                if pi is not None and pi in sub_set:
+                    seg_len = _euclidean(nodes[pi], nodes[idx])
+                    seg_radius = 0.5 * (nodes[pi].radius + nodes[idx].radius)
+                    sub_volume += math.pi * (seg_radius ** 2) * seg_len
+                for ci in kids:
+                    stack.append(ci)
+            lm_pa_mean_by_root[pr]      = float(np.mean(pa_vals)) if pa_vals else 0.0
+            lm_pa_max_by_root[pr]       = float(np.max(pa_vals))  if pa_vals else 0.0
+            lm_volume_norm_by_root[pr]  = sub_volume / cell_volume
 
     # --- Per-primary-subtree trunk-detection stats ---
     # Trunk = longest root-to-leaf path inside the subtree. Apical subtrees
@@ -998,6 +1095,20 @@ def extract_branches(
             # 2026-05-09 — v10_no_trunk ablation showed zero contribution
             path_to_first_bif_norm,
         ], dtype=np.float64)
+
+        # --- L-Measure-style features (appended only when SWCAL_USE_LMEASURE_FEATURES=1
+        #     OR SWCAL_USE_LMEASURE_FEATURES_SUBSET=... is set) ---
+        if SWCAL_USE_LMEASURE:
+            _lm_values: dict[str, float] = {
+                "partition_asymmetry_mean": lm_pa_mean_by_root.get(br_primary_root, 0.0),
+                "partition_asymmetry_max":  lm_pa_max_by_root.get(br_primary_root, 0.0),
+                # branch_contraction = endpoint-Euclidean / branch path length.
+                # Apical trunks: near 1.0 (straight). Basal: lower (wandering).
+                "branch_contraction":       (euclid_dist / path_length) if path_length > 1e-9 else 0.0,
+                "subtree_volume_norm":      lm_volume_norm_by_root.get(br_primary_root, 0.0),
+            }
+            _lm_extra = np.array([_lm_values[n] for n in LMEASURE_EXTRA_NAMES], dtype=np.float64)
+            fv = np.concatenate([fv, _lm_extra])
 
         branches.append(BranchData(
             branch_id=bid,

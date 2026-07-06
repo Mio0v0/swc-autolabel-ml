@@ -377,7 +377,17 @@ def _island_flipping(
     An island is a contiguous group of nodes with the same label,
     surrounded by a different label. If the island is small and
     low-confidence, flip it.
+
+    Override `max_island_size` via env var `SWCAL_MAX_ISLAND_SIZE`
+    (used by the P10 iteration to test more aggressive cleanup).
     """
+    import os as _os
+    env_size = _os.environ.get("SWCAL_MAX_ISLAND_SIZE")
+    if env_size is not None:
+        try:
+            max_island_size = int(env_size)
+        except ValueError:
+            pass
     neurite_labels = label_set - {1}
     if len(neurite_labels) <= 1:
         return labels
@@ -472,9 +482,9 @@ def _soft_subtree_majority(
     children: list[list[int]],
     soma_indices: set[int],
     label_set: set[int],
-    high_conf: float = 0.70,
-    low_conf: float = 0.55,
-    min_margin: float = 0.60,
+    high_conf: float | None = None,
+    low_conf: float | None = None,
+    min_margin: float | None = None,
 ) -> list[int]:
     """Soft subtree-majority propagation (interneuron-safe).
 
@@ -489,7 +499,19 @@ def _soft_subtree_majority(
     3. High-confidence nodes are never touched.
 
     This is a conservative "fill in the unsure parts" operation.
+
+    Thresholds default to (high_conf=0.70, low_conf=0.55, min_margin=0.60) but
+    can be overridden via SWCAL_SOFT_HIGH_CONF / SWCAL_SOFT_LOW_CONF /
+    SWCAL_SOFT_MIN_MARGIN env vars for boundary-smoothing parameter sweeps.
     """
+    import os as _os
+    if high_conf is None:
+        high_conf = float(_os.environ.get("SWCAL_SOFT_HIGH_CONF", 0.70))
+    if low_conf is None:
+        low_conf = float(_os.environ.get("SWCAL_SOFT_LOW_CONF", 0.55))
+    if min_margin is None:
+        min_margin = float(_os.environ.get("SWCAL_SOFT_MIN_MARGIN", 0.60))
+
     neurite_labels = sorted(label_set - {1})
     if len(neurite_labels) <= 1:
         return labels
@@ -639,6 +661,94 @@ def _strip_spurious_soma(
     for i in range(len(out)):
         if i not in soma_indices and out[i] == 1:
             out[i] = fallback
+    return out
+
+
+def _branch_neighbor_smoothing(
+    nodes: list[SWCNode],
+    labels: list[int],
+    parent_idx: list[int | None],
+    children: list[list[int]],
+    soma_indices: set[int],
+    label_set: set[int],
+) -> list[int]:
+    """Post-process: flip a branch's label if its parent branch AND at least
+    one child branch both predict a DIFFERENT class than this branch.
+
+    A "branch" here is a contiguous run of nodes with the same label between
+    bifurcations. The function uses Stage 3's already-segmented branches via
+    a simple node-level scan + parent/child references.
+
+    Targets isolated mislabeled branches that survived earlier smoothing
+    (e.g., a basal branch sandwiched between two apical branches).
+
+    Env-gated by SWCAL_BRANCH_NEIGHBOR_SMOOTH=1 (off by default).
+    """
+    import os as _os
+    if _os.environ.get("SWCAL_BRANCH_NEIGHBOR_SMOOTH") != "1":
+        return labels
+
+    out = list(labels)
+    neurite_labels = label_set - {1}
+    if len(neurite_labels) <= 1:
+        return out
+
+    # Group nodes into "branch segments" — contiguous run with same label
+    # between bifurcations.
+    n = len(nodes)
+    branch_id = [-1] * n
+    cur_id = 0
+    for i in range(n):
+        if i in soma_indices:
+            continue
+        p = parent_idx[i] if isinstance(parent_idx[i], int) else None
+        # New branch if parent is soma, parent has >1 children, or parent has
+        # a different label than this node
+        if (p is None or p in soma_indices
+                or len(children[p]) > 1
+                or out[i] != out[p]):
+            branch_id[i] = cur_id
+            cur_id += 1
+        else:
+            branch_id[i] = branch_id[p]
+
+    # For each branch, find its parent branch + child branches
+    branch_label: dict[int, int] = {}
+    branch_parent: dict[int, int | None] = {}
+    branch_children: dict[int, list[int]] = {}
+    branch_nodes: dict[int, list[int]] = {}
+    for i in range(n):
+        b = branch_id[i]
+        if b < 0:
+            continue
+        branch_label[b] = out[i]
+        branch_nodes.setdefault(b, []).append(i)
+        p = parent_idx[i]
+        if isinstance(p, int) and p >= 0 and p not in soma_indices:
+            pb = branch_id[p]
+            if pb >= 0 and pb != b:
+                branch_parent.setdefault(b, pb)
+                branch_children.setdefault(pb, []).append(b)
+
+    # Now flip branches whose parent + at least one child agree on a
+    # different label
+    flipped = 0
+    for b, lbl in branch_label.items():
+        pb = branch_parent.get(b)
+        if pb is None:
+            continue
+        parent_lbl = branch_label.get(pb)
+        if parent_lbl is None or parent_lbl == lbl:
+            continue
+        # Need at least one child branch agreeing with parent (not this branch)
+        kids = branch_children.get(b, [])
+        if not any(branch_label.get(k) == parent_lbl for k in kids):
+            continue
+        # Both parent + a child agree on a different label → flip this branch
+        for idx in branch_nodes[b]:
+            out[idx] = parent_lbl
+            flipped += 1
+
     return out
 
 
@@ -837,6 +947,14 @@ def refine(
         n_refined = sum(1 for i in range(n) if labels[i] != ml_labels[i])
 
     labels = _strip_spurious_soma(labels, soma_indices, neurite_labels)
+
+    # Optional: branch-level neighbor smoothing (env-gated; off by default).
+    # Targets isolated mislabeled branches between consistently-labeled
+    # parent and child branches.
+    labels = _branch_neighbor_smoothing(
+        nodes, labels, parent_idx, children, soma_indices, label_set,
+    )
+    n_refined = sum(1 for i in range(n) if labels[i] != ml_labels[i])
 
     # Build result
     refined_labels = []

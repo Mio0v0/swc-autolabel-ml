@@ -1,0 +1,55 @@
+V12 architecture ablation ladder
+================================
+
+Rows are mean +/- SD over seeds. Stage2 rows bypass Stage1 with GT cell type.
+
+Stage2 only (GT cell type)  (n=3)
+  accuracy                     0.9701 +/- 0.0018 [0.9688, 0.9722]
+  neurite_macro_f1             0.9252 +/- 0.0046 [0.9219, 0.9304]
+  apical_f1                    0.8652 +/- 0.0112 [0.8578, 0.8781]
+  per_cell_f1_mean             0.9070 +/- 0.0057 [0.9004, 0.9109]
+  per_cell_f1_p10              0.6384 +/- 0.0111 [0.6261, 0.6475]
+  pyramidal_neurite_f1         0.9329 +/- 0.0055 [0.9295, 0.9393]
+  pyramidal_apical_f1          0.8700 +/- 0.0133 [0.8586, 0.8846]
+  interneuron_neurite_f1       0.9421 +/- 0.0012 [0.9410, 0.9433]
+
+Stage2 + GNN (GT cell type)  (n=3)
+  accuracy                     0.9696 +/- 0.0022 [0.9675, 0.9719]
+  neurite_macro_f1             0.9223 +/- 0.0055 [0.9172, 0.9282]
+  apical_f1                    0.8583 +/- 0.0148 [0.8432, 0.8727]
+  per_cell_f1_mean             0.9017 +/- 0.0052 [0.8969, 0.9072]
+  per_cell_f1_p10              0.6239 +/- 0.0149 [0.6132, 0.6409]
+  pyramidal_neurite_f1         0.9295 +/- 0.0073 [0.9222, 0.9367]
+  pyramidal_apical_f1          0.8632 +/- 0.0179 [0.8440, 0.8794]
+  interneuron_neurite_f1       0.9421 +/- 0.0012 [0.9410, 0.9433]
+
+Stage2 + GNN + Stage3 (GT cell type)  (n=3)
+  accuracy                     0.9828 +/- 0.0017 [0.9818, 0.9847]
+  neurite_macro_f1             0.9525 +/- 0.0041 [0.9493, 0.9572]
+  apical_f1                    0.9123 +/- 0.0092 [0.9066, 0.9229]
+  per_cell_f1_mean             0.9194 +/- 0.0069 [0.9122, 0.9259]
+  per_cell_f1_p10              0.6439 +/- 0.0156 [0.6260, 0.6544]
+  pyramidal_neurite_f1         0.9545 +/- 0.0053 [0.9506, 0.9605]
+  pyramidal_apical_f1          0.9173 +/- 0.0114 [0.9074, 0.9297]
+  interneuron_neurite_f1       0.9705 +/- 0.0014 [0.9695, 0.9721]
+
+Full Branch3 (GT cell type)  (n=3)
+  accuracy                     0.9832 +/- 0.0016 [0.9823, 0.9850]
+  neurite_macro_f1             0.9543 +/- 0.0041 [0.9509, 0.9589]
+  apical_f1                    0.9160 +/- 0.0096 [0.9098, 0.9270]
+  per_cell_f1_mean             0.9251 +/- 0.0056 [0.9191, 0.9301]
+  per_cell_f1_p10              0.6554 +/- 0.0041 [0.6510, 0.6590]
+  pyramidal_neurite_f1         0.9568 +/- 0.0051 [0.9528, 0.9625]
+  pyramidal_apical_f1          0.9209 +/- 0.0113 [0.9120, 0.9337]
+  interneuron_neurite_f1       0.9705 +/- 0.0014 [0.9695, 0.9721]
+
+Full Branch3 (Stage1 active)  (n=3)
+  accuracy                     0.9822 +/- 0.0010 [0.9814, 0.9833]
+  neurite_macro_f1             0.9503 +/- 0.0012 [0.9494, 0.9516]
+  apical_f1                    0.9062 +/- 0.0036 [0.9025, 0.9096]
+  per_cell_f1_mean             0.9204 +/- 0.0043 [0.9154, 0.9233]
+  per_cell_f1_p10              0.6502 +/- 0.0069 [0.6422, 0.6543]
+  pyramidal_neurite_f1         0.9528 +/- 0.0017 [0.9515, 0.9547]
+  pyramidal_apical_f1          0.9130 +/- 0.0058 [0.9065, 0.9176]
+  interneuron_neurite_f1       0.9701 +/- 0.0015 [0.9691, 0.9718]
+  stage1_accuracy              0.9739 +/- 0.0069

@@ -1,0 +1,13 @@
+Validation-selected high-recall flag model candidates for F1 < 0.60
+======================================================================================
+Selection rule per recall target: choose model with highest validation precision at that recall threshold; test metrics are then held out.
+
+ target_R  selected_model/features       val_P  val_R  val_flagged | test_P test_R test_flagged false_flags missed_bad accuracy kept_P10
+   50.0%  gb:no_lab                    58.1%  50.0%          31 |   46.9%  42.9%           32          17         20    89.4%   0.6619
+   70.0%  rf:numeric_only              45.6%  72.2%          57 |   45.5%  71.4%           55          30         10    88.5%   0.8842
+   80.0%  rf:full                      43.9%  80.6%          66 |   38.8%  74.3%           67          41          9    85.7%   0.9514
+   90.0%  hgb:no_lab                   26.0%  91.7%         127 |   25.6%  85.7%          117          87          5    73.6%   0.9948
+   95.0%  rf:numeric_only              14.1%  97.2%         249 |   13.5%  97.1%          252         218          1    37.2%   1.0000
+  100.0%  hgb:full                     13.0% 100.0%         277 |   12.5% 100.0%          279         244          0    30.1%   1.0000
+
+Best practical point from this run: around 70-80% recall. Above 90%, precision collapses because many bad cells score like good cells.

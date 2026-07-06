@@ -31,8 +31,13 @@ from .cell_type_detector import (
 # the ablation row in the paper. Module-level env-read keeps the
 # evaluator-side change to one CLI flag (see paper/run_ablations.py).
 DEFAULT_SOFT_HANDOFF_THRESHOLD = (
-    0.0 if os.environ.get("SWCAL_NO_SOFT_HANDOFF") == "1" else 0.65
+    0.0 if os.environ.get("SWCAL_NO_SOFT_HANDOFF") == "1"
+    else float(os.environ.get("SWCAL_SOFT_HANDOFF_THRESHOLD", "0.65"))
 )
+# Override the soft-handoff trigger threshold via env. Set 0.99 to run
+# BOTH cell-type Stage 2 pipelines for almost every cell (P10-pushing
+# experiment), 0.0 to disable handoff entirely. Default 0.65 keeps the
+# previous behavior.
 from .branch_features import (
     extract_branches,
 )
@@ -91,6 +96,7 @@ def run_pipeline(
     stage1_model: str | Path | None = None,
     stage2_model: str | Path | None = None,
     gnn_state: object | None = None,
+    branch3_state: object | None = None,
 ) -> PipelineResult:
     """Run the full 3-stage hybrid pipeline on an SWC file.
 
@@ -110,7 +116,7 @@ def run_pipeline(
     nodes = parse_swc(swc_path)
     return run_pipeline_on_nodes(
         nodes, str(swc_path), stage1_model, stage2_model,
-        gnn_state=gnn_state,
+        gnn_state=gnn_state, branch3_state=branch3_state,
     )
 
 
@@ -121,8 +127,10 @@ def run_pipeline_on_nodes(
     stage2_model: str | Path | None = None,
     soft_handoff_threshold: float = DEFAULT_SOFT_HANDOFF_THRESHOLD,
     gnn_state: object | None = None,
+    branch3_state: object | None = None,
     gnn_after_stage3: bool = False,
-    use_subtree_stage2: bool = False,
+    use_subtree_stage2: bool = True,
+    override_cell_type: str | None = None,
 ) -> PipelineResult:
     """Run the full pipeline on pre-parsed nodes.
 
@@ -136,9 +144,29 @@ def run_pipeline_on_nodes(
 
     Pass ``soft_handoff_threshold=0.0`` to disable the soft handoff and
     use the original hard-cascade behaviour.
+
+    Pass ``override_cell_type="pyramidal"`` (or `"interneuron"`) to BYPASS
+    Stage 1 entirely and dispatch Stage 2 with the given cell type. Used
+    for "Stage 2/3-only" evaluations where we want to measure the
+    downstream model's quality independent of Stage 1 errors. Disables
+    soft handoff (no need; cell type is asserted).
     """
-    # --- Stage 1: Cell-type detection ---
-    s1_result = detect_cell_type_from_nodes(nodes, stage1_model)
+    # --- Stage 1: Cell-type detection (or override) ---
+    if override_cell_type is not None:
+        # Construct a synthetic Stage 1 result with confidence=1.0 so the
+        # soft-handoff gate below never triggers and Stage 2 uses the
+        # asserted cell type. CellTypeResult + CELL_TYPE_LABEL_SETS are
+        # already imported at module top (lines 16-22).
+        s1_result = CellTypeResult(
+            cell_type=override_cell_type,
+            confidence=1.0,
+            probabilities={override_cell_type: 1.0},
+            label_set=set(CELL_TYPE_LABEL_SETS.get(override_cell_type, {1, 2, 3})),
+            structure_flags={"override_cell_type": True},
+            features={},
+        )
+    else:
+        s1_result = detect_cell_type_from_nodes(nodes, stage1_model)
 
     s2_path = Path(stage2_model) if stage2_model else STAGE2_MODEL
     bundle = _load_stage2_bundle(s2_path)
@@ -158,6 +186,7 @@ def run_pipeline_on_nodes(
                 trial = _run_stage23(
                     nodes, file_path, ct, bundle, s1_result,
                     gnn_state=gnn_state, gnn_after_stage3=gnn_after_stage3,
+                    branch3_state=branch3_state,
                     use_subtree_stage2=use_subtree_stage2,
                 )
                 candidates.append((ct, trial))
@@ -177,12 +206,16 @@ def run_pipeline_on_nodes(
             chosen = _run_stage23(
                 nodes, file_path, s1_result.cell_type, bundle, s1_result,
                 gnn_state=gnn_state, gnn_after_stage3=gnn_after_stage3,
+                branch3_state=branch3_state,
                 use_subtree_stage2=use_subtree_stage2,
             )
     else:
         chosen = _run_stage23(
             nodes, file_path, s1_result.cell_type, bundle, s1_result,
             gnn_state=gnn_state,
+            branch3_state=branch3_state,
+            gnn_after_stage3=gnn_after_stage3,
+            use_subtree_stage2=use_subtree_stage2,
         )
 
     # If the soft handoff overrode the Stage 1 label, propagate the new
@@ -267,6 +300,82 @@ def _apply_gnn_override(
                 confidences[node_idx] = gnn_conf
 
 
+def _apply_branch3_rescue(
+    labels: list[int],
+    confidences: list[float],
+    morph,
+    branch3_state: object,
+    subtree_owner_map: dict[int, dict[str, float | int]],
+    apical_owner_root: int | None,
+) -> None:
+    """Optionally correct axon/basal/apical branch labels with Branch3.
+
+    This head is intentionally conservative: it can rescue apical branches
+    from axon/basal, but off-owner apical predictions need a higher score.
+    Thresholds are env-gated so the experiment can sweep precision/recall
+    without retraining.
+    """
+    from paper.gnn_branch3_inference import score_morphology  # noqa: PLC0415
+
+    apical_thr = float(os.environ.get("SWCAL_BRANCH3_APICAL_THRESHOLD", "0.72"))
+    basal_thr = float(os.environ.get("SWCAL_BRANCH3_BASAL_THRESHOLD", "0.78"))
+    axon_thr = float(os.environ.get("SWCAL_BRANCH3_AXON_THRESHOLD", "0.84"))
+    off_owner_apical_thr = float(os.environ.get("SWCAL_BRANCH3_OFF_OWNER_APICAL_THRESHOLD", "0.90"))
+    gate = getattr(branch3_state, "gate", None)
+    gate_enabled = gate is not None and os.environ.get("SWCAL_BRANCH3_DISABLE_GATE") != "1"
+    gate_thr = float(os.environ.get(
+        "SWCAL_BRANCH3_GATE_THRESHOLD",
+        str(gate.get("threshold", 0.5) if gate else 0.5),
+    ))
+
+    branch_labels = [labels[br.node_indices[0]] for br in morph.branches]
+    branch_confs = [confidences[br.node_indices[0]] for br in morph.branches]
+    preds = score_morphology(
+        branch3_state,
+        morph,
+        subtree_owner_map,
+        branch_labels,
+        branch_confs,
+    )
+
+    for br in morph.branches:
+        cur_label = labels[br.node_indices[0]]
+        pred = preds.get(br.branch_id)
+        if pred is None:
+            continue
+        if len(pred) == 4:
+            new_label, conf, _, gate_score = pred
+        else:
+            new_label, conf, _ = pred
+            gate_score = None
+        if new_label == cur_label or new_label not in (2, 3, 4):
+            continue
+
+        if gate_enabled:
+            if gate_score is None or gate_score < gate_thr:
+                continue
+        else:
+            if new_label == 4:
+                if conf < apical_thr:
+                    continue
+                if (
+                    apical_owner_root is not None
+                    and br.primary_root_idx != apical_owner_root
+                    and conf < off_owner_apical_thr
+                ):
+                    continue
+            elif new_label == 3:
+                if conf < basal_thr:
+                    continue
+            elif new_label == 2:
+                if conf < axon_thr:
+                    continue
+
+        for node_idx in br.node_indices:
+            labels[node_idx] = new_label
+            confidences[node_idx] = max(confidences[node_idx], conf)
+
+
 def _run_stage23(
     nodes: list[SWCNode],
     file_path: str,
@@ -274,8 +383,9 @@ def _run_stage23(
     bundle: dict,
     s1_result: CellTypeResult,
     gnn_state: object | None = None,
+    branch3_state: object | None = None,
     gnn_after_stage3: bool = False,
-    use_subtree_stage2: bool = False,
+    use_subtree_stage2: bool = True,
 ) -> dict:
     """Run Stage 2 + Stage 3 for a *given* cell type.
 
@@ -439,6 +549,16 @@ def _run_stage23(
             ),
         )
 
+    if branch3_state is not None and cell_type == "pyramidal" and not gnn_after_stage3:
+        _apply_branch3_rescue(
+            node_labels,
+            node_confidences,
+            morph,
+            branch3_state,
+            subtree_owner_map,
+            apical_owner_root,
+        )
+
     # Build a trial Stage-1 result with the candidate cell type so
     # Stage-3 refinement uses the matching label set.
     trial_s1 = CellTypeResult(
@@ -540,6 +660,7 @@ def _branch_feature_with_owner(br, subtree_owner_map: dict[int, dict[str, float 
 
 
 def _best_apical_owner(subtree_owner_map: dict[int, dict[str, float | int]]) -> int | None:
+    threshold = float(os.environ.get("SWCAL_APICAL_OWNER_THRESHOLD", "0.45"))
     best_root: int | None = None
     best_prob = 0.0
     for root_idx, info in subtree_owner_map.items():
@@ -547,6 +668,6 @@ def _best_apical_owner(subtree_owner_map: dict[int, dict[str, float | int]]) -> 
         if prob > best_prob:
             best_prob = prob
             best_root = root_idx
-    if best_root is None or best_prob < 0.45:
+    if best_root is None or best_prob < threshold:
         return None
     return best_root

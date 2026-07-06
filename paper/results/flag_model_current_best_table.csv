@@ -1,0 +1,6 @@
+scope,target_recall_setting,precision,recall,flagged_total,actually_bad_flagged_tp,false_flags_fp,missed_bad_fn,bad_total_in_test,model,experiment
+pyramidal,0.7,0.7837837837837838,0.8285714285714286,37,29,8,6,35,hgb:full,single_cell_f060/cell_f060
+pyramidal,0.8,0.7894736842105263,0.8571428571428571,38,30,8,5,35,hgb:full,single_cell_f060/cell_f060
+pyramidal,0.9,0.3902439024390244,0.9142857142857144,82,32,50,3,35,extra_trees:numeric_only,single_failure_head_ranked_against_cell_f060/basal_f060
+interneuron,0.9,0.6,0.8571428571428571,10,6,4,1,7,rf:full,single_failure_head_ranked_against_cell_f060/axon_f050
+all,0.8,0.5384615384615384,0.8333333333333334,65,35,30,7,42,two_stage:max_validation_percentile,two_stage_max_failure_heads/cell_f060+axon_f050+basal_f060+apical_f050

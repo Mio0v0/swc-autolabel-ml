@@ -1,0 +1,13 @@
+{
+  "labels": "paper/results/heldout_per_cell_f1_seed123_branch3.csv",
+  "base_features": "paper/results/flag_features_seed123_branch3_xmodel.csv",
+  "out_v12ens": "paper/results/flag_v12_ensemble_features_seed123_branch3.csv",
+  "out_features": "paper/results/flag_features_seed123_branch3_xmodel_v12ens.csv",
+  "n_rows": 2402,
+  "n_v12ens_columns": 44,
+  "elapsed_min": 48.97891825833334,
+  "seeds": [
+    42,
+    789
+  ]
+}

@@ -1,0 +1,9 @@
+Final multi-seed flag leakage precheck
+ok: True
+rows: 7023
+unique files: 5739
+duplicate file rows across seeds: 1284
+pair overlaps: {'123_x_42': 462, '123_x_789': 471, '42_x_789': 445}
+triple overlap: 94
+labels: paper/results/final_flag_multiseed_labels.csv
+features: paper/results/final_flag_multiseed_features.csv

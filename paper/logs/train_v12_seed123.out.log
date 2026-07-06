@@ -1,0 +1,105 @@
+=== v12_gentle seed=123 ===
+  SWCAL_CLASS_BALANCE_POWER = 1.25
+  SWCAL_GNN_CLASS_WEIGHT    = inverse_sqrt
+  OUT_DIR                   = D:\Desktop\swc-autolabel-ml\paper\models\v12_gentle_seed123
+  --force-retrain           = True
+
+QC CSV: 21054 files, 11862 passed QC
+  pyramidal: 8488
+  interneuron: 3374
+  test_size                 = 0.2
+  pyramidal     train=6743  test=1745
+  interneuron   train=2717  test=657
+  split saved -> D:\Desktop\swc-autolabel-ml\paper\models\v12_gentle_seed123\train_test_split.json
+
+[1] Stage 1 train (cell-type RF)
+  Oversampled training to balanced: 13486 samples (6743 interneuron + 6743 pyramidal)
+  Stage 1 config: RF n=500, GB n=300, oversample=True
+  XGB stopped at iteration 185 of 2000 (best val error=0.0185)
+    Stage 1 elapsed: 8.3 min
+
+[2] Stage 2 train (per-branch RF, SWCAL_CLASS_BALANCE_POWER=1.25)
+    Stage 2 elapsed: 43.7 min
+
+[3] GNN train (SWCAL_GNN_CLASS_WEIGHT=inverse_sqrt, --seed 123, --gnn-type sage)
+    Command: D:\Desktop\SWC-Studio\.venv\Scripts\python.exe -u -m paper.gnn_apical_basal --data-dir D:\Desktop\swc-autolabel-ml\data\v12_uncurated --eval-split D:\Desktop\swc-autolabel-ml\paper\models\v12_gentle_seed123\eval_split_for_gnn.json --ckpt D:\Desktop\swc-autolabel-ml\paper\models\v12_gentle_seed123\gnn_apical_basal.pt --seed 123 --gnn-type sage
+Device: cuda
+  GPU: NVIDIA GeForce RTX 4080
+Loading pyramidal graphs from D:\Desktop\swc-autolabel-ml\data\v12_uncurated ...
+  processed 200 files, kept 200, branches so far: 40635 (apical/basal labeled: 19021)
+  processed 400 files, kept 400, branches so far: 90789 (apical/basal labeled: 39298)
+  processed 600 files, kept 600, branches so far: 140086 (apical/basal labeled: 57964)
+  processed 800 files, kept 800, branches so far: 182629 (apical/basal labeled: 79907)
+  processed 1000 files, kept 1000, branches so far: 232923 (apical/basal labeled: 99794)
+  processed 1200 files, kept 1200, branches so far: 287310 (apical/basal labeled: 122098)
+  processed 1400 files, kept 1400, branches so far: 335759 (apical/basal labeled: 143948)
+  processed 1600 files, kept 1600, branches so far: 368254 (apical/basal labeled: 163168)
+  processed 1800 files, kept 1800, branches so far: 380984 (apical/basal labeled: 175375)
+  processed 2000 files, kept 2000, branches so far: 391715 (apical/basal labeled: 185187)
+  processed 2200 files, kept 2200, branches so far: 404956 (apical/basal labeled: 196156)
+  processed 2400 files, kept 2400, branches so far: 415463 (apical/basal labeled: 204116)
+  processed 2600 files, kept 2600, branches so far: 426563 (apical/basal labeled: 212827)
+  processed 2800 files, kept 2800, branches so far: 437422 (apical/basal labeled: 222661)
+  processed 3000 files, kept 3000, branches so far: 449303 (apical/basal labeled: 233187)
+  processed 3200 files, kept 3200, branches so far: 460758 (apical/basal labeled: 244375)
+  processed 3400 files, kept 3400, branches so far: 476013 (apical/basal labeled: 255777)
+  processed 3600 files, kept 3600, branches so far: 492611 (apical/basal labeled: 268144)
+  processed 3800 files, kept 3800, branches so far: 508493 (apical/basal labeled: 277562)
+  processed 4000 files, kept 4000, branches so far: 521780 (apical/basal labeled: 287311)
+  processed 4200 files, kept 4200, branches so far: 532921 (apical/basal labeled: 298244)
+  processed 4400 files, kept 4400, branches so far: 545324 (apical/basal labeled: 310433)
+  processed 4600 files, kept 4600, branches so far: 569911 (apical/basal labeled: 330154)
+  processed 4800 files, kept 4800, branches so far: 595232 (apical/basal labeled: 348575)
+  processed 5000 files, kept 5000, branches so far: 612232 (apical/basal labeled: 361055)
+  processed 5200 files, kept 5200, branches so far: 622461 (apical/basal labeled: 370981)
+  processed 5400 files, kept 5400, branches so far: 634321 (apical/basal labeled: 382768)
+  processed 5600 files, kept 5600, branches so far: 645966 (apical/basal labeled: 393397)
+  processed 5800 files, kept 5800, branches so far: 659593 (apical/basal labeled: 405793)
+  processed 6000 files, kept 6000, branches so far: 666854 (apical/basal labeled: 412134)
+  processed 6200 files, kept 6200, branches so far: 671109 (apical/basal labeled: 416320)
+  processed 6400 files, kept 6400, branches so far: 675190 (apical/basal labeled: 420401)
+  processed 6600 files, kept 6600, branches so far: 684819 (apical/basal labeled: 430021)
+  processed 6800 files, kept 6800, branches so far: 694952 (apical/basal labeled: 439231)
+  processed 7000 files, kept 7000, branches so far: 704262 (apical/basal labeled: 446570)
+  processed 7200 files, kept 7200, branches so far: 710741 (apical/basal labeled: 453049)
+  processed 7400 files, kept 7400, branches so far: 718671 (apical/basal labeled: 460979)
+  processed 7600 files, kept 7600, branches so far: 726876 (apical/basal labeled: 467659)
+  processed 7800 files, kept 7800, branches so far: 739231 (apical/basal labeled: 479152)
+  processed 8000 files, kept 8000, branches so far: 746246 (apical/basal labeled: 485919)
+  processed 8200 files, kept 8200, branches so far: 756507 (apical/basal labeled: 495933)
+  processed 8400 files, kept 8400, branches so far: 766976 (apical/basal labeled: 506360)
+  processed 8600 files, kept 8600, branches so far: 788318 (apical/basal labeled: 527409)
+  processed 8800 files, kept 8800, branches so far: 808668 (apical/basal labeled: 546809)
+  processed 9000 files, kept 9000, branches so far: 838510 (apical/basal labeled: 554174)
+  processed 9200 files, kept 9200, branches so far: 843263 (apical/basal labeled: 558754)
+  processed 9400 files, kept 9400, branches so far: 853777 (apical/basal labeled: 569110)
+  processed 9600 files, kept 9545, branches so far: 860373 (apical/basal labeled: 569241)
+  processed 9800 files, kept 9744, branches so far: 871283 (apical/basal labeled: 569241)
+  processed 10000 files, kept 9943, branches so far: 882760 (apical/basal labeled: 569241)
+  processed 10200 files, kept 10143, branches so far: 894812 (apical/basal labeled: 569241)
+  processed 10600 files, kept 10460, branches so far: 914882 (apical/basal labeled: 579047)
+  processed 10800 files, kept 10660, branches so far: 919623 (apical/basal labeled: 581687)
+  processed 11000 files, kept 10860, branches so far: 928435 (apical/basal labeled: 589504)
+  processed 11200 files, kept 11060, branches so far: 937280 (apical/basal labeled: 598233)
+  processed 11400 files, kept 11260, branches so far: 945293 (apical/basal labeled: 606092)
+  total=11339  train=9594  test=1745  (expected: 763 / 169 from eval_split.json)
+  train apical/basal labeled branches: 498738
+  test  apical/basal labeled branches: 111548
+
+Train graphs: 9594  apical/basal-labeled branches: 498738
+Input feature dim: 47
+Model: 2-layer GraphSAGE, hidden=64, dropout=0.2, params=14,466
+
+=== Fold 1/5  train=7675  val=1919 ===
+    GNN class weight enabled: [0.8471403121948242, 1.283997893333435]
+  fold0 ep000  loss=0.0788  val: macroF1=0.9063 apF1=0.8692 baF1=0.9435 cellF1=0.9078  (best ep0 F1=0.9063)
+  fold0 ep004  loss=0.0543  val: macroF1=0.9286 apF1=0.9004 baF1=0.9568 cellF1=0.9210  (best ep4 F1=0.9286)
+  fold0 ep009  loss=0.0494  val: macroF1=0.9305 apF1=0.9037 baF1=0.9573 cellF1=0.9217  (best ep7 F1=0.9317)
+  fold0 ep014  loss=0.0491  val: macroF1=0.9337 apF1=0.9086 baF1=0.9588 cellF1=0.9268  (best ep12 F1=0.9353)
+  fold0 ep019  loss=0.0467  val: macroF1=0.9311 apF1=0.9047 baF1=0.9576 cellF1=0.9241  (best ep15 F1=0.9381)
+  fold0 ep024  loss=0.0463  val: macroF1=0.9349 apF1=0.9100 baF1=0.9598 cellF1=0.9295  (best ep15 F1=0.9381)
+  fold0 ep029  loss=0.0453  val: macroF1=0.9320 apF1=0.9062 baF1=0.9578 cellF1=0.9299  (best ep15 F1=0.9381)
+  fold0 ep034  loss=0.0447  val: macroF1=0.9373 apF1=0.9128 baF1=0.9618 cellF1=0.9287  (best ep15 F1=0.9381)
+  fold0 ep039  loss=0.0445  val: macroF1=0.9292 apF1=0.9030 baF1=0.9553 cellF1=0.9281  (best ep36 F1=0.9382)
+  fold0 ep044  loss=0.0440  val: macroF1=0.9343 apF1=0.9082 baF1=0.9603 cellF1=0.9302  (best ep40 F1=0.9393)
+    GNN elapsed: 21.3 min  (rc=4294967295)

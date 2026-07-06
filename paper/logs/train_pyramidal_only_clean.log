@@ -1,0 +1,232 @@
+=== Pyramidal-only retrain  seed=2024  test_size=0.5 ===
+  source model dir: v12_gentle_seed42
+  output model dir: v12_pyramidal_only_seed2024_clean
+  SWCAL_GNN_FOCAL_GAMMA      = 2.0
+  SWCAL_CLASS_BALANCE_POWER  = 1.25
+  SWCAL_GNN_CLASS_WEIGHT     = inverse_sqrt
+
+[Split] QC-passed pyramidals: 8488
+  train=4225  test=4263
+  GNN test_files.pyramidal = 7254 files  (test half + 2991 dropped)
+  copied frozen artifact: cell_type_classifier.pkl
+  copied frozen artifact: qc_gate.pkl
+
+[Stage 2] training pyramidal sub-model on 4225 files...
+  Stage 2 elapsed: 18.9 min
+  merged Stage 2 -> D:\Desktop\swc-autolabel-ml\paper\models\v12_pyramidal_only_seed2024_clean\branch_classifier.pkl  ({'merged_keys': ['interneuron', 'pyramidal'], 'source_interneuron_present': True, 'new_pyramidal_present': True})
+
+[GNN] training (seed=2024, gnn-type=sage)...
+  CMD: D:\Desktop\SWC-Studio\.venv\Scripts\python.exe -u -m paper.gnn_apical_basal --data-dir D:\Desktop\swc-autolabel-ml\data\v12_uncurated --eval-split D:\Desktop\swc-autolabel-ml\paper\models\v12_pyramidal_only_seed2024_clean\eval_split_for_gnn.json --ckpt D:\Desktop\swc-autolabel-ml\paper\models\v12_pyramidal_only_seed2024_clean\gnn_apical_basal.pt --seed 2024 --gnn-type sage
+Device: cuda
+  GPU: NVIDIA GeForce RTX 4080
+Loading pyramidal graphs from D:\Desktop\swc-autolabel-ml\data\v12_uncurated ...
+  processed 200 files, kept 200, branches so far: 40635 (apical/basal labeled: 19021)
+  processed 400 files, kept 400, branches so far: 90789 (apical/basal labeled: 39298)
+  processed 600 files, kept 600, branches so far: 140086 (apical/basal labeled: 57964)
+  processed 800 files, kept 800, branches so far: 182629 (apical/basal labeled: 79907)
+  processed 1000 files, kept 1000, branches so far: 232923 (apical/basal labeled: 99794)
+  processed 1200 files, kept 1200, branches so far: 287310 (apical/basal labeled: 122098)
+  processed 1400 files, kept 1400, branches so far: 335759 (apical/basal labeled: 143948)
+  processed 1600 files, kept 1600, branches so far: 368254 (apical/basal labeled: 163168)
+  processed 1800 files, kept 1800, branches so far: 380984 (apical/basal labeled: 175375)
+  processed 2000 files, kept 2000, branches so far: 391715 (apical/basal labeled: 185187)
+  processed 2200 files, kept 2200, branches so far: 404956 (apical/basal labeled: 196156)
+  processed 2400 files, kept 2400, branches so far: 415463 (apical/basal labeled: 204116)
+  processed 2600 files, kept 2600, branches so far: 426563 (apical/basal labeled: 212827)
+  processed 2800 files, kept 2800, branches so far: 437422 (apical/basal labeled: 222661)
+  processed 3000 files, kept 3000, branches so far: 449303 (apical/basal labeled: 233187)
+  processed 3200 files, kept 3200, branches so far: 460758 (apical/basal labeled: 244375)
+  processed 3400 files, kept 3400, branches so far: 476013 (apical/basal labeled: 255777)
+  processed 3600 files, kept 3600, branches so far: 492611 (apical/basal labeled: 268144)
+  processed 3800 files, kept 3800, branches so far: 508493 (apical/basal labeled: 277562)
+  processed 4000 files, kept 4000, branches so far: 521780 (apical/basal labeled: 287311)
+  processed 4200 files, kept 4200, branches so far: 532921 (apical/basal labeled: 298244)
+  processed 4400 files, kept 4400, branches so far: 545324 (apical/basal labeled: 310433)
+  processed 4600 files, kept 4600, branches so far: 569911 (apical/basal labeled: 330154)
+  processed 4800 files, kept 4800, branches so far: 595232 (apical/basal labeled: 348575)
+  processed 5000 files, kept 5000, branches so far: 612232 (apical/basal labeled: 361055)
+  processed 5200 files, kept 5200, branches so far: 622461 (apical/basal labeled: 370981)
+  processed 5400 files, kept 5400, branches so far: 634321 (apical/basal labeled: 382768)
+  processed 5600 files, kept 5600, branches so far: 645966 (apical/basal labeled: 393397)
+  processed 5800 files, kept 5800, branches so far: 659593 (apical/basal labeled: 405793)
+  processed 6000 files, kept 6000, branches so far: 666854 (apical/basal labeled: 412134)
+  processed 6200 files, kept 6200, branches so far: 671109 (apical/basal labeled: 416320)
+  processed 6400 files, kept 6400, branches so far: 675190 (apical/basal labeled: 420401)
+  processed 6600 files, kept 6600, branches so far: 684819 (apical/basal labeled: 430021)
+  processed 6800 files, kept 6800, branches so far: 694952 (apical/basal labeled: 439231)
+  processed 7000 files, kept 7000, branches so far: 704262 (apical/basal labeled: 446570)
+  processed 7200 files, kept 7200, branches so far: 710741 (apical/basal labeled: 453049)
+  processed 7400 files, kept 7400, branches so far: 718671 (apical/basal labeled: 460979)
+  processed 7600 files, kept 7600, branches so far: 726876 (apical/basal labeled: 467659)
+  processed 7800 files, kept 7800, branches so far: 739231 (apical/basal labeled: 479152)
+  processed 8000 files, kept 8000, branches so far: 746246 (apical/basal labeled: 485919)
+  processed 8200 files, kept 8200, branches so far: 756507 (apical/basal labeled: 495933)
+  processed 8400 files, kept 8400, branches so far: 766976 (apical/basal labeled: 506360)
+  processed 8600 files, kept 8600, branches so far: 788318 (apical/basal labeled: 527409)
+  processed 8800 files, kept 8800, branches so far: 808668 (apical/basal labeled: 546809)
+  processed 9000 files, kept 9000, branches so far: 838510 (apical/basal labeled: 554174)
+  processed 9200 files, kept 9200, branches so far: 843263 (apical/basal labeled: 558754)
+  processed 9400 files, kept 9400, branches so far: 853777 (apical/basal labeled: 569110)
+  processed 9600 files, kept 9545, branches so far: 860373 (apical/basal labeled: 569241)
+  processed 9800 files, kept 9744, branches so far: 871283 (apical/basal labeled: 569241)
+  processed 10000 files, kept 9943, branches so far: 882760 (apical/basal labeled: 569241)
+  processed 10200 files, kept 10143, branches so far: 894812 (apical/basal labeled: 569241)
+  processed 10600 files, kept 10460, branches so far: 914882 (apical/basal labeled: 579047)
+  processed 10800 files, kept 10660, branches so far: 919623 (apical/basal labeled: 581687)
+  processed 11000 files, kept 10860, branches so far: 928435 (apical/basal labeled: 589504)
+  processed 11200 files, kept 11060, branches so far: 937280 (apical/basal labeled: 598233)
+  processed 11400 files, kept 11260, branches so far: 945293 (apical/basal labeled: 606092)
+  total=11339  train=4225  test=7114  (expected: 763 / 169 from eval_split.json)
+  train apical/basal labeled branches: 273768
+  test  apical/basal labeled branches: 336518
+  WARN: 140 test files not found: e.g. neuromorpho__Snap-202.swc
+
+Train graphs: 4225  apical/basal-labeled branches: 273768
+Input feature dim: 47
+Model: 2-layer GraphSAGE, hidden=64, dropout=0.2, params=14,466
+
+=== Fold 1/5  train=3380  val=845 ===
+    GNN class weight enabled: [0.8464030623435974, 1.2865761518478394]
+  fold0 ep000  loss=0.0779  val: macroF1=0.8791 apF1=0.8360 baF1=0.9221 cellF1=0.8956  (best ep0 F1=0.8791)
+  fold0 ep004  loss=0.0498  val: macroF1=0.9022 apF1=0.8661 baF1=0.9384 cellF1=0.9127  (best ep4 F1=0.9022)
+  fold0 ep009  loss=0.0443  val: macroF1=0.9175 apF1=0.8895 baF1=0.9455 cellF1=0.9224  (best ep9 F1=0.9175)
+  fold0 ep014  loss=0.0410  val: macroF1=0.9057 apF1=0.8708 baF1=0.9407 cellF1=0.9183  (best ep9 F1=0.9175)
+  fold0 ep019  loss=0.0397  val: macroF1=0.9073 apF1=0.8729 baF1=0.9417 cellF1=0.9186  (best ep18 F1=0.9209)
+  fold0 ep024  loss=0.0376  val: macroF1=0.9106 apF1=0.8772 baF1=0.9440 cellF1=0.9160  (best ep22 F1=0.9247)
+  fold0 ep029  loss=0.0361  val: macroF1=0.9146 apF1=0.8835 baF1=0.9457 cellF1=0.9266  (best ep26 F1=0.9271)
+  fold0 ep034  loss=0.0362  val: macroF1=0.9142 apF1=0.8822 baF1=0.9462 cellF1=0.9243  (best ep26 F1=0.9271)
+  fold0 ep039  loss=0.0370  val: macroF1=0.9272 apF1=0.9005 baF1=0.9539 cellF1=0.9302  (best ep36 F1=0.9287)
+  fold0 ep044  loss=0.0348  val: macroF1=0.9163 apF1=0.8856 baF1=0.9470 cellF1=0.9294  (best ep36 F1=0.9287)
+  fold0 ep049  loss=0.0362  val: macroF1=0.9074 apF1=0.8723 baF1=0.9425 cellF1=0.9129  (best ep36 F1=0.9287)
+  fold0 ep054  loss=0.0355  val: macroF1=0.9097 apF1=0.8742 baF1=0.9451 cellF1=0.9167  (best ep36 F1=0.9287)
+  fold0 ep059  loss=0.0351  val: macroF1=0.9256 apF1=0.8990 baF1=0.9522 cellF1=0.9263  (best ep36 F1=0.9287)
+  fold0 early stop at ep61 (no val improvement for 25 ep)
+  fold0 best ep=36  val macroF1=0.9287  (134s)
+
+=== Fold 2/5  train=3380  val=845 ===
+    GNN class weight enabled: [0.8491674065589905, 1.277022123336792]
+  fold1 ep000  loss=0.0817  val: macroF1=0.8968 apF1=0.8580 baF1=0.9356 cellF1=0.9059  (best ep0 F1=0.8968)
+  fold1 ep004  loss=0.0516  val: macroF1=0.9337 apF1=0.9080 baF1=0.9593 cellF1=0.9309  (best ep4 F1=0.9337)
+  fold1 ep009  loss=0.0467  val: macroF1=0.9323 apF1=0.9058 baF1=0.9587 cellF1=0.9296  (best ep7 F1=0.9380)
+  fold1 ep014  loss=0.0438  val: macroF1=0.9399 apF1=0.9164 baF1=0.9634 cellF1=0.9343  (best ep14 F1=0.9399)
+  fold1 ep019  loss=0.0414  val: macroF1=0.9350 apF1=0.9105 baF1=0.9594 cellF1=0.9385  (best ep14 F1=0.9399)
+  fold1 ep024  loss=0.0413  val: macroF1=0.9330 apF1=0.9076 baF1=0.9584 cellF1=0.9324  (best ep21 F1=0.9418)
+  fold1 ep029  loss=0.0396  val: macroF1=0.9375 apF1=0.9139 baF1=0.9611 cellF1=0.9364  (best ep27 F1=0.9426)
+  fold1 ep034  loss=0.0388  val: macroF1=0.9373 apF1=0.9139 baF1=0.9606 cellF1=0.9394  (best ep27 F1=0.9426)
+  fold1 ep039  loss=0.0375  val: macroF1=0.9385 apF1=0.9153 baF1=0.9618 cellF1=0.9398  (best ep36 F1=0.9449)
+  fold1 ep044  loss=0.0387  val: macroF1=0.9278 apF1=0.9017 baF1=0.9539 cellF1=0.9335  (best ep41 F1=0.9456)
+  fold1 ep049  loss=0.0370  val: macroF1=0.9432 apF1=0.9214 baF1=0.9650 cellF1=0.9397  (best ep41 F1=0.9456)
+  fold1 ep054  loss=0.0376  val: macroF1=0.9368 apF1=0.9126 baF1=0.9610 cellF1=0.9367  (best ep41 F1=0.9456)
+  fold1 ep059  loss=0.0361  val: macroF1=0.9447 apF1=0.9227 baF1=0.9666 cellF1=0.9382  (best ep41 F1=0.9456)
+  fold1 ep064  loss=0.0353  val: macroF1=0.9403 apF1=0.9172 baF1=0.9635 cellF1=0.9370  (best ep63 F1=0.9459)
+  fold1 ep069  loss=0.0355  val: macroF1=0.9452 apF1=0.9241 baF1=0.9663 cellF1=0.9412  (best ep63 F1=0.9459)
+  fold1 ep074  loss=0.0354  val: macroF1=0.9443 apF1=0.9227 baF1=0.9659 cellF1=0.9399  (best ep73 F1=0.9486)
+  fold1 ep079  loss=0.0350  val: macroF1=0.9424 apF1=0.9205 baF1=0.9643 cellF1=0.9416  (best ep73 F1=0.9486)
+  fold1 ep084  loss=0.0354  val: macroF1=0.9435 apF1=0.9223 baF1=0.9648 cellF1=0.9429  (best ep73 F1=0.9486)
+  fold1 ep089  loss=0.0350  val: macroF1=0.9421 apF1=0.9193 baF1=0.9650 cellF1=0.9389  (best ep73 F1=0.9486)
+  fold1 ep094  loss=0.0343  val: macroF1=0.9445 apF1=0.9230 baF1=0.9660 cellF1=0.9428  (best ep73 F1=0.9486)
+  fold1 early stop at ep98 (no val improvement for 25 ep)
+  fold1 best ep=73  val macroF1=0.9486  (221s)
+
+=== Fold 3/5  train=3380  val=845 ===
+    GNN class weight enabled: [0.8485025763511658, 1.2792918682098389]
+  fold2 ep000  loss=0.0792  val: macroF1=0.8995 apF1=0.8587 baF1=0.9404 cellF1=0.9005  (best ep0 F1=0.8995)
+  fold2 ep004  loss=0.0509  val: macroF1=0.9236 apF1=0.8942 baF1=0.9531 cellF1=0.9226  (best ep4 F1=0.9236)
+  fold2 ep009  loss=0.0457  val: macroF1=0.9275 apF1=0.8994 baF1=0.9555 cellF1=0.9238  (best ep9 F1=0.9275)
+  fold2 ep014  loss=0.0441  val: macroF1=0.9290 apF1=0.9027 baF1=0.9553 cellF1=0.9276  (best ep10 F1=0.9298)
+  fold2 ep019  loss=0.0426  val: macroF1=0.9295 apF1=0.9023 baF1=0.9567 cellF1=0.9272  (best ep10 F1=0.9298)
+  fold2 ep024  loss=0.0396  val: macroF1=0.9343 apF1=0.9092 baF1=0.9593 cellF1=0.9313  (best ep23 F1=0.9348)
+  fold2 ep029  loss=0.0409  val: macroF1=0.9353 apF1=0.9104 baF1=0.9603 cellF1=0.9311  (best ep29 F1=0.9353)
+  fold2 ep034  loss=0.0369  val: macroF1=0.9373 apF1=0.9136 baF1=0.9609 cellF1=0.9342  (best ep34 F1=0.9373)
+  fold2 ep039  loss=0.0367  val: macroF1=0.9364 apF1=0.9121 baF1=0.9607 cellF1=0.9355  (best ep34 F1=0.9373)
+  fold2 ep044  loss=0.0376  val: macroF1=0.9293 apF1=0.9030 baF1=0.9556 cellF1=0.9253  (best ep34 F1=0.9373)
+  fold2 ep049  loss=0.0362  val: macroF1=0.9338 apF1=0.9087 baF1=0.9589 cellF1=0.9327  (best ep48 F1=0.9399)
+  fold2 ep054  loss=0.0356  val: macroF1=0.9374 apF1=0.9136 baF1=0.9611 cellF1=0.9331  (best ep48 F1=0.9399)
+  fold2 ep059  loss=0.0348  val: macroF1=0.9318 apF1=0.9058 baF1=0.9579 cellF1=0.9301  (best ep48 F1=0.9399)
+  fold2 ep064  loss=0.0360  val: macroF1=0.9397 apF1=0.9170 baF1=0.9624 cellF1=0.9400  (best ep63 F1=0.9400)
+  fold2 ep069  loss=0.0342  val: macroF1=0.9388 apF1=0.9156 baF1=0.9620 cellF1=0.9348  (best ep63 F1=0.9400)
+  fold2 ep074  loss=0.0341  val: macroF1=0.9370 apF1=0.9133 baF1=0.9607 cellF1=0.9369  (best ep63 F1=0.9400)
+  fold2 ep079  loss=0.0350  val: macroF1=0.9375 apF1=0.9143 baF1=0.9608 cellF1=0.9357  (best ep63 F1=0.9400)
+  fold2 ep084  loss=0.0344  val: macroF1=0.9361 apF1=0.9123 baF1=0.9599 cellF1=0.9323  (best ep63 F1=0.9400)
+  fold2 early stop at ep88 (no val improvement for 25 ep)
+  fold2 best ep=63  val macroF1=0.9400  (200s)
+
+=== Fold 4/5  train=3380  val=845 ===
+    GNN class weight enabled: [0.8478437662124634, 1.2815583944320679]
+  fold3 ep000  loss=0.0837  val: macroF1=0.9016 apF1=0.8624 baF1=0.9409 cellF1=0.9050  (best ep0 F1=0.9016)
+  fold3 ep004  loss=0.0530  val: macroF1=0.9308 apF1=0.9049 baF1=0.9566 cellF1=0.9302  (best ep4 F1=0.9308)
+  fold3 ep009  loss=0.0484  val: macroF1=0.9328 apF1=0.9084 baF1=0.9573 cellF1=0.9336  (best ep6 F1=0.9329)
+  fold3 ep014  loss=0.0448  val: macroF1=0.9351 apF1=0.9109 baF1=0.9593 cellF1=0.9349  (best ep11 F1=0.9370)
+  fold3 ep019  loss=0.0428  val: macroF1=0.9344 apF1=0.9102 baF1=0.9585 cellF1=0.9371  (best ep17 F1=0.9383)
+  fold3 ep024  loss=0.0405  val: macroF1=0.9376 apF1=0.9146 baF1=0.9607 cellF1=0.9364  (best ep23 F1=0.9389)
+  fold3 ep029  loss=0.0389  val: macroF1=0.9356 apF1=0.9116 baF1=0.9597 cellF1=0.9342  (best ep25 F1=0.9402)
+  fold3 ep034  loss=0.0380  val: macroF1=0.9405 apF1=0.9181 baF1=0.9629 cellF1=0.9378  (best ep34 F1=0.9405)
+  fold3 ep039  loss=0.0369  val: macroF1=0.9358 apF1=0.9113 baF1=0.9603 cellF1=0.9359  (best ep37 F1=0.9433)
+  fold3 ep044  loss=0.0376  val: macroF1=0.9410 apF1=0.9190 baF1=0.9630 cellF1=0.9389  (best ep37 F1=0.9433)
+  fold3 ep049  loss=0.0366  val: macroF1=0.9362 apF1=0.9119 baF1=0.9605 cellF1=0.9335  (best ep37 F1=0.9433)
+  fold3 ep054  loss=0.0370  val: macroF1=0.9413 apF1=0.9202 baF1=0.9625 cellF1=0.9443  (best ep37 F1=0.9433)
+  fold3 ep059  loss=0.0349  val: macroF1=0.9417 apF1=0.9205 baF1=0.9630 cellF1=0.9423  (best ep55 F1=0.9448)
+  fold3 ep064  loss=0.0361  val: macroF1=0.9398 apF1=0.9178 baF1=0.9619 cellF1=0.9386  (best ep55 F1=0.9448)
+  fold3 ep069  loss=0.0360  val: macroF1=0.9378 apF1=0.9158 baF1=0.9598 cellF1=0.9427  (best ep55 F1=0.9448)
+  fold3 ep074  loss=0.0360  val: macroF1=0.9420 apF1=0.9202 baF1=0.9639 cellF1=0.9355  (best ep55 F1=0.9448)
+  fold3 ep079  loss=0.0361  val: macroF1=0.9419 apF1=0.9213 baF1=0.9624 cellF1=0.9452  (best ep77 F1=0.9456)
+  fold3 ep084  loss=0.0352  val: macroF1=0.9441 apF1=0.9236 baF1=0.9647 cellF1=0.9416  (best ep77 F1=0.9456)
+  fold3 ep089  loss=0.0352  val: macroF1=0.9329 apF1=0.9096 baF1=0.9563 cellF1=0.9383  (best ep77 F1=0.9456)
+  fold3 ep094  loss=0.0343  val: macroF1=0.9417 apF1=0.9205 baF1=0.9628 cellF1=0.9448  (best ep77 F1=0.9456)
+  fold3 ep099  loss=0.0339  val: macroF1=0.9430 apF1=0.9224 baF1=0.9637 cellF1=0.9449  (best ep77 F1=0.9456)
+  fold3 early stop at ep102 (no val improvement for 25 ep)
+  fold3 best ep=77  val macroF1=0.9456  (221s)
+
+=== Fold 5/5  train=3380  val=845 ===
+    GNN class weight enabled: [0.8514425158500671, 1.2693843841552734]
+  fold4 ep000  loss=0.0813  val: macroF1=0.8812 apF1=0.8371 baF1=0.9252 cellF1=0.9099  (best ep0 F1=0.8812)
+  fold4 ep004  loss=0.0526  val: macroF1=0.9184 apF1=0.8853 baF1=0.9514 cellF1=0.9325  (best ep4 F1=0.9184)
+  fold4 ep009  loss=0.0456  val: macroF1=0.9147 apF1=0.8816 baF1=0.9478 cellF1=0.9304  (best ep6 F1=0.9204)
+  fold4 ep014  loss=0.0444  val: macroF1=0.9265 apF1=0.8961 baF1=0.9568 cellF1=0.9359  (best ep14 F1=0.9265)
+  fold4 ep019  loss=0.0412  val: macroF1=0.9306 apF1=0.9018 baF1=0.9594 cellF1=0.9404  (best ep19 F1=0.9306)
+  fold4 ep024  loss=0.0411  val: macroF1=0.9210 apF1=0.8895 baF1=0.9525 cellF1=0.9360  (best ep23 F1=0.9321)
+  fold4 ep029  loss=0.0387  val: macroF1=0.9245 apF1=0.8945 baF1=0.9544 cellF1=0.9419  (best ep23 F1=0.9321)
+  fold4 ep034  loss=0.0390  val: macroF1=0.9217 apF1=0.8908 baF1=0.9525 cellF1=0.9401  (best ep23 F1=0.9321)
+  fold4 ep039  loss=0.0372  val: macroF1=0.9293 apF1=0.9001 baF1=0.9585 cellF1=0.9420  (best ep23 F1=0.9321)
+  fold4 ep044  loss=0.0364  val: macroF1=0.9268 apF1=0.8979 baF1=0.9558 cellF1=0.9439  (best ep41 F1=0.9331)
+  fold4 ep049  loss=0.0363  val: macroF1=0.9212 apF1=0.8905 baF1=0.9520 cellF1=0.9426  (best ep45 F1=0.9356)
+  fold4 ep054  loss=0.0356  val: macroF1=0.9368 apF1=0.9104 baF1=0.9633 cellF1=0.9437  (best ep54 F1=0.9368)
+  fold4 ep059  loss=0.0358  val: macroF1=0.9330 apF1=0.9057 baF1=0.9603 cellF1=0.9448  (best ep54 F1=0.9368)
+  fold4 ep064  loss=0.0358  val: macroF1=0.9333 apF1=0.9045 baF1=0.9622 cellF1=0.9379  (best ep54 F1=0.9368)
+  fold4 ep069  loss=0.0346  val: macroF1=0.9346 apF1=0.9076 baF1=0.9616 cellF1=0.9435  (best ep54 F1=0.9368)
+  fold4 ep074  loss=0.0338  val: macroF1=0.9286 apF1=0.9006 baF1=0.9566 cellF1=0.9435  (best ep54 F1=0.9368)
+  fold4 ep079  loss=0.0340  val: macroF1=0.9376 apF1=0.9115 baF1=0.9637 cellF1=0.9459  (best ep79 F1=0.9376)
+  fold4 ep084  loss=0.0329  val: macroF1=0.9325 apF1=0.9046 baF1=0.9605 cellF1=0.9459  (best ep79 F1=0.9376)
+  fold4 ep089  loss=0.0335  val: macroF1=0.9311 apF1=0.9033 baF1=0.9588 cellF1=0.9426  (best ep79 F1=0.9376)
+  fold4 ep094  loss=0.0331  val: macroF1=0.9334 apF1=0.9063 baF1=0.9604 cellF1=0.9446  (best ep79 F1=0.9376)
+  fold4 ep099  loss=0.0337  val: macroF1=0.9360 apF1=0.9096 baF1=0.9624 cellF1=0.9470  (best ep79 F1=0.9376)
+  fold4 ep104  loss=0.0337  val: macroF1=0.9351 apF1=0.9084 baF1=0.9618 cellF1=0.9448  (best ep79 F1=0.9376)
+  fold4 early stop at ep104 (no val improvement for 25 ep)
+  fold4 best ep=79  val macroF1=0.9376  (234s)
+
+=== CV summary ===
+  branch macro-F1: 0.9401 +/- 0.0069
+  apical-F1      : 0.9173 +/- 0.0092
+  basal-F1       : 0.9629 +/- 0.0049
+  per-cell mean  : 0.9390 +/- 0.0069
+
+=== Final retrain on full train (n=4225) for 74 epochs ===
+    GNN class weight enabled: [0.8486725091934204, 1.278710126876831]
+  ep000  train_loss=0.0786
+  ep009  train_loss=0.0453
+  ep019  train_loss=0.0412
+  ep029  train_loss=0.0378
+  ep039  train_loss=0.0381
+  ep049  train_loss=0.0376
+  ep059  train_loss=0.0360
+  ep069  train_loss=0.0349
+
+HELD-OUT TEST  branchMacroF1=0.9044  apF1=0.8691  baF1=0.9398  cellMeanF1=0.8634
+
+Saved checkpoint to D:\Desktop\swc-autolabel-ml\paper\models\v12_pyramidal_only_seed2024_clean\gnn_apical_basal.pt  (63.0 KB)
+  GNN elapsed: 37.2 min (rc=0)
+
+--skip-eval set; not running held-out eval.
+
+TOTAL ELAPSED: 56.1 min
+Model -> D:\Desktop\swc-autolabel-ml\paper\models\v12_pyramidal_only_seed2024_clean

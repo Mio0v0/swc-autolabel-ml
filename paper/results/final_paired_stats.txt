@@ -1,0 +1,45 @@
+Paired v12 vs baseline statistics
+=================================
+
+Unit: unique SWC file. Repeated seed-file pairs are averaged before testing.
+Diff is v12 minus baseline. Bootstrap CI is 95%; p-value is paired sign-flip.
+
+lmeasure_rf / accuracy
+  n_files=5739  n_seed_file_pairs=7023  v12_mean=0.9576  baseline_mean=0.9420
+  mean_diff=+0.0156 CI95=[+0.0118, +0.0196] p=0.000050
+  p10_diff=+0.1702 CI95=[+0.1390, +0.1950] wins=749 losses=659 ties=4331
+
+lmeasure_rf / neurite_macro_f1
+  n_files=5739  n_seed_file_pairs=7023  v12_mean=0.9240  baseline_mean=0.9043
+  mean_diff=+0.0197 CI95=[+0.0149, +0.0245] p=0.000050
+  p10_diff=+0.1389 CI95=[+0.0914, +0.1625] wins=500 losses=376 ties=4863
+
+neurom_rf / accuracy
+  n_files=5739  n_seed_file_pairs=7023  v12_mean=0.9576  baseline_mean=0.8875
+  mean_diff=+0.0701 CI95=[+0.0663, +0.0740] p=0.000050
+  p10_diff=+0.2539 CI95=[+0.2275, +0.2737] wins=3602 losses=408 ties=1729
+
+neurom_rf / neurite_macro_f1
+  n_files=5739  n_seed_file_pairs=7023  v12_mean=0.9240  baseline_mean=0.8462
+  mean_diff=+0.0777 CI95=[+0.0734, +0.0821] p=0.000050
+  p10_diff=+0.1173 CI95=[+0.1037, +0.1328] wins=3449 losses=511 ties=1779
+
+sholl_rf / accuracy
+  n_files=5739  n_seed_file_pairs=7023  v12_mean=0.9576  baseline_mean=0.9314
+  mean_diff=+0.0262 CI95=[+0.0220, +0.0305] p=0.000050
+  p10_diff=+0.2414 CI95=[+0.2108, +0.2702] wins=886 losses=611 ties=4242
+
+sholl_rf / neurite_macro_f1
+  n_files=5739  n_seed_file_pairs=7023  v12_mean=0.9240  baseline_mean=0.8893
+  mean_diff=+0.0347 CI95=[+0.0297, +0.0399] p=0.000050
+  p10_diff=+0.2095 CI95=[+0.1791, +0.2289] wins=626 losses=327 ties=4786
+
+sholl_mlp / accuracy
+  n_files=5739  n_seed_file_pairs=7023  v12_mean=0.9576  baseline_mean=0.9160
+  mean_diff=+0.0417 CI95=[+0.0370, +0.0462] p=0.000050
+  p10_diff=+0.3042 CI95=[+0.2748, +0.3323] wins=1183 losses=557 ties=3999
+
+sholl_mlp / neurite_macro_f1
+  n_files=5739  n_seed_file_pairs=7023  v12_mean=0.9240  baseline_mean=0.8633
+  mean_diff=+0.0607 CI95=[+0.0552, +0.0663] p=0.000050
+  p10_diff=+0.2509 CI95=[+0.2356, +0.2658] wins=921 losses=235 ties=4583

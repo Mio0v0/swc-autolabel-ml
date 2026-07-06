@@ -1,0 +1,4 @@
+D:\Desktop\swc-autolabel-ml\paper\_train_flag_model.py:247: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  df = df.merge(cf[keep], on="file", how="left", indicator="_confidence_merge")
+D:\Desktop\swc-autolabel-ml\paper\_train_flag_model.py:247: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  df = df.merge(cf[keep], on="file", how="left", indicator="_confidence_merge")

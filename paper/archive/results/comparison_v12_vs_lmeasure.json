@@ -1,0 +1,156 @@
+{
+  "corpus_comparison": [
+    {
+      "metric": "Per-node accuracy",
+      "v12": 0.9813607220560921,
+      "lmeasure": 0.9829808909126128,
+      "delta_lm_minus_v12": 0.0016201688565206096
+    },
+    {
+      "metric": "Macro F1 (4 cls)",
+      "v12": 0.9588413705283736,
+      "lmeasure": 0.9601726457861628,
+      "delta_lm_minus_v12": 0.0013312752577891995
+    },
+    {
+      "metric": "Neurite macro F1",
+      "v12": 0.9451218273711648,
+      "lmeasure": 0.946896861048217,
+      "delta_lm_minus_v12": 0.001775033677052229
+    },
+    {
+      "metric": "soma F1 corpus",
+      "v12": 1.0,
+      "lmeasure": 1.0,
+      "delta_lm_minus_v12": 0.0
+    },
+    {
+      "metric": "axon F1 corpus",
+      "v12": 0.9941714024194556,
+      "lmeasure": 0.99610236860208,
+      "delta_lm_minus_v12": 0.0019309661826244495
+    },
+    {
+      "metric": "basal F1 corpus",
+      "v12": 0.9404103994704524,
+      "lmeasure": 0.9414153278697758,
+      "delta_lm_minus_v12": 0.0010049283993234237
+    },
+    {
+      "metric": "apical F1 corpus",
+      "v12": 0.9007836802235866,
+      "lmeasure": 0.9031728866727954,
+      "delta_lm_minus_v12": 0.002389206449208814
+    }
+  ],
+  "per_cell_comparison": [
+    {
+      "metric": "F1 neurite",
+      "stat": "mean",
+      "v12": 0.914846657283603,
+      "lmeasure": 0.8892589021815621
+    },
+    {
+      "metric": "F1 neurite",
+      "stat": "P10",
+      "v12": 0.5908,
+      "lmeasure": 0.49210000000000004
+    },
+    {
+      "metric": "F1 neurite",
+      "stat": "P25",
+      "v12": 1.0,
+      "lmeasure": 1.0
+    },
+    {
+      "metric": "F1 neurite",
+      "stat": "P50",
+      "v12": 1.0,
+      "lmeasure": 1.0
+    },
+    {
+      "metric": "F1 neurite",
+      "stat": "P75",
+      "v12": 1.0,
+      "lmeasure": 1.0
+    },
+    {
+      "metric": "F1 neurite",
+      "stat": "P90",
+      "v12": 1.0,
+      "lmeasure": 1.0
+    },
+    {
+      "metric": "accuracy",
+      "stat": "mean",
+      "v12": 0.936581359372945,
+      "lmeasure": 0.9348233337931245
+    },
+    {
+      "metric": "accuracy",
+      "stat": "P10",
+      "v12": 0.7211916828272295,
+      "lmeasure": 0.7071233983758912
+    },
+    {
+      "metric": "accuracy",
+      "stat": "P25",
+      "v12": 1.0,
+      "lmeasure": 1.0
+    },
+    {
+      "metric": "accuracy",
+      "stat": "P50",
+      "v12": 1.0,
+      "lmeasure": 1.0
+    },
+    {
+      "metric": "axon_F1",
+      "stat": "mean",
+      "v12": 0.8698589935296013,
+      "lmeasure": 0.7726802973681287
+    },
+    {
+      "metric": "axon_F1",
+      "stat": "P10",
+      "v12": 0.0,
+      "lmeasure": 0.0
+    },
+    {
+      "metric": "basal_F1",
+      "stat": "mean",
+      "v12": 0.9490938942689082,
+      "lmeasure": 0.9437856584839146
+    },
+    {
+      "metric": "basal_F1",
+      "stat": "P10",
+      "v12": 0.8004961607016112,
+      "lmeasure": 0.7623543123543123
+    },
+    {
+      "metric": "apical_F1",
+      "stat": "mean",
+      "v12": 0.8240688078206456,
+      "lmeasure": 0.7694450555636451
+    },
+    {
+      "metric": "apical_F1",
+      "stat": "P10",
+      "v12": 0.0,
+      "lmeasure": 0.0
+    }
+  ],
+  "ensemble_upper_bound": {
+    "v12_only_mean": 0.914846657283603,
+    "v12_only_P10": 0.5908,
+    "lmeasure_only_mean": 0.8892589021815622,
+    "lmeasure_only_P10": 0.49210000000000004,
+    "best_of_two_mean": 0.9452076941121276,
+    "best_of_two_P10": 0.68874,
+    "worst_of_two_mean": 0.8588978653530378,
+    "n_cells_v12_better_by_05": 535,
+    "n_cells_lm_better_by_05": 379,
+    "n_cells_close": 3349
+  }
+}

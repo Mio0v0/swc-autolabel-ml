@@ -1,0 +1,71 @@
+{
+  "seed": 2024,
+  "source_seed": 42,
+  "test_size": 0.5,
+  "n_train_pyramidal": 4225,
+  "n_test_pyramidal": 4263,
+  "stage2_min": 18.902645148333008,
+  "gnn_min": 37.17236907833333,
+  "total_min": 56.10771803666721,
+  "swcal_class_balance_power": "1.25",
+  "swcal_gnn_class_weight": "inverse_sqrt",
+  "swcal_gnn_focal_gamma": "2.0",
+  "merge_summary": {
+    "merged_keys": [
+      "interneuron",
+      "pyramidal"
+    ],
+    "source_interneuron_present": true,
+    "new_pyramidal_present": true
+  },
+  "branch3_rescue": {
+    "artifact": "gnn_branch3_rescue.pt",
+    "train_script": "paper.gnn_branch3_rescue",
+    "n_train_pyramidal": 4225,
+    "n_test_pyramidal": 4263,
+    "branch3_focal_gamma": "2.0",
+    "branch3_class_weight": "inverse_sqrt",
+    "adopted_thresholds": {
+      "apical": 0.72,
+      "basal": 0.78,
+      "axon": 0.84,
+      "off_owner_apical": 0.9
+    },
+    "eval_json": "paper/results/v12_pyramidal_only_seed2024_clean_branch3_eval.json",
+    "eval_summary": {
+      "accuracy": 0.982344686881887,
+      "apical_f1": 0.908129417341792,
+      "basal_f1": 0.943663237796046,
+      "per_cell_f1_mean": 0.920871100164204,
+      "per_cell_f1_p10": 0.62144
+    },
+    "loose_threshold_eval": {
+      "note": "Higher P10 but more regressions on already-good cells; kept as optional env override.",
+      "thresholds": {
+        "apical": 0.55,
+        "basal": 0.7,
+        "axon": 0.8,
+        "off_owner_apical": 0.82
+      },
+      "eval_json": "paper/results/v12_pyramidal_only_seed2024_clean_branch3_loose_eval.json",
+      "per_cell_f1_p10": 0.63768
+    },
+    "learned_gate_eval": {
+      "artifact": "branch3_gate.joblib",
+      "train_script": "paper.train_branch3_gate",
+      "status": "opt-in only; not adopted as default",
+      "reason": "Higher aggregate scores, but too many regressions on already-good cells.",
+      "eval_json": "paper/results/v12_pyramidal_only_seed2024_clean_branch3_gate_eval.json",
+      "eval_summary": {
+        "accuracy": 0.9843247734891173,
+        "apical_f1": 0.9117450252042503,
+        "basal_f1": 0.9481601246677482,
+        "per_cell_f1_mean": 0.9282952850105559,
+        "per_cell_f1_p10": 0.6463,
+        "good_base_ge_0_8_worsened_below_0_8": 60,
+        "worse_by_ge_0_05": 125,
+        "improved_by_ge_0_05": 250
+      }
+    }
+  }
+}

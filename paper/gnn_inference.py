@@ -67,6 +67,7 @@ def load_gnn(
         n_classes=cfg["n_classes"],
         dropout=cfg["dropout"],
         n_layers=cfg.get("n_layers", 2),
+        gnn_type=cfg.get("gnn_type", "sage"),
     ).to(device)
     model.load_state_dict(payload["model_state"])
     model.eval()

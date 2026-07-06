@@ -1,26 +1,29 @@
-"""SWC type-normalization: replace custom / non-standard node types with
-the dominant standard type of the branch the node belongs to.
+"""SWC normalization — two transforms applied before features/training.
 
-Some labs (and some NeuroMorpho submitters) annotate sub-cellular features
-with non-standard SWC type values, e.g.:
-    type 10 — axon hillock / axon initial segment
-    type 11 — spines
-    type 12 — boutons / synapses
-or any other custom value outside the standard {0, 1, 2, 3, 4, 5, 6, 7}.
+  1. ``normalize_custom_types``  — rewrite non-standard SWC types
+     (anything outside {1, 2, 3, 4}) to the dominant standard type of
+     the branch the node sits on. Absorbs custom sub-cellular
+     annotations (type 10 = AIS, type 11 = spines, etc.) into the
+     parent neurite class they belong to.
 
-These nodes are *part of* a real neurite (axon, dendrite, etc.) and should
-be labeled as such for training purposes, not treated as a separate class.
+  2. ``consolidate_multi_point_soma`` — collapse connected groups of
+     type-1 soma nodes into a SINGLE anchor node. Multi-point somas
+     (3-point, 5-point, or 50-node cloud representations of the cell
+     body) confuse the per-node F1 metric: the model labels exactly
+     one node as soma per cell, so multi-node GT somas show artificial
+     low soma recall. Algorithm matches SWC-Studio's
+     ``consolidate_complex_somas_array`` (see ``validation_engine.py``):
+       - For each connected type-1 component: anchor = root (parent==-1)
+         or first in component; centroid = mean(x,y,z); mega-radius =
+         distance from centroid to the furthest soma node + that node's
+         original radius (i.e. the smallest sphere centered at the
+         centroid that contains every soma node including its radius).
+       - Anchor is updated to (centroid, mega_radius, parent=-1).
+       - Non-anchor soma nodes are removed; any non-soma child whose
+         parent was a removed soma is rewired to the anchor's id.
 
-The function ``normalize_custom_types`` rewrites every non-standard type
-to the dominant standard type ({1, 2, 3, 4}) of the branch the node sits
-on. A "branch" here is a contiguous run between bifurcations (or between
-a bifurcation and the root). If no standard type is present in the branch,
-we walk up the parent chain to inherit the nearest standard ancestor's
-type. If no standard ancestor exists either, the node is mapped to 0
-(undefined) as a last-resort fallback.
-
-Topology (id, x, y, z, radius, parent) is preserved exactly. Only the
-``type`` field is rewritten.
+The combined ``normalize_swc`` wrapper applies (1) then (2). ``parse_swc``
+in hybrid.features uses this wrapper by default.
 """
 from __future__ import annotations
 
@@ -148,3 +151,179 @@ def count_custom_types(nodes: list[SWCNode]) -> dict[int, int]:
         if nd.type not in STANDARD_NEURITE_TYPES:
             out[nd.type] = out.get(nd.type, 0) + 1
     return out
+
+
+def consolidate_multi_point_soma(
+    nodes: list[SWCNode],
+) -> tuple[list[SWCNode], dict]:
+    """Collapse connected groups of type-1 soma nodes into one anchor node.
+
+    Ports SWC-Studio's ``consolidate_complex_somas_array``
+    (``swcstudio/core/validation_engine.py``) to the list-of-SWCNode
+    representation used by this codebase.
+
+    Returns ``(new_nodes, info)`` where ``info`` reports:
+        soma_count_before / soma_count_after  — number of type-1 nodes
+        group_count                            — number of soma components
+        complex_group_count                    — components with >1 node
+        removed_nodes                          — total nodes deleted
+        changed                                — True iff any soma collapsed
+
+    Topology guarantee: surviving node IDs are preserved exactly; only
+    non-anchor soma nodes are deleted, and any child pointing at a
+    deleted soma is rewired to that group's anchor ID.
+    """
+    n = len(nodes)
+    if n == 0:
+        return nodes, {
+            "soma_count_before": 0, "soma_count_after": 0,
+            "group_count": 0, "complex_group_count": 0,
+            "removed_nodes": 0, "changed": False,
+        }
+
+    id_to_idx = {nd.id: i for i, nd in enumerate(nodes)}
+    parent_idx = [-1] * n
+    children: list[list[int]] = [[] for _ in range(n)]
+    for i, nd in enumerate(nodes):
+        if nd.parent != -1 and nd.parent in id_to_idx:
+            p = id_to_idx[nd.parent]
+            parent_idx[i] = p
+            children[p].append(i)
+
+    soma_idxs = [i for i, nd in enumerate(nodes) if nd.type == 1]
+    if not soma_idxs:
+        return nodes, {
+            "soma_count_before": 0, "soma_count_after": 0,
+            "group_count": 0, "complex_group_count": 0,
+            "removed_nodes": 0, "changed": False,
+        }
+    soma_idx_set = set(soma_idxs)
+
+    # BFS within the type-1 subgraph to find connected components.
+    visited: set[int] = set()
+    groups: list[list[int]] = []
+    for start in soma_idxs:
+        if start in visited:
+            continue
+        stack = [start]
+        component: list[int] = []
+        visited.add(start)
+        while stack:
+            idx = stack.pop()
+            component.append(idx)
+            p = parent_idx[idx]
+            if p in soma_idx_set and p not in visited:
+                visited.add(p); stack.append(p)
+            for c in children[idx]:
+                if c in soma_idx_set and c not in visited:
+                    visited.add(c); stack.append(c)
+        groups.append(sorted(component))
+
+    # For each group, pick anchor + compute centroid + mega-radius.
+    # anchor_map: original_soma_id -> anchor_id (for rewiring children).
+    anchor_map: dict[int, int] = {}
+    keep_mask = [True] * n
+    new_xyz: dict[int, tuple[float, float, float]] = {}
+    new_radius: dict[int, float] = {}
+    new_parent_for_anchor: dict[int, int] = {}
+    complex_count = 0
+
+    for group in groups:
+        # Prefer the actual root (parent==-1) as anchor.
+        anchor_local = next((i for i in group if parent_idx[i] < 0), group[0])
+        anchor_id = nodes[anchor_local].id
+
+        # Centroid of all soma nodes in this component.
+        xs = [nodes[i].x for i in group]
+        ys = [nodes[i].y for i in group]
+        zs = [nodes[i].z for i in group]
+        cx = sum(xs) / len(group)
+        cy = sum(ys) / len(group)
+        cz = sum(zs) / len(group)
+
+        # Mega-radius: distance to furthest node + that node's radius.
+        if len(group) == 1:
+            mega_r = max(float(nodes[anchor_local].radius), 0.0)
+        else:
+            best_d = -1.0
+            best_idx = anchor_local
+            for i in group:
+                d = ((nodes[i].x - cx) ** 2
+                     + (nodes[i].y - cy) ** 2
+                     + (nodes[i].z - cz) ** 2) ** 0.5
+                if d > best_d:
+                    best_d = d
+                    best_idx = i
+            mega_r = best_d + max(float(nodes[best_idx].radius), 0.0)
+
+        new_xyz[anchor_local] = (cx, cy, cz)
+        new_radius[anchor_local] = mega_r
+        new_parent_for_anchor[anchor_local] = -1
+
+        for i in group:
+            anchor_map[nodes[i].id] = anchor_id
+            if i != anchor_local:
+                keep_mask[i] = False
+
+        if len(group) > 1:
+            complex_count += 1
+
+    # Build the output list: anchors updated, non-anchor somas dropped,
+    # children of dropped somas rewired to anchor.
+    out: list[SWCNode] = []
+    for i, nd in enumerate(nodes):
+        if not keep_mask[i]:
+            continue
+        if i in new_xyz:
+            cx, cy, cz = new_xyz[i]
+            out.append(SWCNode(
+                id=nd.id, type=1,
+                x=float(cx), y=float(cy), z=float(cz),
+                radius=float(new_radius[i]),
+                parent=int(new_parent_for_anchor[i]),
+            ))
+            continue
+        # Non-soma surviving node — rewire parent if it pointed at a dropped soma.
+        new_parent = nd.parent
+        if nd.parent != -1 and nd.parent in anchor_map:
+            new_parent = anchor_map[nd.parent]
+        out.append(SWCNode(
+            id=nd.id, type=nd.type,
+            x=nd.x, y=nd.y, z=nd.z, radius=nd.radius,
+            parent=new_parent,
+        ))
+
+    n_after_soma = sum(1 for nd in out if nd.type == 1)
+    info = {
+        "soma_count_before":   len(soma_idxs),
+        "soma_count_after":    n_after_soma,
+        "group_count":         len(groups),
+        "complex_group_count": complex_count,
+        "removed_nodes":       n - len(out),
+        "changed":             complex_count > 0,
+    }
+    return out, info
+
+
+def normalize_swc(
+    nodes: list[SWCNode],
+) -> tuple[list[SWCNode], dict]:
+    """Apply both normalization steps in the canonical order.
+
+    1. Rewrite non-standard SWC types into {1, 2, 3, 4}.
+    2. Consolidate connected multi-point soma components into a single
+       anchor soma node per component.
+
+    Used by ``hybrid.features.parse_swc`` when ``normalize_types=True``.
+    Returns ``(nodes, info)`` where info combines the diagnostics from
+    both passes.
+    """
+    n0 = len(nodes)
+    nodes, n_type_rewrites = normalize_custom_types(nodes)
+    nodes, soma_info = consolidate_multi_point_soma(nodes)
+    return nodes, {
+        "n_input":            n0,
+        "n_output":           len(nodes),
+        "n_type_rewrites":    n_type_rewrites,
+        "soma":               soma_info,
+    }

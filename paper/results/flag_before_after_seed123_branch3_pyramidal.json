@@ -1,0 +1,155 @@
+{
+  "scope": "Accepted flag model evaluation test split only: 349 pyramidal cells from the seed=123 v12+Branch3 no-leak test split. Stage 1 is active for labels/features.",
+  "accepted_model": "paper/models/flag_model_seed123_branch3_pyramidal/flag_model_f060.joblib",
+  "accepted_target": "bad if held_out_F1 < 0.60",
+  "selected_model": "gb",
+  "selected_feature_set": "full",
+  "raw_rank_test_average_precision": 0.4572896906149206,
+  "raw_rank_test_roc_auc": 0.844995450409463,
+  "before_flag": {
+    "n": 349,
+    "bad_lt_0_5": 22,
+    "bad_lt_0_6": 35,
+    "bad_lt_0_5_rate": 0.06303724928366762,
+    "bad_lt_0_6_rate": 0.10028653295128939,
+    "f1": {
+      "n": 349,
+      "mean": 0.9141446991404011,
+      "p10": 0.60192,
+      "p25": 1.0,
+      "median": 1.0
+    }
+  },
+  "after_flag_by_reject_rate": [
+    {
+      "reject_rate": 0.005,
+      "n_flagged": 2,
+      "true_bad_lt_0_6_flagged": 1,
+      "false_flags_good_label": 1,
+      "bad_lt_0_6_missed": 34,
+      "precision_lt_0_6": 0.5,
+      "recall_lt_0_6": 0.02857142857142857,
+      "binary_accuracy_for_bad_lt_0_6": 0.8997134670487106,
+      "flagged_bad_lt_0_5": 1,
+      "precision_lt_0_5": 0.5,
+      "kept": {
+        "n": 347,
+        "mean": 0.9156492795389047,
+        "p10": 0.61412,
+        "p25": 1.0,
+        "median": 1.0
+      },
+      "flagged": {
+        "n": 2,
+        "mean": 0.6531,
+        "p10": 0.37558,
+        "p25": 0.47965,
+        "median": 0.6531
+      }
+    },
+    {
+      "reject_rate": 0.01,
+      "n_flagged": 3,
+      "true_bad_lt_0_6_flagged": 2,
+      "false_flags_good_label": 1,
+      "bad_lt_0_6_missed": 33,
+      "precision_lt_0_6": 0.6666666666666666,
+      "recall_lt_0_6": 0.05714285714285714,
+      "binary_accuracy_for_bad_lt_0_6": 0.9025787965616046,
+      "flagged_bad_lt_0_5": 2,
+      "precision_lt_0_5": 0.6666666666666666,
+      "kept": {
+        "n": 346,
+        "mean": 0.9178378612716764,
+        "p10": 0.62085,
+        "p25": 1.0,
+        "median": 1.0
+      },
+      "flagged": {
+        "n": 3,
+        "mean": 0.48819999999999997,
+        "p10": 0.18796000000000002,
+        "p25": 0.2323,
+        "median": 0.3062
+      }
+    },
+    {
+      "reject_rate": 0.02,
+      "n_flagged": 7,
+      "true_bad_lt_0_6_flagged": 5,
+      "false_flags_good_label": 2,
+      "bad_lt_0_6_missed": 30,
+      "precision_lt_0_6": 0.7142857142857143,
+      "recall_lt_0_6": 0.14285714285714285,
+      "binary_accuracy_for_bad_lt_0_6": 0.9083094555873925,
+      "flagged_bad_lt_0_5": 4,
+      "precision_lt_0_5": 0.5714285714285714,
+      "kept": {
+        "n": 342,
+        "mean": 0.9235938596491228,
+        "p10": 0.6249800000000001,
+        "p25": 1.0,
+        "median": 1.0
+      },
+      "flagged": {
+        "n": 7,
+        "mean": 0.45248571428571427,
+        "p10": 0.09504000000000003,
+        "p25": 0.1806,
+        "median": 0.3062
+      }
+    },
+    {
+      "reject_rate": 0.03,
+      "n_flagged": 10,
+      "true_bad_lt_0_6_flagged": 6,
+      "false_flags_good_label": 4,
+      "bad_lt_0_6_missed": 29,
+      "precision_lt_0_6": 0.6,
+      "recall_lt_0_6": 0.17142857142857143,
+      "binary_accuracy_for_bad_lt_0_6": 0.9054441260744985,
+      "flagged_bad_lt_0_5": 4,
+      "precision_lt_0_5": 0.4,
+      "kept": {
+        "n": 339,
+        "mean": 0.9250705014749261,
+        "p10": 0.62764,
+        "p25": 1.0,
+        "median": 1.0
+      },
+      "flagged": {
+        "n": 10,
+        "mean": 0.54376,
+        "p10": 0.14256000000000002,
+        "p25": 0.22865000000000002,
+        "median": 0.5097
+      }
+    },
+    {
+      "reject_rate": 0.05,
+      "n_flagged": 17,
+      "true_bad_lt_0_6_flagged": 8,
+      "false_flags_good_label": 9,
+      "bad_lt_0_6_missed": 27,
+      "precision_lt_0_6": 0.47058823529411764,
+      "recall_lt_0_6": 0.22857142857142856,
+      "binary_accuracy_for_bad_lt_0_6": 0.8968481375358166,
+      "flagged_bad_lt_0_5": 6,
+      "precision_lt_0_5": 0.35294117647058826,
+      "kept": {
+        "n": 332,
+        "mean": 0.931467469879518,
+        "p10": 0.63459,
+        "p25": 1.0,
+        "median": 1.0
+      },
+      "flagged": {
+        "n": 17,
+        "mean": 0.5758411764705883,
+        "p10": 0.08886000000000002,
+        "p25": 0.2028,
+        "median": 0.6217
+      }
+    }
+  ]
+}

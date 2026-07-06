@@ -1,0 +1,12 @@
+Leakage check seed=123
+ok: True
+model_dir: paper\models\v12_gentle_seed123
+qc_csv: paper\results\corpus_qc_v12_uncurated.csv
+counts: {"expected_test": {"interneuron": 657, "pyramidal": 1745}, "expected_train": {"interneuron": 2717, "pyramidal": 6743}, "test": {"interneuron": 657, "pyramidal": 1745}, "train": {"interneuron": 2717, "pyramidal": 6743}}
+train/test overlap: 0
+missing from model split: 0
+extra in model split: 0
+wrong train assignments: 0
+wrong test assignments: 0
+branch3: {"has_test_metrics": true, "path": "paper\\models\\v12_gentle_seed123\\gnn_branch3_rescue.pt", "present": true, "seed": 123, "seed_matches": true, "test_metrics": {"branch_apical_f1": 0.9312122593141164, "branch_axon_f1": 0.9797471187199284, "branch_basal_f1": 0.9649465865245807, "branch_macro_f1": 0.9586353215195418, "cell_mean_macro_f1": 0.9337928897610679, "n_test_branches": 164928, "n_test_files": 1745}}
+baseline: {"checked": true, "counts_match": true, "n_test": 2402, "n_test_expected": 2402, "n_train": 9460, "n_train_expected": 9460, "path": "paper\\results\\baselines_on_v12_seed123.json", "qc_csv": "paper\\results\\corpus_qc_v12_uncurated.csv", "seed": 123, "seed_matches": true, "split_source": "QC CSV + hash-bucket split (no v12 dependency)"}

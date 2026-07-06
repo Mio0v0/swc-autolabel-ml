@@ -1,0 +1,90 @@
+Loading both seed models + splits...
+  seed=42  test: 2468
+  seed=789 test: 2449
+  seed=42 models loaded
+  seed=789 models loaded
+  QC-passed cells available: 12395
+
+Held-out cells to score: 4358
+  seed=42  test only : 1943
+  seed=789 test only : 1939
+  in BOTH tests      : 476  (will run both models)
+  (excluded 60 cells previously in test that were dropped by T2)
+
+Starting inference (pre-flight on first 10 largest cells)...
+  pre-flight 1/10: hpf_ca1__202401_138_edited.swc n=121907  F1=0.844  3.8s
+  pre-flight 2/10: hpf_ca1__202461_007_edited.swc n=120271  F1=1.000  3.6s
+  pre-flight 3/10: hpf_ca1__202403_129_edited.swc n=119979  F1=0.551  3.7s
+  pre-flight 4/10: hpf_ca1__202232_022_edited.swc n=118347  F1=1.000  6.1s
+  pre-flight 5/10: hpf_ca1__202664_010_edited.swc n=114891  F1=1.000  6.1s
+  pre-flight 6/10: hpf_ca1__202405_001_edited.swc n=113277  F1=0.795  4.2s
+  pre-flight 7/10: hpf_ca1__202829_069_edited.swc n=107161  F1=0.899  3.3s
+  pre-flight 8/10: hpf_ca1__202234_026_edited.swc n=105116  F1=1.000  5.4s
+  pre-flight 9/10: hpf_ca1__202403_126_edited.swc n=104418  F1=1.000  3.1s
+  pre-flight 10/10: hpf_ca1__202426_055_edited.swc n=104139  F1=1.000  6.6s
+  SLOW: hpf_ca1__202414_533_edited.swc n=90455 took 5.1s
+  SLOW: hpf_ca1__202237_014_edited.swc n=82589 took 5.2s
+  SLOW: neuromorpho__BC150330C_29.swc n=114665 took 5.3s
+  SLOW: neuromorpho__36_den_ax.swc n=108426 took 8.2s
+  SLOW: neuromorpho__C15-10-14DIV15CS1Cell1.swc n=90544 took 8.9s
+  ... 100/4358  (5.5 min, ETA 235 min)
+  SLOW: hpf_ca1__202498_021_edited.swc n=51862 took 7.5s
+  SLOW: hpf_ca1__202252_001_edited.swc n=48744 took 6.4s
+  ... 200/4358  (9.6 min, ETA 199 min)
+  SLOW: neuromorpho__190131_C5.swc n=57539 took 5.7s
+  SLOW: hpf_ca1__202423_024_edited.swc n=37789 took 7.1s
+  SLOW: neuromorpho__I_2_42.swc n=52104 took 7.6s
+  SLOW: neuromorpho__TM-10-02-15-AR.swc n=45789 took 5.7s
+  SLOW: hpf_ca1__201990_038_edited.swc n=31904 took 6.3s
+  ... 300/4358  (13.3 min, ETA 180 min)
+  ... 400/4358  (16.1 min, ETA 160 min)
+  ... 500/4358  (18.6 min, ETA 144 min)
+  SLOW: neuromorpho__TM-12-11-14-ER.swc n=22786 took 5.5s
+  SLOW: neuromorpho__TDI21301012_Cell1_pia.swc n=23328 took 8.6s
+  ... 600/4358  (21.3 min, ETA 133 min)
+  ... 700/4358  (23.4 min, ETA 122 min)
+  ... 800/4358  (25.4 min, ETA 113 min)
+  ... 900/4358  (27.2 min, ETA 104 min)
+  ... 1000/4358  (28.8 min, ETA 97 min)
+  ... 1100/4358  (30.3 min, ETA 90 min)
+  ... 1200/4358  (31.7 min, ETA 83 min)
+  SLOW: neuromorpho__A151218-02_VIP_IN.swc n=4353 took 5.2s
+  ... 1300/4358  (33.2 min, ETA 78 min)
+  ... 1400/4358  (34.4 min, ETA 73 min)
+  ... 1500/4358  (35.4 min, ETA 67 min)
+  ... 1600/4358  (36.5 min, ETA 63 min)
+  ... 1700/4358  (37.5 min, ETA 59 min)
+  ... 1800/4358  (38.4 min, ETA 55 min)
+  ... 1900/4358  (39.3 min, ETA 51 min)
+  ... 2000/4358  (40.2 min, ETA 47 min)
+  ... 2100/4358  (41.1 min, ETA 44 min)
+  ... 2200/4358  (41.9 min, ETA 41 min)
+  ... 2300/4358  (42.7 min, ETA 38 min)
+  ... 2400/4358  (43.5 min, ETA 36 min)
+  ... 2500/4358  (44.3 min, ETA 33 min)
+  ... 2600/4358  (45.1 min, ETA 30 min)
+  ... 2700/4358  (45.8 min, ETA 28 min)
+  ... 2800/4358  (46.6 min, ETA 26 min)
+  ... 2900/4358  (47.3 min, ETA 24 min)
+  ... 3000/4358  (48.0 min, ETA 22 min)
+  ... 3100/4358  (48.7 min, ETA 20 min)
+  ... 3200/4358  (49.4 min, ETA 18 min)
+  ... 3300/4358  (50.1 min, ETA 16 min)
+  ... 3400/4358  (50.8 min, ETA 14 min)
+  ... 3500/4358  (51.6 min, ETA 13 min)
+  ... 3600/4358  (52.2 min, ETA 11 min)
+  ... 3700/4358  (52.9 min, ETA 9 min)
+  ... 3800/4358  (53.6 min, ETA 8 min)
+  ... 3900/4358  (54.2 min, ETA 6 min)
+  ... 4000/4358  (54.7 min, ETA 5 min)
+  ... 4100/4358  (55.3 min, ETA 3 min)
+  ... 4200/4358  (55.9 min, ETA 2 min)
+  ... 4300/4358  (56.4 min, ETA 1 min)
+
+Done: 4358 scored, 0 skipped, 0 failed  (56.7 min)
+Wrote D:\Desktop\swc-autolabel-ml\paper\results\heldout_per_cell_f1.csv
+Wrote D:\Desktop\swc-autolabel-ml\paper\results\heldout_per_cell_f1_summary.json
+
+  F1 mean: 0.9186  median: 1.0000  P10: 0.5918  P25: 1.0000
+  pyramidal   : n= 3146  F1 mean=0.9019  P10=0.5233
+  interneuron : n= 1212  F1 mean=0.9619  P10=0.9791

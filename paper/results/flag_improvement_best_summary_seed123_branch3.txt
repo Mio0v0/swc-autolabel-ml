@@ -1,0 +1,47 @@
+Best flag-model sweep summary, seed123 Branch3 heldout
+========================================================================================
+Target: bad cell = held_out_F1 < 0.60. Metrics below are honest test metrics.
+
+Pyramidal best before multi-v12 features
+----------------------------------------------------------------------------------------
+target_R  50% | P  55.6% R  57.1% flagged   36 fp  16 fn  15 | single_failure_head_ranked_against_cell_f060 / xmodel / apical_f050 / hgb:full
+target_R  70% | P  54.3% R  71.4% flagged   46 fp  21 fn  10 | single_cell_f060 / xmodel_sanity / cell_f060 / gb:full
+target_R  80% | P  33.7% R  91.4% flagged   95 fp  63 fn   3 | single_failure_head_ranked_against_cell_f060 / xmodel_sanity / basal_f060 / rf:numeric_only
+target_R  90% | P  16.5% R  94.3% flagged  200 fp 167 fn   2 | single_failure_head_ranked_against_cell_f060 / xmodel / axon_f050 / rf:no_lab
+target_R  95% | P  20.4% R  94.3% flagged  162 fp 129 fn   2 | single_failure_head_ranked_against_cell_f060 / xmodel_sanity / basal_f060 / gb:numeric_only
+
+Pyramidal best after multi-v12 features
+----------------------------------------------------------------------------------------
+target_R  50% | P  79.2% R  54.3% flagged   24 fp   5 fn  16 | single_failure_head_ranked_against_cell_f060 / xmodel / basal_f060 / gb:full
+target_R  70% | P  78.4% R  82.9% flagged   37 fp   8 fn   6 | single_cell_f060 / xmodel_sanity / cell_f060 / hgb:full
+target_R  80% | P  78.9% R  85.7% flagged   38 fp   8 fn   5 | single_cell_f060 / xmodel / cell_f060 / hgb:full
+target_R  90% | P  39.0% R  91.4% flagged   82 fp  50 fn   3 | single_failure_head_ranked_against_cell_f060 / xmodel_sanity / basal_f060 / extra_trees:numeric_only
+target_R  95% | P  38.4% R  94.3% flagged   86 fp  53 fn   2 | single_failure_head_ranked_against_cell_f060 / xmodel_sanity / basal_f060 / extra_trees:no_lab
+
+Interneuron best after multi-v12 features
+----------------------------------------------------------------------------------------
+target_R  50% | P 100.0% R  57.1% flagged    4 fp   0 fn   3 | two_stage_max_failure_heads / xmodel / cell_f060+axon_f050+basal_f060 / two_stage:max_validation_percentile
+target_R  70% | P 100.0% R  57.1% flagged    4 fp   0 fn   3 | two_stage_max_failure_heads / xmodel / cell_f060+axon_f050+basal_f060 / two_stage:max_validation_percentile
+target_R  80% | P  25.0% R  71.4% flagged   20 fp  15 fn   2 | single_failure_head_ranked_against_cell_f060 / xmodel / basal_f060 / gb:no_lab
+target_R  90% | P  60.0% R  85.7% flagged   10 fp   4 fn   1 | single_failure_head_ranked_against_cell_f060 / xmodel / axon_f050 / rf:full
+target_R  95% | P  60.0% R  85.7% flagged   10 fp   4 fn   1 | single_failure_head_ranked_against_cell_f060 / xmodel / axon_f050 / rf:full
+
+All-cell best after multi-v12 features
+----------------------------------------------------------------------------------------
+target_R  50% | P  50.0% R  50.0% flagged   42 fp  21 fn  21 | single_failure_head_ranked_against_cell_f060 / xmodel / apical_f050 / rf:full
+target_R  70% | P  64.4% R  69.0% flagged   45 fp  16 fn  13 | single_cell_f060 / xmodel_sanity / cell_f060 / extra_trees:numeric_only
+target_R  80% | P  53.8% R  83.3% flagged   65 fp  30 fn   7 | two_stage_max_failure_heads / xmodel_sanity / cell_f060+axon_f050+basal_f060+apical_f050 / two_stage:max_validation_percentile
+target_R  90% | P  24.1% R  95.2% flagged  166 fp 126 fn   2 | single_failure_head_ranked_against_cell_f060 / xmodel / apical_f050 / rf:full
+target_R  95% | P  17.4% R  97.6% flagged  236 fp 195 fn   1 | single_failure_head_ranked_against_cell_f060 / xmodel / axon_f050 / hgb:numeric_only
+
+Recommended practical pyramidal bundle
+----------------------------------------------------------------------------------------
+paper/models/flag_improvement_sweep_seed123_branch3_v12ens/pyramidal_xmodel_cell_f060_r080.joblib
+This point: precision 78.9%, recall 85.7%, flagged 38, false flags 8, missed bad 5.
+Use --claimed-cell-type pyramidal with _flag_cell.py so routing failures are eligible for flagging.
+
+Notes
+----------------------------------------------------------------------------------------
+Multi-v12 disagreement is the first change that materially improved both recall and precision.
+90%+ recall is achievable, but precision drops to ~39% for pyramidal at that operating point.
+The interneuron test set has only 7 bad cells, so its precision/recall estimates are noisy.

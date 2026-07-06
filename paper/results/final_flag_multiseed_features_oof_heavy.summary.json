@@ -1,0 +1,11 @@
+{
+  "labels": "paper/results/final_flag_multiseed_labels.csv",
+  "base_features": "paper/results/final_flag_multiseed_features.csv",
+  "out_heavy": "paper/results/final_flag_multiseed_oof_heavy_features_only.csv",
+  "out_features": "paper/results/final_flag_multiseed_features_oof_heavy.csv",
+  "n_rows": 7023,
+  "n_heavy_columns": 167,
+  "skip_baselines": false,
+  "skip_v12": false,
+  "elapsed_min": 150.3473643133339
+}

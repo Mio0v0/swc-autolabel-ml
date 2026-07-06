@@ -1,0 +1,65 @@
+================================================================================
+  PYRAMIDAL-ONLY BASELINE (Stage 1 bypassed, GT cell-type override)
+  Model:    v12_pyramidal_only_seed2024_clean
+  Cells:    4263 test pyramidals  (corpus: cleaned 11,862 -> 8,488 pyramidals, 50/50 split)
+================================================================================
+
+== CORPUS-LEVEL ==
+  Per-node accuracy            = 0.9823
+  Macro F1 (4 classes)         = 0.9615
+  Neurite macro F1 (3 classes) = 0.9487
+
+  Per-class P/R/F1:
+    class               P        R       F1        support
+    soma           1.0000   1.0000   1.0000          4,263
+    axon           0.9910   0.9977   0.9943     27,069,894
+    basal          0.9465   0.9409   0.9437      3,872,005
+    apical         0.9400   0.8783   0.9081      2,450,357
+
+== CONFUSION MATRIX (rows = GT, cols = PRED) ==
+                      soma        axon       basal      apical
+          soma       4,263           0           0           0  (4,263 GT)
+          axon           0  27,007,310      50,558      12,026  (27,069,894 GT)
+         basal           0     103,603   3,643,061     125,341  (3,872,005 GT)
+        apical           0     142,618     155,480   2,152,259  (2,450,357 GT)
+
+== PER-CELL DISTRIBUTIONS ==
+  metric                       mean      std      min      P10      P25      P50      P75      P90
+  accuracy                   0.9410   0.1633   0.0018   0.7549   1.0000   1.0000   1.0000   1.0000
+  F1_neurite (overall)       0.9209   0.1892   0.0000   0.6214   1.0000   1.0000   1.0000   1.0000
+  axon F1                    0.8688   0.3370   0.0000   0.0000   1.0000   1.0000   1.0000   1.0000
+  basal F1                   0.9517   0.1388   0.0000   0.8149   1.0000   1.0000   1.0000   1.0000
+  apical F1                  0.8481   0.3527   0.0000   0.0000   1.0000   1.0000   1.0000   1.0000
+
+== TOP 30 WORST CELLS BY F1 ==
+  file                                                            n     F1    acc   axF1   baF1   apF1       GT a/b/p     PRED a/b/p
+  neuromorpho__10month-Arctic-C5aR1-KO-52280-LR_4.swc           173  0.000  0.006      -      -  0.000        0/0/172        172/0/0
+  neuromorpho__110E_2_L_Ngr2KO_3.swc                            117  0.000  0.009      -      -  0.000        0/0/116        0/116/0
+  neuromorpho__1451-1-Sec3-LTL1.swc                             558  0.000  0.002      -  0.000      -        0/557/0        0/0/557
+  neuromorpho__20171005A01.swc                                  330  0.000  0.003      -  0.000  0.000      0/179/150      179/150/0
+  neuromorpho__236-3-57LS.swc                                   342  0.000  0.003      -  0.000      -        0/341/0       87/0/254
+  neuromorpho__C1005-2KO-apical-2.swc                            57  0.000  0.018      -      -  0.000         0/0/56        34/22/0
+  neuromorpho__C1042-whole-2.swc                                 61  0.000  0.016      -  0.000  0.000        0/32/28        32/28/0
+  neuromorpho__C1054-whole-3.swc                                 50  0.000  0.020      -      -  0.000         0/0/49         49/0/0
+  neuromorpho__C916-WT-M8-123-3.swc                              95  0.000  0.011      -      -  0.000         0/0/94         94/0/0
+  neuromorpho__C916-WT-ap1.swc                                   66  0.000  0.015      -      -  0.000         0/0/65         65/0/0
+  neuromorpho__C916-WT-ap2.swc                                   62  0.000  0.016      -      -  0.000         0/0/61         0/61/0
+  neuromorpho__Green_2weeks_Neuron1.swc                          32  0.000  0.031      -  0.000      -         0/31/0         31/0/0
+  neuromorpho__KO1-Neuron7.swc                                   50  0.000  0.020  0.000      -  0.000        24/0/25        25/24/0
+  neuromorpho__KO4-Neuron1.swc                                   20  0.000  0.050  0.000  0.000      -         8/11/0         11/8/0
+  neuromorpho__KO5-Neuron9.swc                                   31  0.000  0.032  0.000  0.000      -        14/16/0        16/14/0
+  neuromorpho__WT2-Neuron-8.swc                                  41  0.000  0.024  0.000      -  0.000        14/0/26        26/14/0
+  neuromorpho__WT2-Neuron-9.swc                                  48  0.000  0.021  0.000      -  0.000        18/0/29        29/18/0
+  neuromorpho__WT3-neuron5.swc                                  173  0.000  0.006  0.000      -  0.000       63/0/109       109/63/0
+  neuromorpho__WT4-neuron2.swc                                  125  0.000  0.008  0.000      -  0.000        81/0/43        0/124/0
+  neuromorpho__WT4-neuron5.swc                                  276  0.028  0.033  0.000  0.057      -      104/171/0      0/112/163
+  neuromorpho__T61_NeuronB_40X_Tile_Trace_RK.swc               1514  0.085  0.094      -  0.170  0.000      0/817/696      676/837/0
+  neuromorpho__520s1c3.swc                                     2143  0.088  0.152  0.000  0.263  0.000   1029/324/789       0/2142/0
+  neuromorpho__WT2-Neuron-16.swc                                 63  0.088  0.111  0.000  0.176      -        21/41/0        35/27/0
+  neuromorpho__10n03c2.swc                                     2327  0.100  0.111      -  0.200  0.000    0/1190/1136     932/1394/0
+  neuromorpho__10o27c7.swc                                     3213  0.108  0.121  0.000  0.216      -     886/2326/0  1310/1275/627
+  neuromorpho__241-2-59LU.swc                                   594  0.112  0.126      -  0.224  0.000       0/578/15       6/83/504
+  neuromorpho__iPRCp_09.swc                                    9756  0.112  0.126      -  0.224  0.000    0/7863/1892    0/3122/6633
+  hpf_ca1__202242_010_edited.swc                               9044  0.115  0.129  0.000  0.229      -    7873/1170/0       0/9043/0
+  neuromorpho__389-02-02A.swc                                   581  0.128  0.239  0.000  0.384  0.000      7/271/302      133/447/0
+  neuromorpho__m3s4s4t-lat-sup.swc                              218  0.139  0.165      -  0.278  0.000       0/35/182        0/217/0

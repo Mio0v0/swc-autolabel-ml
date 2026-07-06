@@ -1,0 +1,9 @@
+Deployable xmodel high-recall bundles for F1 < 0.60
+========================================================================
+ target_R  model/features     val_P  val_R | test_P test_R flagged fp fn accuracy kept_P10  path
+   50.0%  hgb:full          62.1%  50.0% |  50.0%  51.4%      36  18 17    90.0%   0.7448  paper/models/flag_model_seed123_branch3_pyramidal_xmodel_highrecall/flag_model_f060_r050.joblib
+   70.0%  gb:full           50.0%  72.2% |  47.8%  62.9%      46  24 13    89.4%   0.8353  paper/models/flag_model_seed123_branch3_pyramidal_xmodel_highrecall/flag_model_f060_r070.joblib
+   80.0%  rf:full           47.5%  80.6% |  52.8%  80.0%      53  25  7    90.8%   0.9793  paper/models/flag_model_seed123_branch3_pyramidal_xmodel_highrecall/flag_model_f060_r080.joblib
+   90.0%  gb:full           38.8%  91.7% |  37.8%  80.0%      74  46  7    84.8%   0.9898  paper/models/flag_model_seed123_branch3_pyramidal_xmodel_highrecall/flag_model_f060_r090.joblib
+   95.0%  hgb:no_lab        25.9%  97.2% |  23.7%  91.4%     135 103  3    69.6%   1.0000  paper/models/flag_model_seed123_branch3_pyramidal_xmodel_highrecall/flag_model_f060_r095.joblib
+  100.0%  hgb:no_lab        25.9% 100.0% |  23.2%  91.4%     138 106  3    68.8%   1.0000  paper/models/flag_model_seed123_branch3_pyramidal_xmodel_highrecall/flag_model_f060_r100.joblib

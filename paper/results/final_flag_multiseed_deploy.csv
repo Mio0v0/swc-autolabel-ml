@@ -1,0 +1,3 @@
+scope,feature_mode,model_path,n_rows,n_bad,selected_model,selected_feature_set,n_numeric_features,n_categorical_features,test_ap_rank,test_auc_rank,test_ap_calibrated,test_auc_calibrated
+all,baseline_oof,paper/models/final_flag_multiseed_deploy/flag_model_all_baseline_oof_f060.joblib,7023,528,hgb,no_lab,199,5,0.5862286718026747,0.9260334149503097,0.5404631197364838,0.9206538960103702
+pyramidal,baseline_oof,paper/models/final_flag_multiseed_deploy/flag_model_pyramidal_baseline_oof_f060.joblib,5025,439,gb,full,199,7,0.6450879574278043,0.9246656275140788,0.5939337883697353,0.9207876609010459

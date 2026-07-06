@@ -1,6 +1,0 @@
-name,n_nodes,predicted_cell_type,stage1_correct,neurite_macro_f1,macro_f1,accuracy,n_apical_gt,n_basal_gt,n_axon_gt
-201983_009_edited.swc,16375,pyramidal,True,1.0,1.0,1.0,1721,932,13704
-201983_010_edited.swc,41412,pyramidal,True,0.9999,0.9999,1.0,2066,2542,36764
-201983_012_edited.swc,9410,pyramidal,True,0.9886,0.9914,0.9942,2268,1222,5917
-201983_047_edited.swc,18073,pyramidal,True,1.0,1.0,1.0,2081,1077,14909
-201990_001_edited.swc,76917,pyramidal,True,1.0,1.0,1.0,0,2343,74535

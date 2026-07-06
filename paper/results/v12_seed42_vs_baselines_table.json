@@ -1,0 +1,79 @@
+{
+  "seed": 42,
+  "suffix": "",
+  "out_suffix": "",
+  "v12_eval": "paper\\results\\v12_gt_celltype_seed42.json",
+  "baseline_eval": "paper\\results\\baselines_on_v12_seed42.json",
+  "headlines": [
+    {
+      "method": "v12_branch3_gt_celltype_seed42",
+      "n_test_cells": 2328,
+      "accuracy": 0.9841,
+      "neurite_macro_f1": 0.9568,
+      "axon_f1": 0.9936,
+      "basal_f1": 0.9538,
+      "apical_f1": 0.9229,
+      "per_cell_accuracy_mean": 0.9568383796106176,
+      "per_cell_accuracy_p10": 0.9001262514146123,
+      "per_cell_f1_mean": 0.945103823024055,
+      "per_cell_f1_p10": 0.7630300000000001,
+      "per_cell_f1_p25": 1.0
+    },
+    {
+      "method": "neurom_rf",
+      "n_test_cells": 2328,
+      "accuracy": 0.9348,
+      "neurite_macro_f1": 0.8281,
+      "axon_f1": 0.9696,
+      "basal_f1": 0.8273,
+      "apical_f1": 0.6874,
+      "per_cell_accuracy_mean": 0.8915446948621114,
+      "per_cell_accuracy_p10": 0.6841322712041255,
+      "per_cell_f1_mean": 0.8503567010309279,
+      "per_cell_f1_p10": 0.5428700000000001,
+      "per_cell_f1_p25": 0.774475
+    },
+    {
+      "method": "lmeasure_rf",
+      "n_test_cells": 2328,
+      "accuracy": 0.9777,
+      "neurite_macro_f1": 0.9439,
+      "axon_f1": 0.9904,
+      "basal_f1": 0.9314,
+      "apical_f1": 0.91,
+      "per_cell_accuracy_mean": 0.9471491173377417,
+      "per_cell_accuracy_p10": 0.8086235926865043,
+      "per_cell_f1_mean": 0.9128562285223368,
+      "per_cell_f1_p10": 0.58918,
+      "per_cell_f1_p25": 1.0
+    },
+    {
+      "method": "sholl_rf",
+      "n_test_cells": 2328,
+      "accuracy": 0.9769,
+      "neurite_macro_f1": 0.939,
+      "axon_f1": 0.9906,
+      "basal_f1": 0.9288,
+      "apical_f1": 0.8976,
+      "per_cell_accuracy_mean": 0.937219440086808,
+      "per_cell_accuracy_p10": 0.7303292752123136,
+      "per_cell_f1_mean": 0.8988474656357389,
+      "per_cell_f1_p10": 0.49500000000000005,
+      "per_cell_f1_p25": 1.0
+    },
+    {
+      "method": "sholl_mlp",
+      "n_test_cells": 2328,
+      "accuracy": 0.9695,
+      "neurite_macro_f1": 0.9239,
+      "axon_f1": 0.9862,
+      "basal_f1": 0.9099,
+      "apical_f1": 0.8757,
+      "per_cell_accuracy_mean": 0.9262536675069858,
+      "per_cell_accuracy_p10": 0.6722015229636321,
+      "per_cell_f1_mean": 0.8757317869415808,
+      "per_cell_f1_p10": 0.4660500000000001,
+      "per_cell_f1_p25": 0.955725
+    }
+  ]
+}

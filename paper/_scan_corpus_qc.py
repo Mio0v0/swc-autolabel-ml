@@ -36,7 +36,10 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from hybrid.features import parse_swc, SWCNode                                # noqa: E402
-from hybrid.swc_normalize import count_custom_types, normalize_custom_types   # noqa: E402
+from hybrid.swc_normalize import (                                            # noqa: E402
+    count_custom_types, normalize_custom_types,
+    consolidate_multi_point_soma, normalize_swc,
+)
 
 CORPUS = ROOT / "data" / "v12_uncurated"
 OUT_CSV = ROOT / "paper" / "results" / "corpus_qc_v12_uncurated.csv"
@@ -45,7 +48,7 @@ OUT_JSON = OUT_CSV.with_suffix(".json")
 # Custom (non-standard) types are NO LONGER a rejection reason; parse_swc
 # rewrites them to the branch's dominant standard type. We still surface
 # the raw on-disk type values for transparency.
-MIN_NODES = 10
+MIN_NODES = 10           # restored to iter-0 default (50 was tried in iter-1 and rolled back)
 MAX_NODES = 200_000
 
 
@@ -83,19 +86,29 @@ def qc_one_file(path: Path) -> dict:
         # informational: raw on-disk custom types (NOT a rejection reason)
         "n_custom_type_nodes_raw": 0,
         "custom_type_values_raw": "",
+        # informational: raw soma node count BEFORE consolidation
+        # (diagnoses how prevalent multi-point soma representations are)
+        "n_soma_raw":            0,
+        "n_soma_groups":         0,
+        "n_soma_nodes_removed":  0,
+        "n_nodes_raw":           0,
         # PASS flag
         "qc_pass": False,
         "qc_reason": "",
     }
 
-    # Parse RAW, then normalize ourselves so we can report raw custom-type
-    # stats and the post-normalization view in a single pass.
+    # Parse RAW so we can record pre-normalization diagnostics, then apply
+    # the FULL normalization pipeline (custom types + multi-point soma
+    # consolidation) — exactly what `parse_swc` does by default and what
+    # training/inference will see. QC checks run on the normalized view.
     try:
         raw_nodes = parse_swc(path, normalize_types=False)
     except Exception as exc:
         row["qc_reason"] = f"parse_error: {exc}"
         return row
     raw_custom = count_custom_types(raw_nodes)
+    row["n_nodes_raw"] = len(raw_nodes)
+    row["n_soma_raw"]  = sum(1 for n in raw_nodes if n.type == 1)
     row["n_custom_type_nodes_raw"] = int(sum(raw_custom.values()))
     if raw_custom:
         row["custom_type_values_raw"] = ",".join(
@@ -103,10 +116,13 @@ def qc_one_file(path: Path) -> dict:
         )
 
     try:
-        nodes, _ = normalize_custom_types(raw_nodes)
+        nodes, info = normalize_swc(raw_nodes)
     except Exception as exc:
         row["qc_reason"] = f"normalize_error: {exc}"
         return row
+    soma_info = info.get("soma", {})
+    row["n_soma_groups"]        = int(soma_info.get("group_count", 0))
+    row["n_soma_nodes_removed"] = int(soma_info.get("removed_nodes", 0))
     row["parseable"] = True
 
     if not nodes:
@@ -146,8 +162,10 @@ def qc_one_file(path: Path) -> dict:
     )
 
     # PASS = every structural check is True. label_set_ok is intentionally
-    # NOT in this list — non-standard types are now absorbed by
-    # normalize_custom_types instead of being a rejection reason.
+    # NOT in this list — non-standard types are absorbed by
+    # normalize_custom_types (rewritten to the branch-dominant standard
+    # type) and multi-point somas are consolidated by
+    # consolidate_multi_point_soma before these checks run.
     checks = [
         "parseable", "non_empty", "has_soma", "single_root", "no_orphan",
         "has_neurites", "radius_positive", "coords_finite", "reasonable_size",

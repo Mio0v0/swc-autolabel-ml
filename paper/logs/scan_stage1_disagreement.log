@@ -1,0 +1,57 @@
+  seed=42: model loaded; train=10016 test=2468
+  seed=789: model loaded; train=10035 test=2449
+
+Scanning 12484 QC-passed cells with Stage 1 from both seeds...
+  ... 1000/12484  (3.7 min)
+  ... 2000/12484  (5.1 min)
+  ... 3000/12484  (5.4 min)
+  ... 4000/12484  (5.8 min)
+  ... 5000/12484  (6.1 min)
+  ... 6000/12484  (6.2 min)
+  ... 7000/12484  (6.3 min)
+  ... 8000/12484  (6.5 min)
+  ... 9000/12484  (6.6 min)
+  ... 10000/12484  (7.3 min)
+  ... 11000/12484  (8.3 min)
+  ... 12000/12484  (9.1 min)
+
+Done scanning: 12484 cells scored, 0 skipped (9.5 min)
+Wrote D:\Desktop\swc-autolabel-ml\paper\results\stage1_disagreement.csv
+
+=== Classification breakdown ===
+  STRONG_CANDIDATE         10  (0.1%)
+  LIKELY_GT_ERROR          79  (0.6%)
+  MAYBE_GT_ERROR           16  (0.1%)
+  OK                    12379  (99.2%)
+
+=== By cell type ===
+  pyramidal     total=9057  STRONG+LIKELY=64  (0.7%)
+  interneuron   total=3427  STRONG+LIKELY=25  (0.7%)
+
+=== Top 25 most suspect (STRONG_CANDIDATE preview) ===
+  file                                                         gt           s42 pred/conf          s789 pred/conf         score
+  neuromorpho__15--P14-Acute-20x.swc                           pyramidal    interneuron 0.9718     interneuron 0.9758        12
+  neuromorpho__241-1-18-AW.swc                                 interneuron  pyramidal 0.9639       pyramidal 0.9699          12
+  neuromorpho__Cell-1-f-ch01.swc                               interneuron  pyramidal 0.9894       pyramidal 0.9324          12
+  neuromorpho__Fig1C324co2_NL_50um.swc                         interneuron  pyramidal 0.9503       pyramidal 0.9172          12
+  neuromorpho__g0763_b.swc                                     pyramidal    interneuron 0.9300     interneuron 0.8558        12
+  allen__Nr5a1-Cre_Ai14-230422.05.01.01_502269786.swc          pyramidal    interneuron 0.9748     interneuron 0.9227        11
+  neuromorpho__20160208_2_2.swc                                interneuron  pyramidal 0.9943       pyramidal 0.9156          11
+  neuromorpho__22--OTC-1-nM-NPY-10-weeks-20x.swc               pyramidal    interneuron 0.8797     interneuron 0.8932        11
+  neuromorpho__241-1-25-AW.swc                                 interneuron  pyramidal 0.9471       pyramidal 0.8956          11
+  neuromorpho__2020-03-05_10-54-18SST-MORF3Mb02-1V5-647-30x03- interneuron  pyramidal 0.8845       pyramidal 0.8326          10
+  neuromorpho__Cell2_Subiculum_singlecell.swc                  interneuron  pyramidal 0.9413       pyramidal 0.7324          10
+  neuromorpho__WT3-neuron7.swc                                 pyramidal    interneuron 0.8662     interneuron 0.8603        10
+  allen__H17.06.005.12.10.07_571464200.swc                     pyramidal    interneuron 0.6508     interneuron 0.9737         9
+  neuromorpho__1071-2-Sec5-LT3.swc                             pyramidal    interneuron 0.7230     interneuron 0.9246         9
+  neuromorpho__110412-s3-1.swc                                 pyramidal    interneuron 0.7993     interneuron 0.9733         9
+  neuromorpho__11a_1_2.swc                                     pyramidal    interneuron 0.9547     interneuron 0.6736         9
+  neuromorpho__19--OTC-10-nM-NPY-10-weeks.swc                  pyramidal    interneuron 0.7029     interneuron 0.9668         9
+  neuromorpho__241-1-19-AW.swc                                 interneuron  pyramidal 0.9894       pyramidal 0.6782           9
+  neuromorpho__2983-x1-25.swc                                  pyramidal    interneuron 0.9830     interneuron 0.8356         9
+  neuromorpho__557-3-R3.swc                                    pyramidal    interneuron 0.8734     interneuron 0.7816         9
+  neuromorpho__5c.swc                                          pyramidal    interneuron 0.7866     interneuron 0.8749         9
+  neuromorpho__9--OTC-OA-9-weeks-20x.swc                       pyramidal    interneuron 0.7048     interneuron 0.8991         9
+  neuromorpho__Anstoetz_SLM_IN3.swc                            interneuron  pyramidal 0.9668       pyramidal 0.6715           9
+  neuromorpho__GGB-07-20-18-1R.swc                             pyramidal    interneuron 0.9301     interneuron 0.7344         9
+  neuromorpho__ICR2-4-2-4.swc                                  pyramidal    interneuron 0.8817     interneuron 0.8335         9

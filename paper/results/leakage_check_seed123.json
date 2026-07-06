@@ -1,0 +1,61 @@
+{
+  "ok": true,
+  "seed": 123,
+  "test_size": 0.2,
+  "model_dir": "paper\\models\\v12_gentle_seed123",
+  "qc_csv": "paper\\results\\corpus_qc_v12_uncurated.csv",
+  "counts": {
+    "train": {
+      "pyramidal": 6743,
+      "interneuron": 2717
+    },
+    "test": {
+      "pyramidal": 1745,
+      "interneuron": 657
+    },
+    "expected_train": {
+      "pyramidal": 6743,
+      "interneuron": 2717
+    },
+    "expected_test": {
+      "pyramidal": 1745,
+      "interneuron": 657
+    }
+  },
+  "train_test_overlap": [],
+  "train_duplicates": [],
+  "test_duplicates": [],
+  "missing_from_model_split": [],
+  "extra_in_model_split": [],
+  "train_split_xor_expected": [],
+  "test_split_xor_expected": [],
+  "branch3": {
+    "present": true,
+    "path": "paper\\models\\v12_gentle_seed123\\gnn_branch3_rescue.pt",
+    "seed": 123,
+    "seed_matches": true,
+    "has_test_metrics": true,
+    "test_metrics": {
+      "n_test_files": 1745,
+      "n_test_branches": 164928,
+      "branch_macro_f1": 0.9586353215195418,
+      "branch_axon_f1": 0.9797471187199284,
+      "branch_basal_f1": 0.9649465865245807,
+      "branch_apical_f1": 0.9312122593141164,
+      "cell_mean_macro_f1": 0.9337928897610679
+    }
+  },
+  "baseline": {
+    "checked": true,
+    "path": "paper\\results\\baselines_on_v12_seed123.json",
+    "seed": 123,
+    "seed_matches": true,
+    "n_train": 9460,
+    "n_test": 2402,
+    "n_train_expected": 9460,
+    "n_test_expected": 2402,
+    "counts_match": true,
+    "split_source": "QC CSV + hash-bucket split (no v12 dependency)",
+    "qc_csv": "paper\\results\\corpus_qc_v12_uncurated.csv"
+  }
+}

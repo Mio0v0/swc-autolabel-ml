@@ -1,0 +1,15 @@
+{
+  "dataset_outputs": {
+    "dataset_csv": "paper\\results\\final_dataset_corpus_table.csv",
+    "dataset_md": "paper\\results\\final_dataset_corpus_table.md",
+    "dataset_json": "paper\\results\\final_dataset_corpus_table.json",
+    "fail_reasons_csv": "paper\\results\\final_dataset_qc_fail_reasons.csv"
+  },
+  "canonical_aliases": {
+    "final_multiseed_vs_baselines": "paper/results/final_multiseed_vs_baselines.{csv,json,table.txt}",
+    "final_multiseed_v12_branch3": "paper/results/final_multiseed_v12_branch3_{summary.csv,summary.json,table.txt}",
+    "final_flag_feature_ablation": "paper/results/final_flag_feature_ablation.{csv,json,txt}",
+    "final_flag_leave_one_seed_out_table": "paper/results/final_flag_leave_one_seed_out_table.txt",
+    "final_flag_multiseed_cells": "paper/results/final_flag_multiseed_cells.csv"
+  }
+}

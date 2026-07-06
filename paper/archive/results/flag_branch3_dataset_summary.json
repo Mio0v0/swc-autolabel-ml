@@ -1,0 +1,13 @@
+{
+  "model_dir": "paper\\models\\v12_pyramidal_only_seed2024_clean",
+  "input": "paper\\results\\heldout_per_cell_f1.csv",
+  "out_labels": "paper\\results\\heldout_per_cell_f1_branch3.csv",
+  "out_features": "paper\\results\\flag_confidence_features_branch3.csv",
+  "n_scored": 4176,
+  "n_failed": 0,
+  "elapsed_min": 65.88387892666651,
+  "f1_mean": 0.9573432471264369,
+  "f1_p10": 0.9652499999999999,
+  "bad_rate_f050": 0.034243295019157086,
+  "bad_rate_f060": 0.05196360153256705
+}

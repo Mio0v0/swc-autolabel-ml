@@ -1,0 +1,26 @@
+Flag model before/after summary: seed123 Branch3 pyramidal flagger
+==============================================================================
+Scope: flag-model test split only, 349 pyramidal cells from the clean seed=123 v12+Branch3 test split.
+Accepted flag target: bad cell = held_out_F1 < 0.60
+Accepted model: paper/models/flag_model_seed123_branch3_pyramidal/flag_model_f060.joblib
+Selected learner/features: gb / full
+Ranking AP: 0.4573   ROC AUC: 0.8450
+
+Before flag:
+  n=349  bad<0.5=22 (6.3%)  bad<0.6=35 (10.0%)
+  F1 mean=0.9141  P10=0.6019  P25=1.0000  median=1.0000
+
+After flag/reject sweep:
+  reject  flagged  true_bad<.6  false_flags  missed_bad<.6  precision  recall   flag_accuracy  kept_F1_mean  kept_F1_P10  flagged_F1_mean
+    0.5%        2            1            1             34      50.0%    2.9%          90.0%  0.9156       0.6141       0.6531
+    1.0%        3            2            1             33      66.7%    5.7%          90.3%  0.9178       0.6209       0.4882
+    2.0%        7            5            2             30      71.4%   14.3%          90.8%  0.9236       0.6250       0.4525
+    3.0%       10            6            4             29      60.0%   17.1%          90.5%  0.9251       0.6276       0.5438
+    5.0%       17            8            9             27      47.1%   22.9%          89.7%  0.9315       0.6346       0.5758
+
+Note: flag_accuracy is binary accuracy for predicting bad<0.6 at that rejection threshold. Because bad cells are rare, precision/recall and kept F1 P10 are more useful than accuracy alone.
+
+Related detailed files:
+  paper/results/v12_seed123_vs_baselines_table.txt              # before-flag v12/baseline matrix
+  paper/results/flag_model_seed123_branch3_pyramidal_eval.txt  # full flag-model candidate and rejection report
+  paper/results/leakage_check_seed123.txt                      # no-leak split check

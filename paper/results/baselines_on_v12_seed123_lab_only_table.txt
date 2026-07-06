@@ -1,0 +1,43 @@
+Baseline summary (lab subset prefix='hpf_ca1__', seed=123)
+{
+  "neurom_rf": {
+    "accuracy": 0.9527,
+    "neurite_macro_f1": 0.7651,
+    "apical_f1": 0.594,
+    "axon_f1": 0.9799,
+    "basal_f1": 0.7215,
+    "per_cell_F1_mean": 0.817171768707483,
+    "per_cell_F1_p10": 0.6742400000000001,
+    "per_cell_F1_p25": 0.771425
+  },
+  "lmeasure_rf": {
+    "accuracy": 0.9923,
+    "neurite_macro_f1": 0.9487,
+    "apical_f1": 0.9254,
+    "axon_f1": 0.9983,
+    "basal_f1": 0.9225,
+    "per_cell_F1_mean": 0.9483003401360544,
+    "per_cell_F1_p10": 0.73412,
+    "per_cell_F1_p25": 1.0
+  },
+  "sholl_rf": {
+    "accuracy": 0.992,
+    "neurite_macro_f1": 0.9479,
+    "apical_f1": 0.9252,
+    "axon_f1": 0.998,
+    "basal_f1": 0.9206,
+    "per_cell_F1_mean": 0.95125,
+    "per_cell_F1_p10": 0.79557,
+    "per_cell_F1_p25": 1.0
+  },
+  "sholl_mlp": {
+    "accuracy": 0.9889,
+    "neurite_macro_f1": 0.9337,
+    "apical_f1": 0.9135,
+    "axon_f1": 0.9966,
+    "basal_f1": 0.8911,
+    "per_cell_F1_mean": 0.9390537414965986,
+    "per_cell_F1_p10": 0.64912,
+    "per_cell_F1_p25": 1.0
+  }
+}

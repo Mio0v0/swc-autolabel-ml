@@ -1,0 +1,136 @@
+========================================================================================
+  LEARNED PER-CELL FLAG MODEL
+========================================================================================
+
+Input rows: 4176
+Split: train=2505  val=835  test=836
+Selection reject rate:   3.0%
+
+Targets:
+  F1 < 0.50: base train=  3.6% val=  3.2% test=  3.1%; selected=extra_trees (numeric_only)
+  F1 < 0.60: base train=  5.2% val=  5.3% test=  5.1%; selected=extra_trees (full)
+
+----------------------------------------------------------------------------------------
+Target: F1 < 0.50  (selected: extra_trees, features: numeric_only)
+
+Candidates:
+  model                      val AP  val AUC  val prec@sel  val kept P10  test AP test AUC
+  logreg:full               0.3369   0.8993        0.4400        0.9891   0.2691   0.7884
+  hgb:full                  0.3591   0.9180        0.4000        0.9802   0.4033   0.8916
+  rf:full                   0.4381   0.9399        0.4000        0.9785   0.3683   0.8767
+  extra_trees:full          0.4111   0.9350        0.3600        0.9919   0.3959   0.8783
+  gb:full                   0.2758   0.9257        0.3200        0.9802   0.2800   0.8898
+  logreg:no_lab             0.3110   0.8931        0.4000        0.9827   0.2437   0.7408
+  hgb:no_lab                0.3412   0.9110        0.3600        0.9785   0.4159   0.9170
+  rf:no_lab                 0.4290   0.9410        0.4000        0.9780   0.3820   0.8837
+  extra_trees:no_lab        0.4837   0.9308        0.4400        0.9934   0.3934   0.8668
+  gb:no_lab                 0.2652   0.9347        0.3600        0.9802   0.2750   0.8728
+  logreg:numeric_only       0.3319   0.9017        0.4000        0.9874   0.2384   0.7186
+  hgb:numeric_only          0.3412   0.9250        0.4000        0.9785   0.3828   0.8943
+  rf:numeric_only           0.4353   0.9385        0.4800        0.9802   0.3566   0.8780
+* extra_trees:numeric_only   0.4488   0.9225        0.4800        0.9827   0.3481   0.8615
+  gb:numeric_only           0.2807   0.9358        0.3200        0.9802   0.2713   0.8856
+
+Test rejection sweep using raw rank score:
+   reject     n   prec<tgt   prec<.5   prec<.6   rec<tgt  accuracy   kept P10  rej mean F1
+     2.0%    17      47.1%     47.1%     58.8%     30.8%     96.8%     0.9970       0.5841
+     3.0%    25      48.0%     48.0%     60.0%     46.2%     96.8%     0.9990       0.6032
+     5.0%    42      28.6%     28.6%     38.1%     46.2%     94.7%     0.9995       0.7433
+     7.5%    63      23.8%     23.8%     30.2%     57.7%     92.9%     1.0000       0.7912
+    10.0%    84      21.4%     21.4%     28.6%     69.2%     91.1%     1.0000       0.7880
+    12.5%   104      17.3%     17.3%     26.0%     69.2%     88.8%     1.0000       0.8099
+    15.0%   125      15.2%     15.2%     23.2%     73.1%     86.5%     1.0000       0.8258
+
+Test rejection sweep, deployment guard: rank only Stage1-pyramidal cells:
+   target  actual     n eligible   prec<tgt   rec<tgt  accuracy   kept P10
+     2.0%    2.0%    17      593      41.2%     26.9%     96.5%     0.9977
+     3.0%    3.0%    25      593      28.0%     26.9%     95.6%     0.9986
+     5.0%    5.0%    42      593      26.2%     42.3%     94.5%     1.0000
+     7.5%    7.5%    63      593      19.0%     46.2%     92.2%     1.0000
+    10.0%   10.0%    84      593      15.5%     50.0%     90.0%     1.0000
+    12.5%   12.4%   104      593      13.5%     53.8%     87.8%     1.0000
+    15.0%   15.0%   125      593      11.2%     53.8%     85.3%     1.0000
+
+Validation-derived high-precision thresholds, applied to test:
+   target P     val P  score thr  test n   test P   test R  accuracy   kept P10
+      85.0%    100.0%   0.874574       3    66.7%     7.7%     97.0%     0.9742
+      90.0%    100.0%   0.874574       3    66.7%     7.7%     97.0%     0.9742
+      95.0%    100.0%   0.874574       3    66.7%     7.7%     97.0%     0.9742
+
+Validation-derived rank-score thresholds:
+  target reject  score threshold  val flagged
+           2.0%         0.719834           17
+           3.0%         0.674593           25
+           5.0%         0.619294           42
+           7.5%         0.545532           63
+          10.0%         0.466018           84
+          12.5%         0.386025          104
+          15.0%         0.335660          125
+
+Test by GT cell type at   3.0% rejection:
+  cell type        n rejected   prec<tgt   kept P10
+  interneuron    237        5      20.0%     1.0000
+  pyramidal      599       20      55.0%     0.9627
+
+----------------------------------------------------------------------------------------
+Target: F1 < 0.60  (selected: extra_trees, features: full)
+
+Candidates:
+  model                      val AP  val AUC  val prec@sel  val kept P10  test AP test AUC
+  logreg:full               0.3664   0.9051        0.4000        0.9919   0.4511   0.8962
+  hgb:full                  0.4760   0.9361        0.6400        0.9934   0.5067   0.9034
+  rf:full                   0.5076   0.9399        0.6400        0.9949   0.4890   0.9096
+* extra_trees:full          0.5315   0.9411        0.6800        0.9956   0.5158   0.9081
+  gb:full                   0.3486   0.9179        0.3600        0.9827   0.4642   0.9208
+  logreg:no_lab             0.3437   0.9026        0.3600        0.9891   0.4322   0.8898
+  hgb:no_lab                0.4816   0.9315        0.6400        0.9934   0.5120   0.9015
+  rf:no_lab                 0.4931   0.9409        0.6000        0.9949   0.4967   0.9086
+  extra_trees:no_lab        0.5573   0.9486        0.6400        0.9951   0.5508   0.9144
+  gb:no_lab                 0.3599   0.9224        0.3200        0.9827   0.4778   0.9230
+  logreg:numeric_only       0.3663   0.9063        0.4000        0.9905   0.3953   0.8814
+  hgb:numeric_only          0.5312   0.9310        0.6800        0.9949   0.4081   0.8903
+  rf:numeric_only           0.4662   0.9366        0.5600        0.9919   0.4631   0.9100
+  extra_trees:numeric_only   0.5470   0.9410        0.6000        0.9951   0.5056   0.9048
+  gb:numeric_only           0.3475   0.9194        0.3200        0.9827   0.4703   0.9186
+
+Test rejection sweep using raw rank score:
+   reject     n   prec<tgt   prec<.5   prec<.6   rec<tgt  accuracy   kept P10  rej mean F1
+     2.0%    17      64.7%     41.2%     64.7%     25.6%     95.5%     0.9989       0.5323
+     3.0%    25      60.0%     40.0%     60.0%     34.9%     95.5%     1.0000       0.5645
+     5.0%    42      57.1%     31.0%     57.1%     55.8%     95.6%     1.0000       0.6221
+     7.5%    63      46.0%     27.0%     46.0%     67.4%     94.3%     1.0000       0.6898
+    10.0%    84      34.5%     20.2%     34.5%     67.4%     91.7%     1.0000       0.7457
+    12.5%   104      30.8%     16.3%     30.8%     74.4%     90.1%     1.0000       0.7811
+    15.0%   125      25.6%     13.6%     25.6%     74.4%     87.6%     1.0000       0.8156
+
+Test rejection sweep, deployment guard: rank only Stage1-pyramidal cells:
+   target  actual     n eligible   prec<tgt   rec<tgt  accuracy   kept P10
+     2.0%    2.0%    17      593      64.7%     25.6%     95.5%     0.9989
+     3.0%    3.0%    25      593      60.0%     34.9%     95.5%     1.0000
+     5.0%    5.0%    42      593      52.4%     51.2%     95.1%     1.0000
+     7.5%    7.5%    63      593      38.1%     55.8%     93.1%     1.0000
+    10.0%   10.0%    84      593      31.0%     60.5%     91.0%     1.0000
+    12.5%   12.4%   104      593      27.9%     67.4%     89.4%     1.0000
+    15.0%   15.0%   125      593      23.2%     67.4%     86.8%     1.0000
+
+Validation-derived high-precision thresholds, applied to test:
+   target P     val P  score thr  test n   test P   test R  accuracy   kept P10
+      85.0%    100.0%   0.882201       2   100.0%     4.7%     95.1%     0.9756
+      90.0%    100.0%   0.882201       2   100.0%     4.7%     95.1%     0.9756
+      95.0%    100.0%   0.882201       2   100.0%     4.7%     95.1%     0.9756
+
+Validation-derived rank-score thresholds:
+  target reject  score threshold  val flagged
+           2.0%         0.761461           17
+           3.0%         0.714811           25
+           5.0%         0.624976           42
+           7.5%         0.561325           63
+          10.0%         0.512006           84
+          12.5%         0.478954          104
+          15.0%         0.448660          125
+
+Test by GT cell type at   3.0% rejection:
+  cell type        n rejected   prec<tgt   kept P10
+  interneuron    237        0       0.0%     1.0000
+  pyramidal      599       25      60.0%     0.9883
+

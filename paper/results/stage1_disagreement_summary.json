@@ -1,0 +1,25 @@
+{
+  "total_scanned": 12484,
+  "n_failed": 0,
+  "classification_counts": {
+    "STRONG_CANDIDATE": 10,
+    "LIKELY_GT_ERROR": 79,
+    "MAYBE_GT_ERROR": 16,
+    "OK": 12379
+  },
+  "by_celltype": {
+    "pyramidal": {
+      "STRONG_CANDIDATE": 5,
+      "LIKELY_GT_ERROR": 59,
+      "MAYBE_GT_ERROR": 7,
+      "OK": 8986
+    },
+    "interneuron": {
+      "STRONG_CANDIDATE": 5,
+      "LIKELY_GT_ERROR": 20,
+      "MAYBE_GT_ERROR": 9,
+      "OK": 3393
+    }
+  },
+  "elapsed_min": 9.49236384500012
+}

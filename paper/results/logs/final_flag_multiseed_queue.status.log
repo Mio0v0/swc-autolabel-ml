@@ -1,0 +1,14 @@
+[2026-06-09T09:43:43] final flag multiseed queue start
+[2026-06-09T09:43:43] seed 123 score flag labels/features start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\final_flag_seed123_score.log
+[2026-06-09T10:36:55] seed 123 score flag labels/features complete
+[2026-06-09T10:36:55] seed 42 score flag labels/features start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\final_flag_seed42_score.log
+[2026-06-09T11:26:26] seed 42 score flag labels/features complete
+[2026-06-09T11:26:26] seed 789 score flag labels/features start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\final_flag_seed789_score.log
+[2026-06-09T12:09:35] seed 789 score flag labels/features complete
+[2026-06-09T12:09:35] combine multiseed flag rows and leakage precheck start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\final_flag_multiseed_combine.log
+[2026-06-09T12:09:36] combine multiseed flag rows and leakage precheck complete
+[2026-06-09T12:09:36] build out-of-fold baseline and v12 disagreement features start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\final_flag_oof_heavy_features.log
+[2026-06-09T14:40:01] build out-of-fold baseline and v12 disagreement features complete
+[2026-06-09T14:40:01] train/evaluate no-leak leave-one-seed-out flag models start -> D:\Desktop\swc-autolabel-ml\paper\results\logs\final_flag_loso_train_eval.log
+[2026-06-09T15:27:09] train/evaluate no-leak leave-one-seed-out flag models complete (manual clean rerun)
+[2026-06-09T15:27:09] final flag multiseed queue complete
