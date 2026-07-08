@@ -41,7 +41,6 @@ from hybrid.pipeline import (  # noqa: E402
     _branch_feature_with_owner,
     _load_stage2_bundle,
     _predict_subtree_owner_map,
-    _select_stage2_model,
     run_pipeline_on_nodes,
 )
 from hybrid.stage3_refine import refine  # noqa: E402
@@ -108,7 +107,9 @@ def _raw_stage2_labels(
     label_set = set(CELL_TYPE_LABEL_SETS.get(cell_type, {1, 2, 3}))
     neurite_labels = sorted(label_set - {1})
 
-    model, default_label = _select_stage2_model(bundle, cell_type)
+    # Legacy per-branch classifier removed; this ablation runs subtree mode
+    # only (use_subtree_stage2=True), so the branch-mode model is unused.
+    model, default_label = None, None
     subtree_models_by_ct = bundle.get("subtree_owner_models_by_cell_type")
     if subtree_models_by_ct:
         subtree_owner_model = subtree_models_by_ct.get(cell_type)

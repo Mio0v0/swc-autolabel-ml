@@ -6,13 +6,13 @@
   "branch3_ckpt": "paper\\models\\v12_gentle_seed123\\gnn_branch3_rescue.pt",
   "branch3_gate": null,
   "n_test_cells": 294,
-  "inference_min": 6.726579271664377,
+  "inference_min": 5.968719036666638,
   "per_cell_csv": "paper\\results\\v12_gt_celltype_seed123_lab_only.csv",
   "report": {
     "method": "v12_branch3_gt_celltype_seed123_lab_only",
     "n_test_cells": 294,
     "n_test_nodes": 10965009,
-    "inference_min": 6.726579271664377,
+    "inference_min": 5.968719036666638,
     "convention": "v11 (macro F1 over GT-present classes only)",
     "corpus": {
       "accuracy": 0.9904,

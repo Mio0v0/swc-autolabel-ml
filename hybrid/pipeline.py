@@ -64,33 +64,6 @@ def _load_stage2_bundle(model_path: Path) -> dict:
     return data
 
 
-def _select_stage2_model(
-    bundle: dict,
-    cell_type: str,
-) -> tuple[object | None, int | None]:
-    """Pick the right Stage 2 model (or default label) for a cell type.
-
-    Returns (model, default_label). Exactly one of them is non-None:
-      - (model, None): use model.predict_proba on branch features
-      - (None, label): no model trained for this cell type; assign the
-                       single default label to all non-soma branches
-    """
-    models = bundle.get("models_by_cell_type")
-    defaults = bundle.get("default_labels_by_cell_type", {})
-
-    if models is not None:
-        if cell_type in models:
-            return models[cell_type], None
-        if cell_type in defaults:
-            return None, int(defaults[cell_type])
-        # Fallback: use any trained model if a direct cell-type match is absent.
-        if models:
-            return next(iter(models.values())), None
-        return None, 3  # final fallback: mark as generic dendrite
-    # Old-format single model
-    return bundle.get("model"), None
-
-
 def run_pipeline(
     swc_path: str | Path,
     stage1_model: str | Path | None = None,
@@ -176,8 +149,8 @@ def run_pipeline_on_nodes(
     soft_handoff_used = False
     can_handoff = (
         s1_result.confidence < soft_handoff_threshold
-        and bundle.get("models_by_cell_type") is not None
-        and len(bundle.get("models_by_cell_type") or {}) > 1
+        and bundle.get("subtree_owner_models_by_cell_type") is not None
+        and len(bundle.get("subtree_owner_models_by_cell_type") or {}) > 1
     )
     if can_handoff:
         candidates: list[tuple[str, dict]] = []
@@ -401,8 +374,7 @@ def _run_stage23(
     label_set = set(CELL_TYPE_LABEL_SETS.get(cell_type, {1, 2, 3}))
     neurite_labels = sorted(label_set - {1})
 
-    # --- Stage 2 model selection ---
-    model, default_label = _select_stage2_model(bundle, cell_type)
+    # --- Stage 2: per-subtree labeling ---
     subtree_models_by_ct = bundle.get("subtree_owner_models_by_cell_type")
     if subtree_models_by_ct:
         subtree_owner_model = subtree_models_by_ct.get(cell_type)
@@ -418,107 +390,47 @@ def _run_stage23(
     node_labels = [1 if i in proxy_soma else 0 for i in range(n)]
     node_confidences = [1.0 if i in proxy_soma else 0.0 for i in range(n)]
 
-    is_binary_b1 = bundle.get("kind") == "axon_dendrite_binary"
+    # Stage 2 assigns each primary subtree the label predicted by the
+    # subtree-owner model and propagates it to every branch in that subtree.
+    # (The legacy per-branch classifier was removed: subtree-level features —
+    # path length, polar angle, node count, depth — carry much stronger signal
+    # for thin-trunk-apical vs axon. For pyramidals the GNN downstream still
+    # refines basal-vs-apical at branch level. ``use_subtree_stage2`` is
+    # retained for call-signature compatibility.)
     branch_confs: list[float] = []
-    if use_subtree_stage2:
-        # Stage 2 = Tier A's per-subtree predictions, propagated to all
-        # branches in each primary subtree. Skips the per-branch Tier B
-        # inference entirely. Rationale: branch-level features struggle to
-        # distinguish thin trunk-like apicals from axons; subtree-level
-        # features (path length, polar angle, total node count, depth)
-        # carry much stronger signal. The GNN downstream still refines
-        # basal-vs-apical at branch level when Tier A predicts there is
-        # an apical somewhere.
-        if not subtree_owner_map:
-            # Tier A unavailable for this cell type — fall back to default basal.
-            fallback = 3 if 3 in neurite_labels else (
-                neurite_labels[0] if neurite_labels else 3
-            )
-            for br in morph.branches:
-                branch_confs.append(0.5)
-                for node_idx in br.node_indices:
-                    node_labels[node_idx] = fallback
-                    node_confidences[node_idx] = 0.5
-        else:
-            for br in morph.branches:
-                pr = br.primary_root_idx
-                info = subtree_owner_map.get(pr) if pr is not None else None
-                if info is None:
-                    best_label = 3 if 3 in neurite_labels else (
+    if not subtree_owner_map:
+        # Subtree-owner model unavailable for this cell type — default basal.
+        fallback = 3 if 3 in neurite_labels else (
+            neurite_labels[0] if neurite_labels else 3
+        )
+        for br in morph.branches:
+            branch_confs.append(0.5)
+            for node_idx in br.node_indices:
+                node_labels[node_idx] = fallback
+                node_confidences[node_idx] = 0.5
+    else:
+        for br in morph.branches:
+            pr = br.primary_root_idx
+            info = subtree_owner_map.get(pr) if pr is not None else None
+            if info is None:
+                best_label = 3 if 3 in neurite_labels else (
+                    neurite_labels[0] if neurite_labels else 3
+                )
+                best_conf = 0.5
+            else:
+                pred = int(info.get("pred", 3))
+                if pred not in neurite_labels:
+                    # Subtree model predicted a class invalid for this cell
+                    # type (e.g. apical for an interneuron). Default to basal.
+                    pred = 3 if 3 in neurite_labels else (
                         neurite_labels[0] if neurite_labels else 3
                     )
-                    best_conf = 0.5
-                else:
-                    pred = int(info.get("pred", 3))
-                    if pred not in neurite_labels:
-                        # Tier A predicted a class invalid for this cell type
-                        # (e.g. apical for an interneuron). Default to basal.
-                        pred = 3 if 3 in neurite_labels else (
-                            neurite_labels[0] if neurite_labels else 3
-                        )
-                    best_label = pred
-                    best_conf = float(info.get("conf", 0.5))
-                branch_confs.append(best_conf)
-                for node_idx in br.node_indices:
-                    node_labels[node_idx] = best_label
-                    node_confidences[node_idx] = best_conf
-    elif model is not None:
-        for br in morph.branches:
-            X = _branch_feature_with_owner(br, subtree_owner_map).reshape(1, -1)
-            probs = model.predict_proba(X)[0]
-            classes = model.classes_
-
-            if is_binary_b1:
-                # B1 emits {dendrite=0, axon=1}. Map to SWC labels:
-                # axon -> 2; dendrite -> 3 (basal default; GNN re-decides for
-                # pyramidals if its gate fires).
-                cls_list = list(classes)
-                p_axon = float(probs[cls_list.index(1)]) if 1 in cls_list else 0.0
-                p_dend = float(probs[cls_list.index(0)]) if 0 in cls_list else 1.0 - p_axon
-                if p_axon > 0.5 and 2 in neurite_labels:
-                    best_label = 2
-                    best_conf = p_axon
-                else:
-                    # Default dendrite to basal (3) when valid; otherwise pick
-                    # the first non-axon neurite label available for this cell type.
-                    dend_candidates = [l for l in neurite_labels if l != 2]
-                    best_label = (3 if 3 in dend_candidates else
-                                  (dend_candidates[0] if dend_candidates
-                                   else (neurite_labels[0] if neurite_labels else 3)))
-                    best_conf = p_dend
-            else:
-                # Original multi-class behaviour: pick the highest-probability
-                # neurite label, normalize to that subset.
-                valid_probs: dict[int, float] = {}
-                for cls, prob in zip(classes, probs):
-                    if int(cls) in neurite_labels:
-                        valid_probs[int(cls)] = float(prob)
-
-                if valid_probs:
-                    total = sum(valid_probs.values())
-                    if total > 0:
-                        valid_probs = {k: v / total for k, v in valid_probs.items()}
-                    best_label = max(valid_probs, key=lambda k: valid_probs[k])
-                    best_conf = valid_probs[best_label]
-                else:
-                    best_label = neurite_labels[0] if neurite_labels else 3
-                    best_conf = 0.5
-
+                best_label = pred
+                best_conf = float(info.get("conf", 0.5))
             branch_confs.append(best_conf)
             for node_idx in br.node_indices:
                 node_labels[node_idx] = best_label
                 node_confidences[node_idx] = best_conf
-    else:
-        fallback = default_label if default_label is not None else (
-            neurite_labels[0] if neurite_labels else 3
-        )
-        for br in morph.branches:
-            for node_idx in br.node_indices:
-                node_labels[node_idx] = fallback
-                node_confidences[node_idx] = 0.5
-        # Conservative confidence so the soft-handoff comparison doesn't
-        # spuriously prefer the no-model branch.
-        branch_confs.append(0.5)
 
     for i in range(n):
         if node_labels[i] == 0:
@@ -543,10 +455,7 @@ def _run_stage23(
     if gnn_state is not None and cell_type == "pyramidal" and not gnn_after_stage3:
         _apply_gnn_override(
             node_labels, node_confidences, morph, gnn_state,
-            apical_evidence=(
-                (is_binary_b1 or use_subtree_stage2)
-                and apical_owner_root is not None
-            ),
+            apical_evidence=apical_owner_root is not None,
         )
 
     if branch3_state is not None and cell_type == "pyramidal" and not gnn_after_stage3:
@@ -585,10 +494,7 @@ def _run_stage23(
         _apply_gnn_override(
             final_labels, node_confidences, morph, gnn_state,
             update_confidences=False,
-            apical_evidence=(
-                (is_binary_b1 or use_subtree_stage2)
-                and apical_owner_root is not None
-            ),
+            apical_evidence=apical_owner_root is not None,
         )
 
     mean_neurite_conf = float(np.mean(branch_confs)) if branch_confs else 0.0

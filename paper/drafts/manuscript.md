@@ -39,7 +39,7 @@ same splits with ground-truth cell type supplied to both sides for an
 apples-to-apples comparison. Our pipeline improves neurite macro-F1 by
 +0.005 to +0.13 over these baselines and lifts the 10th-percentile
 per-cell F1 — the metric that matters most for downstream filtering —
-from at most 0.54 (best baseline) to 0.74 (paired sign-flip p < 0.0001,
+from at most 0.54 (best baseline) to 0.66 (paired sign-flip p < 0.0001,
 n = 5,739 unique files). In the deployment configuration, the
 quality-flag model identifies the worst 10% of predictions with 58%
 recall (precision 0.43, F1 0.50) using only features available from a
@@ -480,6 +480,27 @@ only to low-confidence nodes — which permit an axon to be recovered
 one-type-per-subtree assumption and interneuron axon anatomy is the
 cell-type-specific face of the single-primary-tree limitation, §7.)
 
+**Why interneurons receive no rescue head.** It is natural to ask whether
+interneurons would benefit from a correction network symmetric to Branch3
+— a two-class {axon, dendrite} GraphSAGE that re-scores the
+axon-versus-dendrite decision. We built and evaluated one, in two
+independent variants (one given the pipeline's own current label as an
+input feature, one relying on branch morphology and subtree-owner
+evidence alone). Neither helped materially: on a held-out test set the
+head lowered the rate of interneuron dendrite nodes mislabelled as axon
+from ≈7.0% to ≈6.2% and raised interneuron node accuracy by ≈0.2
+percentage points, leaving corpus-level neurite macro-F1 essentially
+unchanged (it corrected ≈0.06% of all neurite nodes). That two
+differently-parameterised heads converge on the same small ceiling points
+to a biologically inherent ambiguity rather than a modelling gap: an
+interneuron axon is characterised by being *thin and long*, and the
+dendritic subtrees the pipeline mislabels are precisely the thin, long
+ones — so no view of the reconstructed geometry (branch morphology,
+subtree context, or the current label) cleanly separates them, and the
+subtree-owner model is itself uncertain on these subtrees. We therefore
+ship no interneuron rescue head: the apical/basal GNN and Branch3 remain
+pyramidal-only, and interneurons pass from Stage 2 directly to Stage 3.
+
 ### 4.4 Stage 4 — Quality-flag model
 
 Even at ~0.95 mean F1 the pipeline produces a long lower tail of
@@ -668,7 +689,7 @@ cell type.**
 | Sholl-MLP | .9713 ± .0016 | .9235 ± .0018 | .9884 ± .0019 | .9201 ± .0092 | .8621 ± .0142 | .8673 ± .0094 | .4164 ± .0447 |
 | Sholl-RF | .9778 ± .0013 | .9405 ± .0028 | .9915 ± .0008 | .9348 ± .0056 | .8951 ± .0055 | .8915 ± .0074 | .4600 ± .0347 |
 | L-Measure-RF | .9793 ± .0016 | .9476 ± .0059 | .9915 ± .0010 | .9389 ± .0069 | .9125 ± .0127 | .9057 ± .0093 | .5397 ± .0548 |
-| **Our pipeline** | **.9819 ± .0025** | **.9513 ± .0064** | **.9923 ± .0012** | **.9522 ± .0076** | **.9094 ± .0126** | **.9402 ± .0092** | **.7359 ± .0779** |
+| **Our pipeline** | **.9832 ± .0016** | **.9543 ± .0041** | **.9934 ± .0009** | **.9535 ± .0037** | **.9160 ± .0096** | **.9251 ± .0056** | **.6554 ± .0041** |
 
 The most consequential result is the worst-case metric:
 
@@ -678,19 +699,19 @@ The most consequential result is the worst-case metric:
  must discard or hand-correct. Every baseline leaves it low — 0.42
  (Sholl-MLP) to 0.54 (best baseline) — meaning a large fraction of
  cells are labeled too unreliably to use as-is. Our pipeline raises it
- to 0.74, a +0.20 absolute improvement over the best baseline, so
+ to 0.66, a +0.11 absolute improvement over the best baseline, so
  substantially fewer cells fall below a usable threshold. The
  practical consequence is a more uniformly reliable labeling across
  the whole corpus, which is precisely what downstream morphometric
  and modeling analyses depend on.
-2. **Overall accuracy (neurite macro-F1).** Our pipeline reaches 0.951,
+2. **Overall accuracy (neurite macro-F1).** Our pipeline reaches 0.954,
  ahead of the strongest baseline (L-Measure-RF, 0.948) and well ahead
  of the weaker ones (Sholl-MLP 0.923, NeuroM-RF 0.822), with a paired
  sign-flip p < 0.0001 against every baseline.
 3. **Per-class breakdown.** The gains concentrate in the basal
- (+0.013 over L-Measure-RF) and axon classes; on apical alone the
+ (+0.015 over L-Measure-RF) and axon classes; on apical the
  strongest baseline is statistically tied with our pipeline (0.9125
- vs 0.9094, within one SD).
+ vs 0.9160, within one SD).
 
 ### 5.2 Stage ablation (GT cell type and deployment)
 
@@ -841,21 +862,21 @@ test cells pooled), GT cell type configuration.
 
 | Metric | All corpus (Table 1) | Lab subset | Δ |
 |---|---:|---:|---:|
-| node accuracy | .9819 ± .0025 | **.9923 ± .0017** | +.0104 |
-| neurite macro-F1 | .9513 ± .0064 | .9496 ± .0070 | −.0017 |
-| axon F1 | .9923 ± .0012 | **.9984 ± .0009** | +.0061 |
-| basal F1 | .9522 ± .0076 | .9281 ± .0148 | −.0241 |
-| apical F1 | .9094 ± .0126 | .9222 ± .0059 | +.0128 |
-| per-cell F1 mean | .9402 ± .0092 | **.9544 ± .0045** | +.0142 |
-| per-cell F1 P10 | .7359 ± .0779 | **.7877 ± .0602** | +.0518 |
+| node accuracy | .9832 ± .0016 | **.9923 ± .0017** | +.0091 |
+| neurite macro-F1 | .9543 ± .0041 | .9496 ± .0070 | −.0047 |
+| axon F1 | .9934 ± .0009 | **.9984 ± .0009** | +.0050 |
+| basal F1 | .9535 ± .0037 | .9281 ± .0148 | −.0254 |
+| apical F1 | .9160 ± .0096 | .9222 ± .0059 | +.0062 |
+| per-cell F1 mean | .9251 ± .0056 | **.9544 ± .0045** | +.0293 |
+| per-cell F1 P10 | .6554 ± .0041 | **.7877 ± .0602** | +.1323 |
 | per-cell accuracy mean | — | .9840 ± .0035 | — |
 | per-cell accuracy P10 | — | .9767 ± .0015 | — |
 
 On lab cells, node accuracy is essentially saturated (99.2%; per-cell
 mean 98.4%, P10 97.7%), and per-cell F1 mean and P10 are clearly better
-than on the full corpus (P10 0.74 → 0.79). Neurite macro-F1 is
-essentially tied (0.951 vs 0.950): the higher accuracy is offset by a
-−0.024 drop in basal F1 — an artifact of macro-averaging on these large
+than on the full corpus (P10 0.66 → 0.79). Neurite macro-F1 is
+essentially tied (0.954 vs 0.950): the higher accuracy is offset by a
+−0.025 drop in basal F1 — an artifact of macro-averaging on these large
 CA1 cells, where axon nodes outnumber basal ~20×, so a few basal→axon
 errors weigh heavily on the basal class. Axon F1 reaches 0.998.
 
@@ -1304,7 +1325,7 @@ configuration, used for apples-to-apples comparison against four
 constructed baselines, the system reaches axon / basal / apical F1 of
 0.993 / 0.954 / 0.916 on held-out cells across three seeds and lifts
 the worst-decile per-cell F1 from at most 0.54 (best baseline) to
-0.74. In the deployment configuration, where Stage 1 predicts cell
+0.66. In the deployment configuration, where Stage 1 predicts cell
 type at 0.974 accuracy, the system reaches axon / basal / apical F1 of
 0.993 / 0.951 / 0.906; the quality-flag model then identifies the
 worst 10% of predictions with 58% recall and lifts the kept-set
